@@ -16,7 +16,7 @@ namespace AgriTrace.Infrastructure.Sqlserver
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(connectionString));
 
-            services.AddScoped<IProductRepository, ProductRepository>();
+            services.AddScoped<IFarmRepository, FarmRepository>();
 
             return services;
         }

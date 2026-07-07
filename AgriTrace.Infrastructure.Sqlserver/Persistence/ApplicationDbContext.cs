@@ -10,7 +10,8 @@ namespace AgriTrace.Infrastructure.Sqlserver.Persistence
         {
         }
 
-        public DbSet<ProductDataModel> Products => Set<ProductDataModel>();
+        public DbSet<FarmDataModel> Farms => Set<FarmDataModel>();
+        public DbSet<CropDataModel> Crops => Set<CropDataModel>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

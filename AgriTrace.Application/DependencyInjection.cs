@@ -1,4 +1,6 @@
 using System.Reflection;
+using AgriTrace.Domain.Interfaces;
+using AgriTrace.Domain.Services;
 using Mapster;
 using MapsterMapper;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,6 +19,9 @@ namespace AgriTrace.Application
             config.Scan(Assembly.GetExecutingAssembly());
             services.AddSingleton(config);
             services.AddScoped<IMapper, Mapper>();
+
+            // Register Domain Services (Commands/Queries gọi qua Domain, Domain gọi Repository)
+            services.AddScoped<IFarmService, FarmService>();
 
             return services;
         }
