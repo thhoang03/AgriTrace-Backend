@@ -47,6 +47,10 @@ namespace AgriTrace.Infrastructure.Sqlserver.Repositories
 
         public async Task<PagedResult<Farm>> GetPagedAsync(int pageNumber, int pageSize)
         {
+            // Tự bảo vệ contract: chặn Skip/Take âm khiến EF ném lỗi lúc chạy.
+            if (pageNumber < 1) pageNumber = 1;
+            if (pageSize < 1) pageSize = 1;
+
             var query = _dbContext.Farms.AsNoTracking();
 
             var totalCount = await query.CountAsync();
