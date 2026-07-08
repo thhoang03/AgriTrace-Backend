@@ -15,6 +15,9 @@ builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
 
+// Bắt mọi exception chưa xử lý và trả về envelope ApiResponse (qua GlobalExceptionHandler).
+app.UseExceptionHandler();
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {

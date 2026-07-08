@@ -8,7 +8,10 @@ namespace AgriTrace.Application.Mappings
     {
         public void Register(TypeAdapterConfig config)
         {
-            config.NewConfig<Product, ProductDto>();
+            // Quan hệ 1 - N: Farm -> FarmDto (kèm danh sách Crop) và Crop -> CropDto.
+            config.NewConfig<Farm, FarmDto>();
+            config.NewConfig<Crop, CropDto>();
+
             // Add custom mapping rules here as the application grows.
         }
     }
