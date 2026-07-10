@@ -1,5 +1,5 @@
 using System.Reflection;
-using AgriTrace.Domain.Interfaces;
+using AgriTrace.Domain.Interfaces.Inbound;
 using AgriTrace.Domain.Services;
 using Mapster;
 using MapsterMapper;

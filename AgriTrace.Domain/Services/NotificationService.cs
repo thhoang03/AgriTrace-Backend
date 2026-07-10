@@ -1,0 +1,89 @@
+﻿using AgriTrace.Domain.Common;
+using AgriTrace.Domain.Entities;
+using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
+
+namespace AgriTrace.Domain.Services;
+
+public class NotificationService : INotificationService
+{
+    private readonly INotificationRepository _repository;
+
+    public NotificationService(
+        INotificationRepository repository)
+    {
+        _repository = repository;
+    }
+
+    public async Task<Notification> CreateAsync(
+        Notification entity,
+        CancellationToken cancellationToken = default)
+    {
+        return await _repository.AddAsync(
+            entity,
+            cancellationToken);
+    }
+
+    public async Task DeleteAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        await _repository.DeleteAsync(
+            id,
+            cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Notification>> GetAllAsync(
+        CancellationToken cancellationToken = default)
+    {
+        return await _repository.GetAllAsync(
+            cancellationToken);
+    }
+
+    public async Task<Notification?> GetByIdAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        return await _repository.GetByIdAsync(
+            id,
+            cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Notification>> GetByUserAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _repository.GetByUserAsync(
+            userId,
+            cancellationToken);
+    }
+
+    public async Task<IReadOnlyList<Notification>> GetUnreadAsync(
+        Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _repository.GetUnreadAsync(
+            userId,
+            cancellationToken);
+    }
+
+    public async Task<PagedResult<Notification>> GetPagedAsync(
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        return await _repository.GetPagedAsync(
+            pageNumber,
+            pageSize,
+            cancellationToken);
+    }
+
+    public async Task UpdateAsync(
+        Notification entity,
+        CancellationToken cancellationToken = default)
+    {
+        await _repository.UpdateAsync(
+            entity,
+            cancellationToken);
+    }
+}

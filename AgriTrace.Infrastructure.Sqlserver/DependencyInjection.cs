@@ -1,24 +1,49 @@
-using AgriTrace.Domain.Interfaces;
+using AgriTrace.Domain.Interfaces.Outbound;
 using AgriTrace.Infrastructure.Sqlserver.Persistence;
-using AgriTrace.Infrastructure.Sqlserver.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace AgriTrace.Infrastructure.Sqlserver
+
+namespace AgriTrace.Infrastructure.Sqlserver;
+
+
+public static class DependencyInjection
 {
-    public static class DependencyInjection
+
+    public static IServiceCollection AddInfrastructureSqlServer(
+        this IServiceCollection services,
+        IConfiguration configuration)
     {
-        public static IServiceCollection AddInfrastructureSqlServer(this IServiceCollection services, IConfiguration configuration)
-        {
-            var connectionString = configuration.GetConnectionString("DefaultConnection");
 
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(connectionString));
 
-            services.AddScoped<IFarmRepository, FarmRepository>();
+        services.AddDbContext<ApplicationDbContext>(
+            options =>
+            {
+                options.UseSqlServer(
+                    configuration.GetConnectionString(
+                        "DefaultConnection"));
+            });
 
-            return services;
-        }
+
+
+        RegisterRepositories(services);
+
+
+
+        return services;
     }
+
+
+
+    private static void RegisterRepositories(
+        IServiceCollection services)
+    {
+
+        // Repository sẽ đăng ký ở đây
+
+        // services.AddScoped<IBatchRepository, BatchRepository>();
+
+    }
+
 }

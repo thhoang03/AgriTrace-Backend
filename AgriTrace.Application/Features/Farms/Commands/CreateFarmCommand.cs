@@ -1,7 +1,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using AgriTrace.Application.Contracts;
-using AgriTrace.Domain.Interfaces;
+using AgriTrace.Domain.Interfaces.Inbound;
 using Mapster;
 using MediatR;
 

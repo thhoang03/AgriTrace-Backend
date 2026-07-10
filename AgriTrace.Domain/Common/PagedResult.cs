@@ -1,20 +1,42 @@
-using System.Collections.Generic;
+namespace AgriTrace.Domain.Common;
 
-namespace AgriTrace.Domain.Common
+
+public class PagedResult<T>
 {
-    /// <summary>
-    /// Container trung lập cho một trang dữ liệu: các phần tử của trang + tổng số bản ghi.
-    /// Dùng chung cho tầng Domain/Application, không phụ thuộc framework.
-    /// </summary>
-    public class PagedResult<T>
-    {
-        public IReadOnlyList<T> Items { get; }
-        public int TotalCount { get; }
 
-        public PagedResult(IReadOnlyList<T> items, int totalCount)
-        {
-            Items = items;
-            TotalCount = totalCount;
-        }
+    public IReadOnlyList<T> Items { get; private set; }
+
+
+    public int TotalCount { get; private set; }
+
+
+    public int PageNumber { get; private set; }
+
+
+    public int PageSize { get; private set; }
+
+
+    public int TotalPages =>
+        (int)Math.Ceiling(
+            TotalCount / (double)PageSize);
+
+
+
+    public PagedResult(
+        IReadOnlyList<T> items,
+        int totalCount,
+        int pageNumber,
+        int pageSize)
+    {
+
+        Items = items;
+
+        TotalCount = totalCount;
+
+        PageNumber = pageNumber;
+
+        PageSize = pageSize;
+
     }
+
 }
