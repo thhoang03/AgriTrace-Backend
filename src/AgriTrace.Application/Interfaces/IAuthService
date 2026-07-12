@@ -1,0 +1,12 @@
+using AgriTrace.Application.DTOs.Auth;
+
+namespace AgriTrace.Application.Interfaces;
+
+public interface IAuthService
+{
+    Task<LoginResponseDto> LoginAsync(LoginRequestDto request);
+    Task<bool> RegisterAsync(RegisterRequestDto request);
+    Task<bool> ChangePasswordAsync(Guid userId, ChangePasswordRequestDto request);
+    Task<LoginResponseDto> RefreshTokenAsync(string refreshToken);
+    Task<bool> LogoutAsync(Guid userId);
+}

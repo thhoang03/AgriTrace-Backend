@@ -1,0 +1,211 @@
+using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
+using AgriTrace.Application.DTOs.Auth;
+using AgriTrace.Application.Interfaces;
+using AgriTrace.Domain.Entities;
+using AgriTrace.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
+
+namespace AgriTrace.Application.Services;
+
+public class AuthService : IAuthService
+{
+    private readonly AppDbContext _context;
+    private readonly IConfiguration _config;
+    private const int MAX_FAILED_ATTEMPTS = 5;
+    private const int LOCKOUT_MINUTES = 30;
+
+    public AuthService(AppDbContext context, IConfiguration config)
+    {
+        _context = context;
+        _config = config;
+    }
+
+    public async Task<LoginResponseDto> LoginAsync(LoginRequestDto request)
+    {
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.Username == request.Username);
+
+        if (user == null)
+            throw new UnauthorizedAccessException("Incorrect username or password. Please try again.");
+
+        // Check account status
+        if (user.Status == "Inactive")
+            throw new UnauthorizedAccessException("Your account has been deactivated. Please contact the system administrator.");
+
+        // Check lockout
+        if (user.LockoutEnd.HasValue && user.LockoutEnd > DateTime.UtcNow)
+        {
+            var remainingMinutes = (int)(user.LockoutEnd.Value - DateTime.UtcNow).TotalMinutes + 1;
+            throw new UnauthorizedAccessException(
+                $"Your account has been temporarily locked for {LOCKOUT_MINUTES} minutes due to multiple failed login attempts. Please try again later.");
+        }
+
+        // Verify password
+        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        {
+            user.FailedLoginAttempts++;
+
+            if (user.FailedLoginAttempts >= MAX_FAILED_ATTEMPTS)
+            {
+                user.LockoutEnd = DateTime.UtcNow.AddMinutes(LOCKOUT_MINUTES);
+                user.FailedLoginAttempts = 0;
+                await _context.SaveChangesAsync();
+                throw new UnauthorizedAccessException(
+                    "Your account has been temporarily locked for 30 minutes due to multiple failed login attempts. Please try again later.");
+            }
+
+            await _context.SaveChangesAsync();
+            throw new UnauthorizedAccessException("Incorrect username or password. Please try again.");
+        }
+
+        // Reset failed attempts on successful login
+        user.FailedLoginAttempts = 0;
+        user.LockoutEnd = null;
+
+        // Generate tokens
+        var accessToken = GenerateAccessToken(user);
+        var refreshToken = GenerateRefreshToken();
+
+        user.RefreshToken = refreshToken;
+        user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+
+        return new LoginResponseDto
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshToken,
+            AccessTokenExpiry = DateTime.UtcNow.AddMinutes(15),
+            User = new UserInfoDto
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                Role = user.Role
+            }
+        };
+    }
+
+    public async Task<bool> RegisterAsync(RegisterRequestDto request)
+    {
+        // Check duplicate email
+        if (await _context.Users.AnyAsync(u => u.Email == request.Email))
+            throw new InvalidOperationException("An account with this email already exists.");
+
+        // Check duplicate username
+        if (await _context.Users.AnyAsync(u => u.Username == request.Username))
+            throw new InvalidOperationException("This username is already taken.");
+
+        var user = new User
+        {
+            Username = request.Username,
+            Email = request.Email,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, workFactor: 12),
+            Role = request.Role,
+            OrganizationId = request.OrganizationId,
+            Status = "Active"
+        };
+
+        _context.Users.Add(user);
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> ChangePasswordAsync(Guid userId, ChangePasswordRequestDto request)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null)
+            throw new KeyNotFoundException("User not found.");
+
+        if (!BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash))
+            throw new UnauthorizedAccessException("Current password is incorrect.");
+
+        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword, workFactor: 12);
+        user.RefreshToken = null; // Invalidate existing sessions
+        user.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<LoginResponseDto> RefreshTokenAsync(string refreshToken)
+    {
+        var user = await _context.Users
+            .FirstOrDefaultAsync(u => u.RefreshToken == refreshToken
+                                   && u.RefreshTokenExpiry > DateTime.UtcNow);
+
+        if (user == null)
+            throw new UnauthorizedAccessException("Invalid or expired refresh token.");
+
+        var newAccessToken = GenerateAccessToken(user);
+        var newRefreshToken = GenerateRefreshToken();
+
+        user.RefreshToken = newRefreshToken;
+        user.RefreshTokenExpiry = DateTime.UtcNow.AddDays(7);
+        await _context.SaveChangesAsync();
+
+        return new LoginResponseDto
+        {
+            AccessToken = newAccessToken,
+            RefreshToken = newRefreshToken,
+            AccessTokenExpiry = DateTime.UtcNow.AddMinutes(15),
+            User = new UserInfoDto
+            {
+                Id = user.Id,
+                Username = user.Username,
+                Email = user.Email,
+                Role = user.Role
+            }
+        };
+    }
+
+    public async Task<bool> LogoutAsync(Guid userId)
+    {
+        var user = await _context.Users.FindAsync(userId);
+        if (user == null) return false;
+
+        user.RefreshToken = null;
+        user.RefreshTokenExpiry = null;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    private string GenerateAccessToken(User user)
+    {
+        var key = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
+        var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+        var claims = new[]
+        {
+            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+            new Claim(ClaimTypes.Name, user.Username),
+            new Claim(ClaimTypes.Email, user.Email),
+            new Claim(ClaimTypes.Role, user.Role),
+            new Claim("organizationId", user.OrganizationId?.ToString() ?? "")
+        };
+
+        var token = new JwtSecurityToken(
+            issuer: _config["Jwt:Issuer"],
+            audience: _config["Jwt:Audience"],
+            claims: claims,
+            expires: DateTime.UtcNow.AddMinutes(15),
+            signingCredentials: credentials
+        );
+
+        return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    private static string GenerateRefreshToken()
+    {
+        var randomBytes = new byte[64];
+        using var rng = RandomNumberGenerator.Create();
+        rng.GetBytes(randomBytes);
+        return Convert.ToBase64String(randomBytes);
+    }
+}

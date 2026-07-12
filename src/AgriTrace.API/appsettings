@@ -1,0 +1,17 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=AgriTraceDB;Trusted_Connection=True;TrustServerCertificate=True;"
+  },
+  "Jwt": {
+    "Key": "AgriTrace_SuperSecretKey_2024_MinLength32Chars!",
+    "Issuer": "AgriTrace-API",
+    "Audience": "AgriTrace-Frontend"
+  },
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}
