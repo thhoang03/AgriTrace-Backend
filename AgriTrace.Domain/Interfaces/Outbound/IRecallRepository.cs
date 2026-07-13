@@ -1,4 +1,4 @@
-﻿using AgriTrace.Domain.Common;
+﻿using AgriTrace.Domain.Common.Enums;
 using AgriTrace.Domain.Entities;
 
 namespace AgriTrace.Domain.Interfaces.Outbound;

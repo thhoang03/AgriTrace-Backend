@@ -4,7 +4,7 @@ namespace AgriTrace.Domain.Interfaces.Inbound;
 
 
 public interface IEventTypeService
-    : IService<EventType, int>
+    : IService<EventType, Guid>
 {
     Task<EventType?> GetByCodeAsync(
         string code,

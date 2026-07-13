@@ -1,6 +1,5 @@
 ﻿using AgriTrace.Domain.Common;
-using AgriTrace.Domain.Entities;
-
+using AgriTrace.Domain.Common.Enums;
 
 public class Organization : BaseEntity
 {

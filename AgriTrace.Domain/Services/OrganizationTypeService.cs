@@ -34,7 +34,7 @@ public class OrganizationTypeService
 
 
     public async Task DeleteAsync(
-        int id,
+        Guid id,
         CancellationToken cancellationToken = default)
     {
         await _repository.DeleteAsync(
@@ -54,7 +54,7 @@ public class OrganizationTypeService
 
 
     public async Task<OrganizationType?> GetByIdAsync(
-        int id,
+        Guid id,
         CancellationToken cancellationToken = default)
     {
         return await _repository.GetByIdAsync(

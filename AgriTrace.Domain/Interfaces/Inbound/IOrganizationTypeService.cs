@@ -5,7 +5,7 @@ namespace AgriTrace.Domain.Interfaces.Inbound;
 
 
 public interface IOrganizationTypeService
-    : IService<OrganizationType, int>
+    : IService<OrganizationType, Guid>
 {
 
     Task<OrganizationType?> GetByCodeAsync(

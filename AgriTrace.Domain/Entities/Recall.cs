@@ -1,4 +1,5 @@
 ﻿using AgriTrace.Domain.Common;
+using AgriTrace.Domain.Common.Enums;
 
 namespace AgriTrace.Domain.Entities;
 

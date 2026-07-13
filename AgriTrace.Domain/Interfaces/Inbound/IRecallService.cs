@@ -1,4 +1,5 @@
-﻿using AgriTrace.Domain.Entities;
+﻿using AgriTrace.Domain.Common.Enums;
+using AgriTrace.Domain.Entities;
 
 namespace AgriTrace.Domain.Interfaces.Inbound;
 
@@ -10,6 +11,6 @@ public interface IRecallService
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<Recall>> GetBySeverityAsync(
-        int severity,
+        RecallSeverity severity,
         CancellationToken cancellationToken = default);
 }

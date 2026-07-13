@@ -6,7 +6,7 @@ public interface IOrganizationService
     : IService<Organization, Guid>
 {
     Task<IReadOnlyList<Organization>> GetByTypeAsync(
-        int organizationTypeId,
+        Guid organizationTypeId,
         CancellationToken cancellationToken = default);
 
     Task<Organization?> GetByNameAsync(

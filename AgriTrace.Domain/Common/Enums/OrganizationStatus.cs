@@ -1,4 +1,4 @@
-﻿namespace AgriTrace.Domain.Entities;
+﻿namespace AgriTrace.Domain.Common.Enums;
 
 
 public enum OrganizationStatus

@@ -1,5 +1,5 @@
 ﻿using AgriTrace.Domain.Common;
-using AgriTrace.Domain.Entities.Enums;
+using AgriTrace.Domain.Common.Enums;
 
 
 namespace AgriTrace.Domain.Entities;
@@ -145,7 +145,7 @@ public class Batch : BaseEntity
 
     public void CompleteProduction()
     {
-        Status = BatchStatus.Completed;
+        //Status = BatchStatus.Completed;
 
         MarkUpdated();
     }

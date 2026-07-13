@@ -1,4 +1,4 @@
-﻿namespace AgriTrace.Domain.Common;
+﻿namespace AgriTrace.Domain.Common.Enums;
 
 public enum BatchStatus
 {

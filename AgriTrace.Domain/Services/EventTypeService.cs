@@ -33,7 +33,7 @@ public class EventTypeService : IEventTypeService
 
 
     public async Task DeleteAsync(
-        int id,
+        Guid id,
         CancellationToken cancellationToken = default)
     {
         await _repository.DeleteAsync(
@@ -64,7 +64,7 @@ public class EventTypeService : IEventTypeService
 
 
     public async Task<EventType?> GetByIdAsync(
-        int id,
+        Guid id,
         CancellationToken cancellationToken = default)
     {
         return await _repository.GetByIdAsync(
