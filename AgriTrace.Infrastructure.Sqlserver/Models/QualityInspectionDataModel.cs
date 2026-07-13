@@ -1,4 +1,5 @@
-﻿using AgriTrace.Infrastructure.Sqlserver.Models;
+﻿using AgriTrace.Domain.Common.Enums;
+using AgriTrace.Infrastructure.Sqlserver.Models;
 
 namespace AgriTrace.Infrastructure.Sqlserver.Models;
 
@@ -18,7 +19,7 @@ public class QualityInspectionDataModel : BaseDataModel
 
 
 
-    public int Status { get; set; }
+    public InspectionStatus Status { get; set; }
 
 
 

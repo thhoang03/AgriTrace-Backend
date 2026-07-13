@@ -220,7 +220,7 @@ public class BatchRepository
 
 
         model.Status =
-            (int)entity.Status;
+            entity.Status;
 
 
 
@@ -446,7 +446,7 @@ public class BatchRepository
 
 
             Status =
-                (int)entity.Status,
+                entity.Status,
 
 
             CreatedAt =

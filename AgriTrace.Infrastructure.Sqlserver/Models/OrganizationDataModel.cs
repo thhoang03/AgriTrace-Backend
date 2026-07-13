@@ -1,4 +1,6 @@
-﻿namespace AgriTrace.Infrastructure.Sqlserver.Models;
+﻿using AgriTrace.Domain.Common.Enums;
+
+namespace AgriTrace.Infrastructure.Sqlserver.Models;
 
 
 public class OrganizationDataModel
@@ -14,9 +16,7 @@ public class OrganizationDataModel
     public string? Address { get; set; }
 
 
-    public int Status { get; set; }
-
-
+    public OrganizationStatus Status { get; set; }
 
     // Navigation
 

@@ -203,7 +203,7 @@ public class QualityInspectionRepository
 
 
         model.Status =
-            (int)entity.Status;
+            entity.Status;
 
 
 
@@ -330,7 +330,7 @@ public class QualityInspectionRepository
 
 
             Status =
-                (int)entity.Status,
+                entity.Status,
 
 
             Result =

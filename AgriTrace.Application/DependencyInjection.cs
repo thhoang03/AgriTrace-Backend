@@ -21,7 +21,7 @@ namespace AgriTrace.Application
             services.AddScoped<IMapper, Mapper>();
 
             // Register Domain Services (Commands/Queries gọi qua Domain, Domain gọi Repository)
-            services.AddScoped<IFarmService, FarmService>();
+            //services.AddScoped<IFarmService, FarmService>();
 
             return services;
         }

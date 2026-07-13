@@ -1,4 +1,6 @@
-﻿namespace AgriTrace.Infrastructure.Sqlserver.Models;
+﻿using AgriTrace.Domain.Common.Enums;
+
+namespace AgriTrace.Infrastructure.Sqlserver.Models;
 
 
 public class BatchDataModel : BaseDataModel
@@ -34,7 +36,7 @@ public class BatchDataModel : BaseDataModel
 
 
 
-    public int Status { get; set; }
+    public BatchStatus Status { get; set; }
 
 
 
@@ -47,6 +49,8 @@ public class BatchDataModel : BaseDataModel
 
 
     public Guid? RootBatchId { get; set; }
+
+
 
 
 
@@ -81,5 +85,8 @@ public class BatchDataModel : BaseDataModel
 
     public ICollection<CertificateDataModel> Certificates { get; set; }
         = new List<CertificateDataModel>();
+
+    public ICollection<RecallDataModel> Recalls { get; set; }
+    = new List<RecallDataModel>();
 
 }

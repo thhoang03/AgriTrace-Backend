@@ -38,4 +38,6 @@ public class RecallDataModel : BaseDataModel
 
     public UserDataModel Creator { get; set; } = null!;
 
+    public ICollection<RecallDataModel> Recalls { get; set; }
+
 }
