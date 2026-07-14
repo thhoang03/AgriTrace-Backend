@@ -3,13 +3,13 @@
 ## Tổng quan
 - **Backend:** .NET 10 (ASP.NET Core Web API, Clean Architecture + CQRS)
 - **Frontend:** React + TypeScript (Redux Toolkit)
-- **Database:** SQL Server 
-- **Thời gian:** 6 tuần(3 sprint)
+- **Database:** SQL Server
+- **Thời gian:** 6 tuần (3 sprint)
 - **Nhóm:** 7 thành viên
 
 ---
 
-## Sprint 1: Nền tảng & Thiết kế 
+## Sprint 1: Nền tảng & Thiết kế
 
 ### 1.1 Thiết lập dự án
 - [x] Tạo Solution Clean Architecture (.NET 10): API / Application / Domain / Infrastructure
@@ -20,47 +20,35 @@
 - [ ] **Cấu hình Docker**: Dockerfile cho backend, docker-compose cho SQL Server + backend
 - [ ] **Cấu hình kết nối DB**: Connection string trong appsettings.Development.json
 
-### 1.2 Domain Layer (hiện có: Farm-Crop mẫu)
+### 1.2 Domain Layer
 - [x] `BaseEntity` (Id, CreatedAt, UpdatedAt)
-- [x] `Farm` entity + `Crop` entity (quan hệ 1-N mẫu)
-- [x] `IFarmRepository`, `IFarmService`, `FarmService`
-- [ ] **Xây dựng Domain thật cho hệ thống Traceability:**
-  - [ ] `OrganizationType` (value object: FARM, PROCESSOR, DISTRIBUTOR, RETAILER, INSPECTION, SYSTEM)
-  - [ ] `Organization` entity (Name, Address, Type, Status)
-  - [ ] `User` entity (FullName, Email, PasswordHash, Role, OrganizationId)
-  - [ ] `Category` entity (Product categories)
-  - [ ] `Unit` entity (kg, ton, box...)
-  - [ ] `Product` entity (thuộc Organization + Category + Unit)
-  - [ ] `Batch` entity (*** aggregate root trung tâm ***): BatchCode, QRCode, Quantity, RemainingQuantity, Status, HarvestDate, ParentBatchId, RootBatchId
-  - [ ] `EventType` (value object: HARVEST, RECEIVE, PROCESSING, PACKAGING, TRANSPORT, DISTRIBUTION, RETAIL, SALE, INSPECTION, SPLIT, MERGE, RECALL)
-  - [ ] `SupplyChainEvent` entity (*** append-only ***): BatchId, EventType, OrganizationId, UserId, EventData, Location, PreviousHash, CurrentHash
-  - [ ] `QualityInspection` entity (BatchId, InspectorId, Status, Result, Notes)
-  - [ ] `Certificate` entity (BatchId, InspectionId, Type, FileUrl)
-  - [ ] `Recall` entity (BatchId, Reason, Severity, Status)
-  - [ ] `BatchSplit` / `BatchSplitDetail` entities
-  - [ ] `BatchMerge` / `BatchMergeSource` entities
-  - [ ] `Notification` entity (UserId, Title, Message, IsRead)
-- [ ] **Domain Interfaces**: `IOrganizationRepository`, `IUserRepository`, `IProductRepository`, `IBatchRepository`, `IEventRepository`, `IInspectionRepository`, `ICertificateRepository`, `IRecallRepository`, `INotificationRepository`
-- [ ] **Domain Services**: `BatchService` (tạo batch, split, merge), `HashChainService` (SHA-256), `EventService`, `RecallService`
+- [ ] `Farm` + `Crop` entity (mẫu - **cần xóa symlink**)
+- [x] **Domain Entities thật cho hệ thống Traceability (18 entities):**
+  - [x] `OrganizationType` (enum: FARM, PROCESSOR, DISTRIBUTOR, RETAILER, INSPECTION, SYSTEM)
+  - [x] `Organization` entity (Name, Address, Type, Status)
+  - [x] `User` entity (FullName, Email, PasswordHash, Role, OrganizationId)
+  - [x] `Category` entity (Product categories)
+  - [x] `Unit` entity (kg, ton, box...)
+  - [x] `Product` entity (thuộc Organization + Category + Unit)
+  - [x] `Batch` entity (**aggregate root trung tâm**): BatchCode, QRCode, Quantity, RemainingQuantity, Status, HarvestDate, ParentBatchId, RootBatchId
+  - [x] `EventType` (enum: HARVEST, RECEIVE, PROCESSING, PACKAGING, TRANSPORT, DISTRIBUTION, RETAIL, SALE, INSPECTION, SPLIT, MERGE, RECALL)
+  - [x] `SupplyChainEvent` entity (**append-only**): BatchId, EventType, OrganizationId, UserId, EventData, Location, PreviousHash, CurrentHash
+  - [x] `QualityInspection` entity (BatchId, InspectorId, Status, Result, Notes)
+  - [x] `Certificate` entity (BatchId, InspectionId, Type, FileUrl)
+  - [x] `Recall` entity (BatchId, Reason, Severity, Status)
+  - [x] `BatchSplit` / `BatchSplitDetail` entities
+  - [x] `BatchMerge` / `BatchMergeSource` entities
+  - [x] `Notification` entity (UserId, Title, Message, IsRead)
+- [x] **Domain Interfaces**: Repositories + Services cho tất cả entities
+- [x] **Domain Services**: `BatchService`, `BatchMergeService`, `BatchSplitService`, `EventService`, `HashChainService`, `RecallService`, `NotificationService`, ...
 
 ### 1.3 Database Design
 - [x] Thiết kế ERD trong docs/
-- [ ] **Tạo EF Core DataModels** cho tất cả bảng:
-  - [ ] `OrganizationTypeDataModel`, `OrganizationDataModel`
-  - [ ] `UserDataModel`
-  - [ ] `CategoryDataModel`, `UnitDataModel`, `ProductDataModel`
-  - [ ] `BatchDataModel`
-  - [ ] `EventTypeDataModel`, `SupplyChainEventDataModel`
-  - [ ] `QualityInspectionDataModel`, `CertificateDataModel`
-  - [ ] `RecallDataModel`
-  - [ ] `BatchSplitDataModel`, `BatchSplitDetailDataModel`
-  - [ ] `BatchMergeDataModel`, `BatchMergeSourceDataModel`
-  - [ ] `NotificationDataModel`
-  - [ ] `RefreshTokenDataModel`
-- [ ] **Fluent API Configurations** cho từng bảng (PK, FK, indexes, constraints)
-- [ ] **Seed data**: OrganizationTypes, EventTypes, Units, Roles
-- [ ] **Tạo Migration đầu tiên** (`Add-Migration Initial`)
-- [ ] **Cập nhật DB** (`Update-Database`)
+- [x] **EF Core DataModels** cho tất cả bảng (17 DataModels)
+- [x] **Fluent API Configurations** cho từng bảng (PK, FK, indexes, constraints)
+- [x] **Seed data**: OrganizationTypes, EventTypes
+- [x] **Tạo Migration đầu tiên** (`Add-Migration Initial`)
+- [x] **Cập nhật DB** (`Update-Database`)
 
 ### 1.4 Authentication & Authorization
 - [ ] JWT Authentication (Access Token + Refresh Token)
@@ -73,13 +61,12 @@
 - [x] `ApiResponse` envelope (success, data, message, errors, timestamp)
 - [x] `ApiResponseWrapperFilter` (auto-wrap responses)
 - [x] `GlobalExceptionHandler` (404, 400, 500)
-- [ ] Mở rộng exception handling: ValidationException, ConflictException, BusinessException
 - [ ] FluentValidation cho request models
 - [ ] API versioning (`/api/v1/`)
 
 ---
 
-## Sprint 2: Tính năng cốt lõi 
+## Sprint 2: Tính năng cốt lõi
 
 ### 2.1 Organization Management
 - [ ] `POST /api/v1/organizations` - Tạo tổ chức
@@ -117,7 +104,7 @@
 - [ ] `POST /api/v1/batches/{id}/events` - Ghi nhận event mới
 - [ ] `GET /api/v1/batches/{id}/events` - Danh sách events của batch
 - [ ] **Hash Chain Mechanism**:
-  - [ ] Implement SHA-256 hash calculation
+  - [x] Domain logic: `HashChainService` (SHA-256), `EventService` (GENESIS, VerifyHashChainAsync)
   - [ ] Lưu PreviousHash + CurrentHash mỗi event
   - [ ] Append-only (không update/delete event)
   - [ ] `GET /api/v1/batches/{id}/events/verify` - Kiểm tra tính toàn vẹn hash chain
@@ -128,8 +115,28 @@
 - [ ] `POST /api/v1/batches/merge` - Gộp lô
 - [ ] Cập nhật RemainingQuantity, tạo Batch con, ghi event SPLIT/MERGE
 
+### 2.7 Application Layer (CQRS)
+- [ ] **Commands/Queries** cho tất cả features (MediatR handlers)
+- [ ] **Mapping** (Mapster) giữa Domain ↔ DataModel ↔ DTO
+- [ ] **Validation** (FluentValidation) cho requests
+- [ ] **Repositories** đăng ký DI + implement GenericRepository
 
-### 2.7 Testing Sprint 2
+### 2.8 API Controllers
+- [ ] `AuthController` (login, refresh, logout, me)
+- [ ] `OrganizationsController`
+- [ ] `UsersController`
+- [ ] `CategoriesController`
+- [ ] `ProductsController`
+- [ ] `BatchesController`
+- [ ] `EventsController`
+- [ ] `InspectionsController`
+- [ ] `CertificatesController`
+- [ ] `RecallsController`
+- [ ] `NotificationsController`
+- [ ] `PublicController` (trace, lineage)
+- [ ] `AnalyticsController`
+
+### 2.9 Testing Sprint 2
 - [ ] Unit Tests cho Domain entities (guard clauses, business rules)
 - [ ] Unit Tests cho HashChainService
 - [ ] Unit Tests cho Application handlers (Commands/Queries)
@@ -138,7 +145,7 @@
 
 ---
 
-## Sprint 3: Nâng cao & Triển khai 
+## Sprint 3: Nâng cao & Triển khai
 
 ### 3.1 Quality Inspection & Certificate
 - [ ] `POST /api/v1/batches/{id}/inspections` - Tạo kiểm định
@@ -213,3 +220,12 @@
 - [x] Đã hoàn thành
 - [ ] Chưa làm / Cần làm
 - ⭐ Tính năng quan trọng nhất
+
+---
+
+## Ghi chú cập nhật (2026-07-13)
+
+- Domain layer hoàn chỉnh: 18 entities + 17 domain services + interfaces
+- Infrastructure: 17 DataModels + Fluent API Configs + SeedData + Migration
+- **Chưa có:** CQRS handlers, Controllers, Auth/JWT, Tests, Docker
+- **Lưu ý:** Farm/Crop là symlink mẫu, cần xóa trước khi triển khai thật

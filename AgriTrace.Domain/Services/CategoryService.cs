@@ -79,7 +79,17 @@ public class CategoryService : ICategoryService
         int pageSize,
         CancellationToken cancellationToken = default)
     {
+        return await GetPagedAsync(null, pageNumber, pageSize, cancellationToken);
+    }
+
+    public async Task<PagedResult<Category>> GetPagedAsync(
+        string? search,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
         return await _repository.GetPagedAsync(
+            search,
             pageNumber,
             pageSize,
             cancellationToken);
@@ -111,4 +121,12 @@ public class CategoryService : ICategoryService
             cancellationToken);
     }
 
+    public async Task<bool> HasProductsAsync(
+        Guid categoryId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _repository.HasProductsAsync(
+            categoryId,
+            cancellationToken);
+    }
 }

@@ -1,720 +1,457 @@
-Agricultural Supply Chain Traceability System
-Database Design v4.0
-1. Architecture Overview
-
-Database gồm các nhóm:
-
-Master Data
-
-OrganizationTypes
-EventTypes
-Categories
-Units
 
 
-Identity
+# Agricultural Supply Chain Traceability System
 
-Users
+## Database Design v4.0
 
+### 1. Architecture Overview
 
-Business Core
+Database gồm các nhóm phân hệ sau:
 
-Organizations
-Products
-Batches
+* **Master Data:** `OrganizationTypes`, `EventTypes`, `Categories`, `Units`
+* **Identity:** `Users`
+* **Business Core:** `Organizations`, `Products`, `Batches`
+* **Traceability:** `SupplyChainEvents`, `BatchSplit`, `BatchMerge`
+* **Quality:** `QualityInspections`, `Certificates`
+* **Safety:** `Recalls`, `Notifications`
 
+---
 
-Traceability
+### 2. Organization Domain
 
-SupplyChainEvents
-BatchSplit
-BatchMerge
-
-
-Quality
-
-QualityInspections
-Certificates
-
-
-Safety
-
-Recalls
-Notifications
-
-2. Organization Domain
-OrganizationTypes
+#### OrganizationTypes
 
 Lưu loại tổ chức trong chuỗi cung ứng.
 
+```sql
 CREATE TABLE OrganizationTypes
 (
     Id INT IDENTITY PRIMARY KEY,
-
     Code VARCHAR(50) UNIQUE NOT NULL,
-
     Name NVARCHAR(100) NOT NULL,
-
     Description NVARCHAR(500)
 );
 
+```
 
-Example:
+**Ví dụ dữ liệu:**
 
-Code	Name
-FARM	Farm
-PROCESSOR	Processor
-DISTRIBUTOR	Distributor
-RETAILER	Retailer
-Organizations
+| Code | Name |
+| --- | --- |
+| `FARM` | Farm |
+| `PROCESSOR` | Processor |
+| `DISTRIBUTOR` | Distributor |
+| `RETAILER` | Retailer |
+
+#### Organizations
 
 Đại diện cho các đơn vị tham gia chuỗi.
 
+```sql
 CREATE TABLE Organizations
 (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
-
-
     OrganizationTypeId INT NOT NULL,
-
-
     Name NVARCHAR(200) NOT NULL,
-
-
     Address NVARCHAR(500),
-
-
     Status INT DEFAULT 1,
-
-
     CreatedAt DATETIME2 DEFAULT GETDATE(),
-
-
+    
     CONSTRAINT FK_Organizations_Types
-
-    FOREIGN KEY(OrganizationTypeId)
-
-    REFERENCES OrganizationTypes(Id)
-
+    FOREIGN KEY(OrganizationTypeId) REFERENCES OrganizationTypes(Id)
 );
 
+```
 
-Ví dụ:
+**Ví dụ dữ liệu:**
 
-Đà Lạt Farm
+* **Name:** Đà Lạt Farm
+* **Type:** `FARM`
 
-Type:
-FARM
+---
 
+### 3. User & Authentication
 
-3. User & Authentication
-Users
+#### Users
 
 Phục vụ JWT Authentication.
 
+```sql
 CREATE TABLE Users
 (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
-
-
     OrganizationId UNIQUEIDENTIFIER NULL,
-
-
     FullName NVARCHAR(200),
-
-
     Email VARCHAR(200) UNIQUE NOT NULL,
-
-
     PasswordHash VARCHAR(500),
-
-
     Role VARCHAR(50) NOT NULL,
-
-
     IsActive BIT DEFAULT 1,
-
-
     CreatedAt DATETIME2 DEFAULT GETDATE(),
 
-
-
     CONSTRAINT FK_Users_Organizations
-
-    FOREIGN KEY(OrganizationId)
-
-    REFERENCES Organizations(Id)
-
+    FOREIGN KEY(OrganizationId) REFERENCES Organizations(Id)
 );
 
+```
 
-Role:
+**Các Role hệ thống:**
 
-SYSTEM_ADMIN
+* `SYSTEM_ADMIN`
+* `ORG_ADMIN`
+* `FARMER`
+* `OPERATOR`
+* `INSPECTOR`
 
-ORG_ADMIN
+---
 
-FARMER
+### 4. Product Domain
 
-OPERATOR
+#### Categories
 
-INSPECTOR
-
-4. Product Domain
-Categories
+```sql
 CREATE TABLE Categories
 (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
-
-
     Name NVARCHAR(100),
-
-
     Description NVARCHAR(500)
-
 );
 
-Units
+```
 
-Ví dụ:
+#### Units
 
-kg
+**Ví dụ dữ liệu:** `kg`, `ton`, `box`.
 
-ton
-
-box
-
+```sql
 CREATE TABLE Units
 (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
-
-
     Code VARCHAR(20),
-
-
     Name NVARCHAR(100)
-
 );
 
-Products
+```
+
+#### Products
+
+```sql
 CREATE TABLE Products
 (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
-
-
     OrganizationId UNIQUEIDENTIFIER NOT NULL,
-
-
     CategoryId UNIQUEIDENTIFIER,
-
-
     UnitId UNIQUEIDENTIFIER,
-
-
     Name NVARCHAR(200) NOT NULL,
-
-
     CreatedAt DATETIME2 DEFAULT GETDATE(),
 
-
-
-    FOREIGN KEY(OrganizationId)
-
-    REFERENCES Organizations(Id),
-
-
-
-    FOREIGN KEY(CategoryId)
-
-    REFERENCES Categories(Id),
-
-
-
-    FOREIGN KEY(UnitId)
-
-    REFERENCES Units(Id)
-
+    FOREIGN KEY(OrganizationId) REFERENCES Organizations(Id),
+    FOREIGN KEY(CategoryId) REFERENCES Categories(Id),
+    FOREIGN KEY(UnitId) REFERENCES Units(Id)
 );
 
-5. Batch Aggregate Root ⭐
+```
 
-Đây là bảng quan trọng nhất.
+---
 
+### 5. Batch Aggregate Root ⭐
+
+Đây là bảng quan trọng nhất trong hệ thống quản lý chuỗi cung ứng.
+
+```sql
 CREATE TABLE Batches
 (
-
     Id UNIQUEIDENTIFIER PRIMARY KEY,
-
-
     ProductId UNIQUEIDENTIFIER NOT NULL,
-
-
     CurrentOrganizationId UNIQUEIDENTIFIER NOT NULL,
-
-
     BatchCode VARCHAR(100) UNIQUE NOT NULL,
-
-
     HarvestDate DATETIME2,
-
-
     Quantity DECIMAL(18,2),
-
-
     RemainingQuantity DECIMAL(18,2),
-
-
     Status INT,
-
-
     QRCode VARCHAR(500),
-
-
     ParentBatchId UNIQUEIDENTIFIER NULL,
-
-
     RootBatchId UNIQUEIDENTIFIER NULL,
-
-
     CreatedAt DATETIME2 DEFAULT GETDATE(),
 
-
-
-    FOREIGN KEY(ProductId)
-
-    REFERENCES Products(Id),
-
-
-    FOREIGN KEY(CurrentOrganizationId)
-
-    REFERENCES Organizations(Id),
-
-
-    FOREIGN KEY(ParentBatchId)
-
-    REFERENCES Batches(Id)
-
+    FOREIGN KEY(ProductId) REFERENCES Products(Id),
+    FOREIGN KEY(CurrentOrganizationId) REFERENCES Organizations(Id),
+    FOREIGN KEY(ParentBatchId) REFERENCES Batches(Id)
 );
 
+```
 
-Status:
+**Các trạng thái (Status):**
 
-CREATED
+* `CREATED`
+* `HARVESTED`
+* `PROCESSING`
+* `TRANSPORTING`
+* `DISTRIBUTED`
+* `RETAIL`
+* `RECALLED`
 
-HARVESTED
+---
 
-PROCESSING
+### 6. Event Type
 
-TRANSPORTING
+#### EventTypes
 
-DISTRIBUTED
-
-RETAIL
-
-RECALLED
-
-6. Event Type
-EventTypes
+```sql
 CREATE TABLE EventTypes
 (
     Id INT IDENTITY PRIMARY KEY,
-
-
     Code VARCHAR(50) UNIQUE,
-
-
     Name NVARCHAR(100)
-
 );
 
+```
 
-Data:
+**Dữ liệu mẫu (Code):**
 
-Code
-HARVEST
-PROCESSING
-PACKAGING
-TRANSPORT
-DISTRIBUTION
-RETAIL
-INSPECTION
-RECALL
-7. Supply Chain Event ⭐⭐⭐
+* `HARVEST`
+* `PROCESSING`
+* `PACKAGING`
+* `TRANSPORT`
+* `DISTRIBUTION`
+* `RETAIL`
+* `INSPECTION`
+* `RECALL`
 
-Append-only.
+---
 
+### 7. Supply Chain Event ⭐⭐⭐
+
+Bảng ghi vết dạng **Append-only** (chỉ thêm, không sửa/xóa).
+
+```sql
 CREATE TABLE SupplyChainEvents
 (
     Id UNIQUEIDENTIFIER PRIMARY KEY,
-
-
     BatchId UNIQUEIDENTIFIER NOT NULL,
-
-
     EventTypeId INT NOT NULL,
-
-
     OrganizationId UNIQUEIDENTIFIER NOT NULL,
-
-
     PerformedByUserId UNIQUEIDENTIFIER NOT NULL,
-
-
     EventData NVARCHAR(MAX),
-
-
     Location NVARCHAR(200),
-
-
     PreviousHash VARCHAR(500),
-
-
     CurrentHash VARCHAR(500),
-
-
     EventTime DATETIME2 DEFAULT GETDATE(),
 
-
-
-    FOREIGN KEY(BatchId)
-
-    REFERENCES Batches(Id),
-
-
-
-    FOREIGN KEY(EventTypeId)
-
-    REFERENCES EventTypes(Id),
-
-
-
-    FOREIGN KEY(OrganizationId)
-
-    REFERENCES Organizations(Id),
-
-
-
-    FOREIGN KEY(PerformedByUserId)
-
-    REFERENCES Users(Id)
-
+    FOREIGN KEY(BatchId) REFERENCES Batches(Id),
+    FOREIGN KEY(EventTypeId) REFERENCES EventTypes(Id),
+    FOREIGN KEY(OrganizationId) REFERENCES Organizations(Id),
+    FOREIGN KEY(PerformedByUserId) REFERENCES Users(Id)
 );
 
+```
 
-Ví dụ:
+**Ví dụ cấu trúc cấu hình động cho `Harvest Event` lưu tại trường `EventData`:**
 
-Harvest Event:
-
+```json
 {
-"temperature":25,
-"farm":"Da Lat",
-"worker":10
+  "temperature": 25,
+  "farm": "Da Lat",
+  "worker": 10
 }
 
-8. Quality Inspection
+```
+
+---
+
+### 8. Quality Inspection
+
+```sql
 CREATE TABLE QualityInspections
 (
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
+    BatchId UNIQUEIDENTIFIER NOT NULL,
+    InspectorId UNIQUEIDENTIFIER NOT NULL,
+    Status INT,
+    Result NVARCHAR(500),
+    Notes NVARCHAR(MAX),
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
 
-Id UNIQUEIDENTIFIER PRIMARY KEY,
-
-
-BatchId UNIQUEIDENTIFIER NOT NULL,
-
-
-InspectorId UNIQUEIDENTIFIER NOT NULL,
-
-
-Status INT,
-
-
-Result NVARCHAR(500),
-
-
-Notes NVARCHAR(MAX),
-
-
-CreatedAt DATETIME2 DEFAULT GETDATE(),
-
-
-
-FOREIGN KEY(BatchId)
-
-REFERENCES Batches(Id),
-
-
-
-FOREIGN KEY(InspectorId)
-
-REFERENCES Users(Id)
-
+    FOREIGN KEY(BatchId) REFERENCES Batches(Id),
+    FOREIGN KEY(InspectorId) REFERENCES Users(Id)
 );
 
-9. Certificate
+```
+
+---
+
+### 9. Certificate
+
+```sql
 CREATE TABLE Certificates
 (
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
+    BatchId UNIQUEIDENTIFIER NOT NULL,
+    InspectionId UNIQUEIDENTIFIER NULL,
+    CertificateType NVARCHAR(100),
+    FileUrl VARCHAR(500),
+    IssuedDate DATETIME2,
 
-Id UNIQUEIDENTIFIER PRIMARY KEY,
-
-
-BatchId UNIQUEIDENTIFIER NOT NULL,
-
-
-InspectionId UNIQUEIDENTIFIER NULL,
-
-
-CertificateType NVARCHAR(100),
-
-
-FileUrl VARCHAR(500),
-
-
-IssuedDate DATETIME2,
-
-
-
-FOREIGN KEY(BatchId)
-
-REFERENCES Batches(Id),
-
-
-FOREIGN KEY(InspectionId)
-
-REFERENCES QualityInspections(Id)
-
+    FOREIGN KEY(BatchId) REFERENCES Batches(Id),
+    FOREIGN KEY(InspectionId) REFERENCES QualityInspections(Id)
 );
 
-10. Recall
+```
+
+---
+
+### 10. Recall
+
+```sql
 CREATE TABLE Recalls
 (
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
+    BatchId UNIQUEIDENTIFIER NOT NULL,
+    CreatedBy UNIQUEIDENTIFIER NOT NULL,
+    Reason NVARCHAR(500),
+    Severity INT,
+    Status INT,
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
 
-Id UNIQUEIDENTIFIER PRIMARY KEY,
-
-
-BatchId UNIQUEIDENTIFIER NOT NULL,
-
-
-CreatedBy UNIQUEIDENTIFIER NOT NULL,
-
-
-Reason NVARCHAR(500),
-
-
-Severity INT,
-
-
-Status INT,
-
-
-CreatedAt DATETIME2 DEFAULT GETDATE(),
-
-
-
-FOREIGN KEY(BatchId)
-
-REFERENCES Batches(Id),
-
-
-
-FOREIGN KEY(CreatedBy)
-
-REFERENCES Users(Id)
-
+    FOREIGN KEY(BatchId) REFERENCES Batches(Id),
+    FOREIGN KEY(CreatedBy) REFERENCES Users(Id)
 );
 
+```
 
-Severity:
+**Mức độ nghiêm trọng (Severity):**
 
-LOW
+* `LOW`
+* `MEDIUM`
+* `HIGH`
+* `CRITICAL`
 
-MEDIUM
+---
 
-HIGH
+### 11. Split Batch
 
-CRITICAL
+**Ví dụ kịch bản tách lô:**
 
-11. Split Batch
+```
+Batch A (1000kg) ───[ Split ]───► Batch B (400kg)
+                                └──► Batch C (600kg)
 
-Ví dụ:
+```
 
-Batch A
+#### BatchSplits
 
-1000kg
-
-
-split
-
-
-Batch B 400kg
-
-Batch C 600kg
-
-BatchSplits
+```sql
 CREATE TABLE BatchSplits
 (
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
+    SourceBatchId UNIQUEIDENTIFIER NOT NULL,
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
 
-Id UNIQUEIDENTIFIER PRIMARY KEY,
-
-
-SourceBatchId UNIQUEIDENTIFIER NOT NULL,
-
-
-CreatedAt DATETIME2 DEFAULT GETDATE(),
-
-
-
-FOREIGN KEY(SourceBatchId)
-
-REFERENCES Batches(Id)
-
+    FOREIGN KEY(SourceBatchId) REFERENCES Batches(Id)
 );
 
-BatchSplitDetails
+```
+
+#### BatchSplitDetails
+
+```sql
 CREATE TABLE BatchSplitDetails
 (
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
+    SplitId UNIQUEIDENTIFIER,
+    TargetBatchId UNIQUEIDENTIFIER,
+    Quantity DECIMAL(18,2),
 
-Id UNIQUEIDENTIFIER PRIMARY KEY,
-
-
-SplitId UNIQUEIDENTIFIER,
-
-
-TargetBatchId UNIQUEIDENTIFIER,
-
-
-Quantity DECIMAL(18,2),
-
-
-
-FOREIGN KEY(SplitId)
-
-REFERENCES BatchSplits(Id),
-
-
-
-FOREIGN KEY(TargetBatchId)
-
-REFERENCES Batches(Id)
-
+    FOREIGN KEY(SplitId) REFERENCES BatchSplits(Id),
+    FOREIGN KEY(TargetBatchId) REFERENCES Batches(Id)
 );
 
-12. Merge Batch
+```
 
-Ví dụ:
+---
 
-Apple A
+### 12. Merge Batch
 
-+
-Apple B
+**Ví dụ kịch bản gộp lô:**
 
+```
+Apple A (Batch) ──┐
+                  ├───[ Merge ]───► Apple C (New Batch)
+Apple B (Batch) ──┘
 
-=
+```
 
-Apple C
+#### BatchMerges
 
-BatchMerges
+```sql
 CREATE TABLE BatchMerges
 (
-
-Id UNIQUEIDENTIFIER PRIMARY KEY,
-
-
-NewBatchId UNIQUEIDENTIFIER,
-
-
-CreatedAt DATETIME2 DEFAULT GETDATE()
-
-
-
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
+    NewBatchId UNIQUEIDENTIFIER,
+    CreatedAt DATETIME2 DEFAULT GETDATE()
 );
 
-BatchMergeSources
+```
+
+#### BatchMergeSources
+
+```sql
 CREATE TABLE BatchMergeSources
 (
+    BatchMergeId UNIQUEIDENTIFIER,
+    SourceBatchId UNIQUEIDENTIFIER,
+    Quantity DECIMAL(18,2),
 
-BatchMergeId UNIQUEIDENTIFIER,
-
-
-SourceBatchId UNIQUEIDENTIFIER,
-
-
-Quantity DECIMAL(18,2),
-
-
-
-PRIMARY KEY
-(
-BatchMergeId,
-SourceBatchId
-)
-
+    PRIMARY KEY (BatchMergeId, SourceBatchId)
 );
 
-13. Notification
+```
+
+---
+
+### 13. Notification
+
+```sql
 CREATE TABLE Notifications
 (
+    Id UNIQUEIDENTIFIER PRIMARY KEY,
+    UserId UNIQUEIDENTIFIER,
+    Title NVARCHAR(200),
+    Message NVARCHAR(MAX),
+    IsRead BIT DEFAULT 0,
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
 
-Id UNIQUEIDENTIFIER PRIMARY KEY,
-
-
-UserId UNIQUEIDENTIFIER,
-
-
-Title NVARCHAR(200),
-
-
-Message NVARCHAR(MAX),
-
-
-IsRead BIT DEFAULT 0,
-
-
-CreatedAt DATETIME2 DEFAULT GETDATE(),
-
-
-
-FOREIGN KEY(UserId)
-
-REFERENCES Users(Id)
-
+    FOREIGN KEY(UserId) REFERENCES Users(Id)
 );
 
-ERD cuối cùng
+```
+
+---
+
+### ERD Tổng Quan (Dạng text)
+
+```text
 OrganizationTypes
-        |
-        |
-Organizations
-        |
-        |
-       Users
+       │
+       ▼
+ Organizations
+       │
+       ▼
+     Users
 
 
-Organizations
-        |
-        |
-     Products
-        |
-        |
-     Batches
-        |
-        |
-+----------------+
-|
-SupplyChainEvents
-|
-QualityInspections
-|
-Certificates
-|
-Recalls
+ Organizations
+       │
+       ▼
+    Products
+       │
+       ▼
+    Batches ◄─── BatchSplits / BatchMerges
+       │
+       ├─► SupplyChainEvents
+       ├─► QualityInspections ──► Certificates
+       └─► Recalls
 
 
-Batches
- |
- +---- BatchSplits
- |
- +---- BatchMerges
+     Users ──► Notifications
 
-
-Users
- |
-Notifications
+```

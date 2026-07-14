@@ -1,6 +1,7 @@
 using AgriTrace.API;
 using AgriTrace.Application;
 using AgriTrace.Infrastructure.Sqlserver;
+using AgriTrace.Infrastructure.Sqlserver.Persistence;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,5 +32,6 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
+
 
 app.Run();

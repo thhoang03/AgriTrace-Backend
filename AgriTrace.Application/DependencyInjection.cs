@@ -20,8 +20,8 @@ namespace AgriTrace.Application
             services.AddSingleton(config);
             services.AddScoped<IMapper, Mapper>();
 
-            // Register Domain Services (Commands/Queries gọi qua Domain, Domain gọi Repository)
-            //services.AddScoped<IFarmService, FarmService>();
+            // Register Domain Services
+            services.AddScoped<ICategoryService, CategoryService>();
 
             return services;
         }
