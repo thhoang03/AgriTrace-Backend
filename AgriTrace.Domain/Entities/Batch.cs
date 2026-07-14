@@ -145,8 +145,7 @@ public class Batch : BaseEntity
 
     public void CompleteProduction()
     {
-        //Status = BatchStatus.Completed;
-
+        Status = BatchStatus.Transporting;
         MarkUpdated();
     }
 

@@ -77,4 +77,9 @@ public class Product : BaseEntity
             throw new ArgumentException("Product name is required.");
         }
     }
+
+    internal void UpdateProduct(Guid? categoryId, Guid? unitId, string name)
+    {
+        throw new NotImplementedException();
+    }
 }

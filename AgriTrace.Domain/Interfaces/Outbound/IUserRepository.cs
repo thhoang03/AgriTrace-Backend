@@ -1,4 +1,5 @@
-﻿using AgriTrace.Domain.Entities;
+﻿using AgriTrace.Domain.Common.Enums;
+using AgriTrace.Domain.Entities;
 
 namespace AgriTrace.Domain.Interfaces.Outbound;
 
@@ -14,6 +15,6 @@ public interface IUserRepository
         CancellationToken cancellationToken = default);
 
     Task<IReadOnlyList<User>> GetByRoleAsync(
-        string role,
+        UserRole role,
         CancellationToken cancellationToken = default);
 }
