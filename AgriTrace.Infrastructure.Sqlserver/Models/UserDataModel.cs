@@ -1,4 +1,6 @@
-﻿namespace AgriTrace.Infrastructure.Sqlserver.Models;
+﻿using AgriTrace.Domain.Common.Enums;
+
+namespace AgriTrace.Infrastructure.Sqlserver.Models;
 
 
 public class UserDataModel : BaseDataModel
@@ -16,7 +18,7 @@ public class UserDataModel : BaseDataModel
     public string? PasswordHash { get; set; }
 
 
-    public string Role { get; set; } = string.Empty;
+    public UserRole Role { get; set; }
 
 
     public bool IsActive { get; set; }

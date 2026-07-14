@@ -7,19 +7,22 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Features\Crops\**" />
+    <Compile Remove="Features\Farms\**" />
+    <EmbeddedResource Remove="Features\Crops\**" />
+    <EmbeddedResource Remove="Features\Farms\**" />
+    <None Remove="Features\Crops\**" />
+    <None Remove="Features\Farms\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" Version="12.1.1" />
     <PackageReference Include="Mapster" Version="10.0.10" />
-    <PackageReference Include="MediatR" Version="12.5.0" />
+    <PackageReference Include="MediatR" Version="14.2.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AgriTrace.Domain\AgriTrace.Domain.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Contracts\" />
-    <Folder Include="Features\Crops\Commands\" />
-    <Folder Include="Features\Farms\Commands\" />
-    <Folder Include="Features\Farms\Queries\" />
   </ItemGroup>
 
 </Project>

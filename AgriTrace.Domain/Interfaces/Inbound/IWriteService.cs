@@ -1,4 +1,5 @@
-﻿namespace AgriTrace.Domain.Interfaces.Inbound;
+﻿
+namespace AgriTrace.Domain.Interfaces.Inbound;
 
 public interface IWriteService<TEntity, TKey>
 {

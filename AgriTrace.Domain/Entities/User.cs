@@ -1,4 +1,5 @@
 ﻿using AgriTrace.Domain.Common;
+using AgriTrace.Domain.Common.Enums;
 
 namespace AgriTrace.Domain.Entities;
 
@@ -12,12 +13,11 @@ public class User : BaseEntity
 
     public string PasswordHash { get; private set; }
 
-    public string Role { get; private set; }
+    public UserRole Role { get; private set; }
 
     public bool IsActive { get; private set; }
 
     // Navigation
-
     public Organization? Organization { get; private set; }
 
     private User()
@@ -29,7 +29,7 @@ public class User : BaseEntity
         string fullName,
         string email,
         string passwordHash,
-        string role)
+        UserRole role)
     {
         Validate(
             fullName,
@@ -41,14 +41,14 @@ public class User : BaseEntity
         FullName = fullName.Trim();
         Email = email.Trim().ToLowerInvariant();
         PasswordHash = passwordHash;
-        Role = role.Trim().ToUpperInvariant();
+        Role = role;
         IsActive = true;
     }
 
     public void UpdateProfile(
         string fullName,
         string email,
-        string role)
+        UserRole role)
     {
         Validate(
             fullName,
@@ -58,7 +58,7 @@ public class User : BaseEntity
 
         FullName = fullName.Trim();
         Email = email.Trim().ToLowerInvariant();
-        Role = role.Trim().ToUpperInvariant();
+        Role = role;
 
         MarkUpdated();
     }
@@ -93,7 +93,7 @@ public class User : BaseEntity
         string fullName,
         string email,
         string passwordHash,
-        string role)
+        UserRole role)
     {
         if (string.IsNullOrWhiteSpace(fullName))
         {
@@ -110,9 +110,9 @@ public class User : BaseEntity
             throw new ArgumentException("Password hash is required.");
         }
 
-        if (string.IsNullOrWhiteSpace(role))
+        if (!Enum.IsDefined(typeof(UserRole), role))
         {
-            throw new ArgumentException("Role is required.");
+            throw new ArgumentException("Role is invalid.");
         }
     }
 }

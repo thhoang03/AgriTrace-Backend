@@ -1,4 +1,5 @@
 ﻿using AgriTrace.Domain.Common;
+using AgriTrace.Domain.Common.Enums;
 using AgriTrace.Domain.Entities;
 using AgriTrace.Domain.Interfaces.Inbound;
 using AgriTrace.Domain.Interfaces.Outbound;
@@ -121,7 +122,7 @@ public class UserService : IUserService
 
 
     public async Task<IReadOnlyList<User>> GetByRoleAsync(
-        string role,
+        UserRole role,
         CancellationToken cancellationToken = default)
     {
         return await _repository.GetByRoleAsync(
