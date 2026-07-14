@@ -1,127 +1,107 @@
 using System;
+using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using AgriTrace.API.Models;
-using AgriTrace.Application.Common.Exceptions;
-using AgriTrace.Domain.Entities;
-using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Application.Contracts;
+using AgriTrace.Application.Features.Categories.Commands;
+using AgriTrace.Application.Features.Categories.Queries;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgriTrace.API.Controllers;
 
 [ApiController]
 [Route("api/v1/categories")]
+[Produces("application/json")]
 public class CategoriesController : ControllerBase
 {
-    private readonly ICategoryService _categoryService;
+    private readonly IMediator _mediator;
 
-    public CategoriesController(ICategoryService categoryService)
+    public CategoriesController(IMediator mediator)
     {
-        _categoryService = categoryService;
+        _mediator = mediator;
     }
 
     [HttpGet]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] CategoryQuery query, CancellationToken cancellationToken)
     {
-        var result = await _categoryService.GetPagedAsync(
-            query.Search,
+        var search = query.Search?.Trim();
+        var result = await _mediator.Send(new GetCategoriesPagedQuery(
+            search,
             query.PageNumber,
-            query.PageSize,
-            cancellationToken);
+            query.PageSize), cancellationToken);
 
-        var response = new
-        {
+        var response = new CategoryPagedResponse(
+            result.Items.Select(ToResponse),
             result.TotalCount,
             result.PageNumber,
-            result.PageSize,
-            result.TotalPages,
-            Items = result.Items.Select(ToResponse)
-        };
+            result.PageSize);
 
         return Ok(response);
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var category = await _categoryService.GetByIdAsync(id, cancellationToken);
-        if (category == null)
-        {
-            throw new NotFoundException($"Category {id} not found.");
-        }
-
+        var category = await _mediator.Send(new GetCategoryByIdQuery(id), cancellationToken);
         return Ok(ToResponse(category));
     }
 
     [HttpPost]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Create([FromBody] CategoryRequest request, CancellationToken cancellationToken)
     {
-        if (await _categoryService.GetByNameAsync(request.Name, cancellationToken) != null)
-        {
-            throw new ConflictException("Category name already exists.");
-        }
-
-        var category = new Category(request.Name, request.Description);
-        var created = await _categoryService.CreateAsync(category, cancellationToken);
+        var created = await _mediator.Send(new CreateCategoryCommand(
+            request.Name,
+            request.Description), cancellationToken);
 
         return CreatedAtAction(nameof(GetById), new { id = created.Id }, ToResponse(created));
     }
 
     [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Update(Guid id, [FromBody] CategoryRequest request, CancellationToken cancellationToken)
     {
-        var existing = await _categoryService.GetByIdAsync(id, cancellationToken);
-        if (existing == null)
-        {
-            throw new NotFoundException($"Category {id} not found.");
-        }
+        var updated = await _mediator.Send(new UpdateCategoryCommand(
+            id,
+            request.Name,
+            request.Description), cancellationToken);
 
-        var duplicate = await _categoryService.GetByNameAsync(request.Name, cancellationToken);
-        if (duplicate != null && duplicate.Id != id)
-        {
-            throw new ConflictException("Category name already exists.");
-        }
-
-        existing.UpdateInformation(request.Name, request.Description);
-        await _categoryService.UpdateAsync(existing, cancellationToken);
-
-        return Ok(ToResponse(existing));
+        return Ok(ToResponse(updated));
     }
 
     [HttpPatch("{id:guid}/status")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateCategoryStatusRequest request, CancellationToken cancellationToken)
     {
-        var category = await _categoryService.GetByIdAsync(id, cancellationToken);
-        if (category == null)
-        {
-            throw new NotFoundException($"Category {id} not found.");
-        }
+        var updated = await _mediator.Send(new UpdateCategoryStatusCommand(
+            id,
+            request.IsActive), cancellationToken);
 
-        category.ChangeStatus(request.IsActive);
-        await _categoryService.UpdateAsync(category, cancellationToken);
-
-        return Ok(ToResponse(category));
+        return Ok(ToResponse(updated));
     }
 
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        var category = await _categoryService.GetByIdAsync(id, cancellationToken);
-        if (category == null)
-        {
-            throw new NotFoundException($"Category {id} not found.");
-        }
-
-        if (await _categoryService.HasProductsAsync(id, cancellationToken))
-        {
-            throw new ConflictException("Cannot delete category because it is being used by products.");
-        }
-
-        await _categoryService.DeleteAsync(id, cancellationToken);
-
-        return NoContent();
+        await _mediator.Send(new DeleteCategoryCommand(id), cancellationToken);
+        return Ok(ApiResponse.Success(null));
     }
 
-    private static CategoryResponse ToResponse(Category category)
+    private static CategoryResponse ToResponse(CategoryDto category)
     {
         return new CategoryResponse
         {

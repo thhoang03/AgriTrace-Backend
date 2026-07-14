@@ -1,6 +1,8 @@
 using AgriTrace.Domain.Interfaces.Outbound;
 using AgriTrace.Infrastructure.Sqlserver.Persistence;
 using AgriTrace.Infrastructure.Sqlserver.Repositories;
+using AgriTrace.Infrastructure.Sqlserver.Repositories.Read;
+using AgriTrace.Infrastructure.Sqlserver.Repositories.Write;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,10 +39,12 @@ public static class DependencyInjection
 
 
 
-    private static void RegisterRepositories(
-        IServiceCollection services)
-    {
-        services.AddScoped<ICategoryRepository, CategoryRepository>();
-    }
+        private static void RegisterRepositories(
+            IServiceCollection services)
+        {
+            services.AddScoped<ICategoryRepository, CategoryRepository>();
+            services.AddScoped<IProductReadRepository, ProductReadRepository>();
+            services.AddScoped<IProductWriteRepository, ProductWriteRepository>();
+        }
 
 }

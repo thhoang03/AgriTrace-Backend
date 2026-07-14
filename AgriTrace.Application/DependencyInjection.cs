@@ -22,6 +22,8 @@ namespace AgriTrace.Application
 
             // Register Domain Services
             services.AddScoped<ICategoryService, CategoryService>();
+            services.AddScoped<IProductReadService, ProductReadService>();
+            services.AddScoped<IProductWriteService, ProductWriteService>();
 
             return services;
         }

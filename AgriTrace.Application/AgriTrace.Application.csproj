@@ -25,4 +25,13 @@
     <ProjectReference Include="..\AgriTrace.Domain\AgriTrace.Domain.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Contracts\" />
+    <Folder Include="Features\Crops\Commands\" />
+    <Folder Include="Features\Farms\Commands\" />
+    <Folder Include="Features\Farms\Queries\" />
+    <Folder Include="Contracts\" />
+    <Folder Include="Features\" />
+  </ItemGroup>
+
 </Project>
