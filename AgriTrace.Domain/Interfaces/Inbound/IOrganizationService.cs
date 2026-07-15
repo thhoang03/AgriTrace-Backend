@@ -1,4 +1,4 @@
-﻿using AgriTrace.Domain.Entities;
+﻿    using AgriTrace.Domain.Entities;
 
 namespace AgriTrace.Domain.Interfaces.Inbound;
 
@@ -12,4 +12,4 @@ public interface IOrganizationService
     Task<Organization?> GetByNameAsync(
         string name,
         CancellationToken cancellationToken = default);
-}
+}   

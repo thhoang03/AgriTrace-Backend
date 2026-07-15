@@ -1,5 +1,6 @@
 using AgriTrace.API.Models;
 using AgriTrace.Application.Contracts;
+using AgriTrace.Application.Features.Organizations.Commands;
 using AgriTrace.Application.Features.Products.Commands;
 
 namespace AgriTrace.API.Mapping;
@@ -10,6 +11,7 @@ internal static class ApiMappings
     // Request -> Command
     // =========================
 
+    //=======PRODUCT=======
     public static CreateProductCommand ToCommand(
         this ProductRequest request)
     {
@@ -30,11 +32,28 @@ internal static class ApiMappings
             request.UnitId,
             request.Name);
     }
+    //========ORGANIZATION=======
+    public static CreateOrganizationCommand ToCommand(this OrganizationRequest request)
+    {
+        return new CreateOrganizationCommand(
+            request.OrganizationTypeId,
+            request.OrganizationName,
+            request.Address);
+    }
+    public static UpdateOrganizationCommand ToCommand(this OrganizationRequest request, Guid id)
+    {
+        return new UpdateOrganizationCommand(
+            id,
+            request.OrganizationTypeId,
+            request.OrganizationName,
+            request.Address);
+    }
 
     // =========================
     // DTO -> Response
     // =========================
 
+    //=======PRODUCT=======
     public static ProductResponse ToResponse(
         this ProductDto dto)
     {
@@ -47,6 +66,20 @@ internal static class ApiMappings
             UnitId = dto.UnitId,
             CategoryName = dto.CategoryName,
             UnitName = dto.UnitName
+        };
+    }
+    //=======ORGANIZATION========
+    public static OrgranizationResponse ToResponse(this OrganizationDto dto)
+    {
+        return new OrgranizationResponse
+        {
+            OrganizationId = dto.Id,
+            OrganizationName = dto.Name,
+            Address = dto.Address ?? string.Empty,
+            OrganizationTypeId = dto.OrganizationTypeId,
+            OrganizationStatus = dto.Status.ToString(),
+            CreatedAt = dto.CreatedAt,
+            UpdatedAt = dto.UpdatedAt
         };
     }
 }
