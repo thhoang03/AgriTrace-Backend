@@ -44,7 +44,8 @@ public class UserConfiguration
 
         builder.Property(x => x.Role)
             .HasMaxLength(50)
-            .IsRequired();
+            .IsRequired()
+            .HasConversion<string>();
 
 
 
