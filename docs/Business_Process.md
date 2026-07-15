@@ -35,7 +35,7 @@ Tính toàn vẹn dùng: **SHA-256 Hash Chain**
 
 ## 2. Actors
 
-### 2.1 System Admin
+### 2.1 Admin
 
 Quản trị toàn hệ thống.
 
@@ -54,7 +54,7 @@ Quản trị toàn hệ thống.
 - Organizations
 - EventTypes
 
-### 2.2 Organization Admin
+### 2.2 Manager
 
 Đại diện quản lý một doanh nghiệp.
 
@@ -79,7 +79,7 @@ Quản trị toàn hệ thống.
 
 ### 2.3 Farmer
 
-Đã tách riêng. Không phải Operator.
+Đã tách riêng. Không phải Staff.
 
 **Responsibilities:**
 
@@ -99,7 +99,7 @@ Generate QR
 - Batches
 - SupplyChainEvents
 
-### 2.4 Operator
+### 2.4 Staff
 
 Nhân viên vận hành trong Processor / Distributor / Retailer.
 
@@ -160,7 +160,7 @@ Không login.
 
 ### BP01 - User Authentication
 
-**Actor:** System User
+**Actor:** User
 
 **Flow:**
 
@@ -175,13 +175,13 @@ Không login.
 
 ### BP02 - Organization Management
 
-**Actor:** System Admin
+**Actor:** Admin
 
 **Flow:**
 
 1. Create Organization
 2. Select Organization Type (FARM/PROCESSOR/DISTRIBUTOR/RETAILER)
-3. Create Organization Admin
+3. Create Manager
 4. Activate Organization
 
 **Output:** Organization, User
@@ -194,7 +194,7 @@ Không login.
 
 ### BP03 - Product Management
 
-**Actor:** Organization Admin
+**Actor:** Manager
 
 **Flow:**
 
@@ -232,7 +232,7 @@ Không login.
 
 ### BP05 - Supply Chain Event Management ⭐
 
-**Actor:** Operator, Farmer
+**Actor:** Staff, Farmer
 
 **Flow:**
 
@@ -257,7 +257,7 @@ Không login.
 
 ### BP06 - Batch Split
 
-**Actor:** Operator
+**Actor:** Staff
 
 **Example:**
 
@@ -289,7 +289,7 @@ Split
 
 ### BP07 - Batch Merge
 
-**Actor:** Operator
+**Actor:** Staff
 
 **Example:**
 
@@ -332,7 +332,7 @@ Batch A + Batch B = Batch C
 
 ### BP09 - Product Recall
 
-**Actor:** System Admin, Inspector
+**Actor:** Admin, Inspector
 
 **Flow:**
 

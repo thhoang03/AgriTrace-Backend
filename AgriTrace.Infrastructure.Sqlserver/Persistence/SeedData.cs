@@ -43,6 +43,18 @@ public static class SeedData
                 Id = new Guid("10000000-0000-0000-0000-000000000004"),
                 Code = "RETAILER",
                 Name = "Retailer"
+            },
+            new OrganizationTypeDataModel
+            {
+                Id = new Guid("10000000-0000-0000-0000-000000000005"),
+                Code = "INSPECTION",
+                Name = "Inspection"
+            },
+            new OrganizationTypeDataModel
+            {
+                Id = new Guid("10000000-0000-0000-0000-000000000006"),
+                Code = "SYSTEM",
+                Name = "System"
             }
         );
     }
