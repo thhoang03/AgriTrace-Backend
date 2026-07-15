@@ -50,6 +50,7 @@ public static class DependencyInjection
             services.AddScoped<IOrganizationService, OrganizationService>();
             services.AddScoped<IOrganizationRepository, OrganizationRepository>();
             services.AddScoped<IQualityInspectionRepository, QualityInspectionRepository>();
+            services.AddScoped<ICertificateRepository, CertificateRepository>();
     }
 
 }
