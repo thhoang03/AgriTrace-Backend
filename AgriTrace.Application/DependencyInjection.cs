@@ -24,6 +24,7 @@ namespace AgriTrace.Application
             services.AddScoped<ICategoryService, CategoryService>();
             services.AddScoped<IProductReadService, ProductReadService>();
             services.AddScoped<IProductWriteService, ProductWriteService>();
+            services.AddScoped<IQualityInspectionService, QualityInspectionService>();
 
             return services;
         }

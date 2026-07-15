@@ -1,4 +1,4 @@
-﻿using AgriTrace.Domain.Common;
+using AgriTrace.Domain.Common;
 using AgriTrace.Domain.Common.Enums;
 
 namespace AgriTrace.Domain.Entities;
@@ -25,6 +25,9 @@ public class QualityInspection : BaseEntity
     {
     }
 
+    /// <summary>
+    /// Constructor for creating a new QualityInspection (generates a new Id).
+    /// </summary>
     public QualityInspection(
         Guid batchId,
         Guid inspectorId,
@@ -35,6 +38,29 @@ public class QualityInspection : BaseEntity
         Validate(
             batchId,
             inspectorId);
+
+        BatchId = batchId;
+        InspectorId = inspectorId;
+        Status = status;
+        Result = result?.Trim();
+        Notes = notes?.Trim();
+    }
+
+    /// <summary>
+    /// Rehydration constructor for reconstructing a QualityInspection from the database (preserves Id and audit fields).
+    /// </summary>
+    public QualityInspection(
+        Guid id,
+        Guid batchId,
+        Guid inspectorId,
+        InspectionStatus status,
+        string? result,
+        string? notes,
+        DateTime createdAt,
+        DateTime? updatedAt)
+        : base(id, createdAt, updatedAt)
+    {
+        Validate(batchId, inspectorId);
 
         BatchId = batchId;
         InspectorId = inspectorId;
