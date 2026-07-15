@@ -145,7 +145,9 @@ public class OrganizationRepository
 
 
 
-        return entity;
+        // Trả lại entity được rehydrate từ model vừa lưu để đảm bảo
+        // Id/CreatedAt trả về khớp chính xác với dữ liệu đã persist.
+        return ToEntity(model);
 
     }
 
@@ -300,10 +302,17 @@ public class OrganizationRepository
         OrganizationDataModel model)
     {
 
+        // Dùng constructor rehydrate để giữ đúng Id/Status/CreatedAt/UpdatedAt
+        // từ database, thay vì constructor "tạo mới" (sẽ sinh Id ngẫu nhiên
+        // và luôn set Status = Active).
         return new Organization(
+            model.Id,
             model.OrganizationTypeId,
             model.Name,
-            model.Address);
+            model.Address,
+            model.Status,
+            model.CreatedAt,
+            model.UpdatedAt);
 
     }
 
