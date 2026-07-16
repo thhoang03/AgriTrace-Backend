@@ -23,6 +23,8 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         var model = await _context.Products
             .AsNoTracking()
+            .Include(x => x.Category)
+            .Include(x => x.Unit)
             .FirstOrDefaultAsync(
                 x => x.Id == id,
                 cancellationToken);
@@ -37,6 +39,8 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         var models = await _context.Products
             .AsNoTracking()
+            .Include(x => x.Category)
+            .Include(x => x.Unit)
             .OrderBy(x => x.Name)
             .ToListAsync(cancellationToken);
 
@@ -49,6 +53,8 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         var models = await _context.Products
             .AsNoTracking()
+            .Include(x => x.Category)
+            .Include(x => x.Unit)
             .Where(x => x.OrganizationId == organizationId)
             .OrderBy(x => x.Name)
             .ToListAsync(cancellationToken);
@@ -62,6 +68,8 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         var models = await _context.Products
             .AsNoTracking()
+            .Include(x => x.Category)
+            .Include(x => x.Unit)
             .Where(x => x.CategoryId == categoryId)
             .OrderBy(x => x.Name)
             .ToListAsync(cancellationToken);
@@ -75,7 +83,9 @@ public sealed class ProductReadRepository : IProductReadRepository
         CancellationToken cancellationToken = default)
     {
         var query = _context.Products
-      .AsNoTracking();
+       .AsNoTracking()
+            .Include(x => x.Category)
+            .Include(x => x.Unit);
 
         var totalCount = await query.CountAsync(cancellationToken);
 
@@ -101,7 +111,9 @@ public sealed class ProductReadRepository : IProductReadRepository
         CancellationToken cancellationToken = default)
     {
         IQueryable<ProductDataModel> query = _context.Products
-            .AsNoTracking();
+            .AsNoTracking()
+            .Include(x => x.Category)
+            .Include(x => x.Unit);
 
         if (organizationId.HasValue)
         {
@@ -138,9 +150,25 @@ public sealed class ProductReadRepository : IProductReadRepository
     private static Product ToEntity(ProductDataModel model)
     {
         return new Product(
+            model.Id,
             model.OrganizationId,
             model.CategoryId,
             model.UnitId,
-            model.Name);
+            model.Name,
+            model.CreatedAt,
+            model.UpdatedAt,
+            model.Category == null ? null : new Category(
+                model.Category.Id,
+                model.Category.Name,
+                model.Category.Description,
+                model.Category.CreatedAt,
+                model.Category.UpdatedAt,
+                model.Category.IsActive),
+            model.Unit == null ? null : new Unit(
+                model.Unit.Id,
+                model.Unit.Code,
+                model.Unit.Name,
+                model.Unit.CreatedAt,
+                model.Unit.UpdatedAt));
     }
 }

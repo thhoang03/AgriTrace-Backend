@@ -1,6 +1,5 @@
 using AgriTrace.Domain.Interfaces.Inbound;
 using AgriTrace.Domain.Interfaces.Outbound;
-using AgriTrace.Domain.Services;
 using AgriTrace.Infrastructure.Sqlserver.Persistence;
 using AgriTrace.Infrastructure.Sqlserver.Repositories;
 using AgriTrace.Infrastructure.Sqlserver.Repositories.Read;
@@ -40,17 +39,17 @@ public static class DependencyInjection
     }
 
 
-
-        private static void RegisterRepositories(
-            IServiceCollection services)
-        {
-            services.AddScoped<ICategoryRepository, CategoryRepository>();
-            services.AddScoped<IProductReadRepository, ProductReadRepository>();
-            services.AddScoped<IProductWriteRepository, ProductWriteRepository>();
-            services.AddScoped<IOrganizationService, OrganizationService>();
-            services.AddScoped<IOrganizationRepository, OrganizationRepository>();
-            services.AddScoped<IQualityInspectionRepository, QualityInspectionRepository>();
-            services.AddScoped<ICertificateRepository, CertificateRepository>();
+    private static void RegisterRepositories(
+        IServiceCollection services)
+    {
+        services.AddScoped<ICategoryRepository, CategoryRepository>();
+        services.AddScoped<IProductReadRepository, ProductReadRepository>();
+        services.AddScoped<IProductWriteRepository, ProductWriteRepository>();
+        services.AddScoped<IOrganizationRepository, OrganizationRepository>();
+        services.AddScoped<IQualityInspectionRepository, QualityInspectionRepository>();
+        services.AddScoped<ICertificateRepository, CertificateRepository>();
+        services.AddScoped<IBatchReadRepository, BatchReadRepository>();
+        services.AddScoped<IBatchWriteRepository, BatchWriteRepository>();
     }
 
 }
