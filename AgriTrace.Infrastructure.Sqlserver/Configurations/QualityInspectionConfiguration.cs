@@ -47,7 +47,7 @@ public class QualityInspectionConfiguration
 
         builder.HasOne(x => x.Batch)
 
-            .WithMany(x => x.Inspections)
+            .WithMany(x => x.QualityInspections)
 
             .HasForeignKey(x => x.BatchId)
 

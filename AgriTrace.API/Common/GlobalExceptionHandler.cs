@@ -1,9 +1,11 @@
 using System;
+using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using AgriTrace.API.Models;
 using AgriTrace.Application.Common.Exceptions;
+using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
@@ -27,6 +29,8 @@ namespace AgriTrace.API.Common
         {
             var (statusCode, messages) = exception switch
             {
+                ValidationException ve => (HttpStatusCode.BadRequest,
+                    ve.Errors.Select(e => e.ErrorMessage).ToArray()),
                 NotFoundException => (HttpStatusCode.NotFound, new[] { exception.Message }),
                 ConflictException => (HttpStatusCode.Conflict, new[] { exception.Message }),
                 ArgumentException => (HttpStatusCode.BadRequest, new[] { exception.Message }),
