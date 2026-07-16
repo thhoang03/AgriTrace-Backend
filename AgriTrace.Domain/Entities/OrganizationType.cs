@@ -31,6 +31,20 @@ public class OrganizationType : BaseEntity
         Description = description?.Trim();
     }
 
+    public OrganizationType(
+        Guid id,
+        string code,
+        string name,
+        string? description,
+        DateTime createdAt,
+        DateTime? updatedAt)
+        : base(id, createdAt, updatedAt)
+    {
+        Code = code.Trim().ToUpperInvariant();
+        Name = name.Trim();
+        Description = description?.Trim();
+    }
+
     public void UpdateInformation(
         string code,
         string name,

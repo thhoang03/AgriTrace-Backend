@@ -96,11 +96,12 @@ CREATE TABLE Users
 
 **Các Role hệ thống:**
 
-* `SYSTEM_ADMIN`
-* `ORG_ADMIN`
+* `ADMIN`
+* `MANAGER`
+* `STAFF`
 * `FARMER`
-* `OPERATOR`
 * `INSPECTOR`
+* `CONSUMER`
 
 ---
 

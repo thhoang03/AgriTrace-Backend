@@ -46,6 +46,26 @@ public class Product : BaseEntity
         Name = name.Trim();
     }
 
+    public Product(
+        Guid id,
+        Guid organizationId,
+        Guid? categoryId,
+        Guid? unitId,
+        string name,
+        DateTime createdAt,
+        DateTime? updatedAt,
+        Category? category,
+        Unit? unit)
+        : base(id, createdAt, updatedAt)
+    {
+        OrganizationId = organizationId;
+        CategoryId = categoryId;
+        UnitId = unitId;
+        Name = name;
+        Category = category;
+        Unit = unit;
+    }
+
     public void UpdateInformation(
         Guid? categoryId,
         Guid? unitId,

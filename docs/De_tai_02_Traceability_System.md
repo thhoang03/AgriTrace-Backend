@@ -44,7 +44,7 @@ Nhiệm vụ của bạn là đọc hiểu, phân tích sâu các thực thể, 
 | **3** | **Đơn vị Sơ chế / Đóng gói** | Tiếp nhận lô hàng từ nông dân; Ghi nhận sự kiện xử lý, phân loại, đóng gói và cập nhật trạng thái lô hàng. |
 | **4** | **Nhà phân phối / Đơn vị vận chuyển** | Ghi nhận sự kiện tiếp nhận, lưu kho, thông tin chuyến xe, nhiệt độ bảo quản (nếu có) và vận chuyển lô hàng đến đại lý. |
 | **5** | **Đại lý bán lẻ / Siêu thị** | Tiếp nhận lô hàng cuối cùng, ghi nhận sự kiện mở bán, quản lý vị trí kệ hàng hoặc trạng thái tiêu thụ. |
-| **6** | **Người tiêu dùng (Consumer)** | Đối tượng không cần đăng nhập hệ thống. Sử dụng thiết bị di động quét mã QR để kiểm tra toàn bộ vòng đời và tính hợp pháp của nông sản. |
+| **6** | **Người mua (Consumer)** | Đối tượng không cần đăng nhập hệ thống. Sử dụng thiết bị di động quét mã QR để kiểm tra toàn bộ vòng đời và tính hợp pháp của nông sản. |
 
 ---
 
