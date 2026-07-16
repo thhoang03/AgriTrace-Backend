@@ -36,6 +36,18 @@ public class UnitConfiguration
             .HasMaxLength(100);
 
 
+        builder.Property(x => x.Description)
+            .HasMaxLength(255);
+
+
+        builder.Property(x => x.Symbol)
+            .HasMaxLength(20);
+
+
+        builder.Property(x => x.ConversionToBase)
+            .HasPrecision(18, 6);
+
+
 
     }
 
