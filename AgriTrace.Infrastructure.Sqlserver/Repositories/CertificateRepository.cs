@@ -307,15 +307,21 @@ public class CertificateRepository
 
         return new Certificate(
 
+            model.Id,
+
             model.BatchId,
 
             model.InspectionId,
 
-            model.CertificateType,
+            model.CertificateType ?? string.Empty,
 
-            model.FileUrl,
+            model.FileUrl ?? string.Empty,
 
-            model.IssuedDate
+            model.IssuedDate,
+
+            model.CreatedAt,
+
+            model.UpdatedAt
 
         );
 

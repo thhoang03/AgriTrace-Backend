@@ -36,6 +36,8 @@ namespace AgriTrace.Application
             services.AddScoped<IBatchReadService, BatchReadService>();
             services.AddScoped<IBatchWriteService, BatchWriteService>();
             services.AddScoped<IOrganizationService, OrganizationService>();
+            services.AddScoped<IQualityInspectionService, QualityInspectionService>();
+            services.AddScoped<ICertificateService, CertificateService>();
 
             return services;
         }
