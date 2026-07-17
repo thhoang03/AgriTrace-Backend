@@ -68,4 +68,9 @@ public class BatchSplitService : IBatchSplitService
             sourceBatchId,
             cancellationToken);
     }
+
+    public Task<BatchSplit> SplitBatchAsync(Guid sourceBatchId, Guid performedByUserId, IReadOnlyList<SplitPartRequest> parts, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }
