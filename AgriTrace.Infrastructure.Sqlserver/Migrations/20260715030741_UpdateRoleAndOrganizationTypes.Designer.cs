@@ -4,6 +4,7 @@ using AgriTrace.Infrastructure.Sqlserver.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgriTrace.Infrastructure.Sqlserver.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260715030741_UpdateRoleAndOrganizationTypes")]
+    partial class UpdateRoleAndOrganizationTypes
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -227,15 +230,15 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000001"),
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Fresh vegetables and tubers",
+                            Description = "Nhóm rau củ quả tươi",
                             IsActive = true,
-                            Name = "Vegetables"
+                            Name = "Rau củ"
                         },
                         new
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000002"),
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Various types of coffee",
+                            Description = "Các loại cà phê",
                             IsActive = true,
                             Name = "Coffee"
                         },
@@ -243,7 +246,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000003"),
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Various types of rice",
+                            Description = "Gạo các loại",
                             IsActive = true,
                             Name = "Rice"
                         },
@@ -251,7 +254,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000004"),
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Fresh fruits",
+                            Description = "Trái cây tươi",
                             IsActive = true,
                             Name = "Fruits"
                         },
@@ -259,7 +262,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000005"),
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Herbs and spices",
+                            Description = "Thảo mộc và gia vị",
                             IsActive = true,
                             Name = "Herbs"
                         });
@@ -464,44 +467,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasIndex("OrganizationTypeId");
 
                     b.ToTable("Organizations", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("50000000-0000-0000-0000-000000000001"),
-                            Address = "Tan Lac, Hoa Binh Province",
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Green Farm Co.",
-                            OrganizationTypeId = new Guid("10000000-0000-0000-0000-000000000001"),
-                            Status = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("50000000-0000-0000-0000-000000000002"),
-                            Address = "Buon Ma Thuot, Dak Lak Province",
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Golden Bean Processor",
-                            OrganizationTypeId = new Guid("10000000-0000-0000-0000-000000000002"),
-                            Status = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("50000000-0000-0000-0000-000000000003"),
-                            Address = "Binh Tan, Ho Chi Minh City",
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Fresh Link Distributor",
-                            OrganizationTypeId = new Guid("10000000-0000-0000-0000-000000000003"),
-                            Status = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("50000000-0000-0000-0000-000000000004"),
-                            Address = "Cau Giay, Hanoi City",
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Agri Quality Inspection",
-                            OrganizationTypeId = new Guid("10000000-0000-0000-0000-000000000005"),
-                            Status = 1
-                        });
                 });
 
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.OrganizationTypeDataModel", b =>
@@ -620,44 +585,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasIndex("UnitId");
 
                     b.ToTable("Products", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("60000000-0000-0000-0000-000000000001"),
-                            CategoryId = new Guid("30000000-0000-0000-0000-000000000001"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Organic Tomato",
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
-                            UnitId = new Guid("40000000-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            Id = new Guid("60000000-0000-0000-0000-000000000002"),
-                            CategoryId = new Guid("30000000-0000-0000-0000-000000000004"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Dragon Fruit",
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
-                            UnitId = new Guid("40000000-0000-0000-0000-000000000004")
-                        },
-                        new
-                        {
-                            Id = new Guid("60000000-0000-0000-0000-000000000003"),
-                            CategoryId = new Guid("30000000-0000-0000-0000-000000000002"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Arabica Coffee",
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
-                            UnitId = new Guid("40000000-0000-0000-0000-000000000005")
-                        },
-                        new
-                        {
-                            Id = new Guid("60000000-0000-0000-0000-000000000004"),
-                            CategoryId = new Guid("30000000-0000-0000-0000-000000000003"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Jasmine Rice",
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
-                            UnitId = new Guid("40000000-0000-0000-0000-000000000002")
-                        });
                 });
 
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.QualityInspectionDataModel", b =>
@@ -838,43 +765,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         .IsUnique();
 
                     b.ToTable("Units", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000001"),
-                            Code = "KG",
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Kilogram"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000002"),
-                            Code = "GRAM",
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Gram"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000003"),
-                            Code = "LITER",
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Liter"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000004"),
-                            Code = "BOX",
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Box"
-                        },
-                        new
-                        {
-                            Id = new Guid("40000000-0000-0000-0000-000000000005"),
-                            Code = "BALE",
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Bale"
-                        });
                 });
 
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.UserDataModel", b =>
@@ -910,9 +800,10 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("Role")
+                    b.Property<string>("Role")
+                        .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -925,51 +816,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasIndex("OrganizationId");
 
                     b.ToTable("Users", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("70000000-0000-0000-0000-000000000001"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "admin@agritrace.com",
-                            FullName = "System Administrator",
-                            IsActive = true,
-                            PasswordHash = "123",
-                            Role = "Admin"
-                        },
-                        new
-                        {
-                            Id = new Guid("70000000-0000-0000-0000-000000000002"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "farmer.a@greenfarm.com",
-                            FullName = "Nguyen Van A",
-                            IsActive = true,
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
-                            PasswordHash = "123",
-                            Role = "Farmer"
-                        },
-                        new
-                        {
-                            Id = new Guid("70000000-0000-0000-0000-000000000003"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "manager.b@goldenbean.com",
-                            FullName = "Tran Thi B",
-                            IsActive = true,
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
-                            PasswordHash = "123",
-                            Role = "Manager"
-                        },
-                        new
-                        {
-                            Id = new Guid("70000000-0000-0000-0000-000000000004"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "inspector.c@agriquality.com",
-                            FullName = "Le Van C",
-                            IsActive = true,
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000004"),
-                            PasswordHash = "123",
-                            Role = "Inspector"
-                        });
                 });
 
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.BatchDataModel", b =>

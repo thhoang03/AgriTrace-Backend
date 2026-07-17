@@ -28,6 +28,18 @@ public class Unit : BaseEntity
         Name = name.Trim();
     }
 
+    public Unit(
+        Guid id,
+        string code,
+        string name,
+        DateTime createdAt,
+        DateTime? updatedAt)
+        : base(id, createdAt, updatedAt)
+    {
+        Code = code.Trim().ToUpperInvariant();
+        Name = name.Trim();
+    }
+
     public void UpdateInformation(
         string code,
         string name)

@@ -53,7 +53,7 @@
 ### 1.4 Authentication & Authorization
 - [ ] JWT Authentication (Access Token + Refresh Token)
 - [ ] `AuthService` (Login, RefreshToken, Logout, ChangePassword)
-- [ ] Role-based Authorization (RBAC): SYSTEM_ADMIN, ORG_ADMIN, STAFF, INSPECTOR
+- [ ] Role-based Authorization (RBAC): ADMIN, MANAGER, STAFF, FARMER, INSPECTOR, CONSUMER
 - [ ] Permission check theo OrganizationType + EventType
 - [ ] `CurrentUserService` (lấy thông tin user từ JWT claims)
 

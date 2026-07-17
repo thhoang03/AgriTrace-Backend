@@ -59,6 +59,7 @@ public class OrganizationRepository
     {
 
         var models = await _context.Organizations
+            .Include(x => x.OrganizationType)
             .OrderBy(x => x.Name)
             .ToListAsync(cancellationToken);
 
@@ -85,6 +86,7 @@ public class OrganizationRepository
     {
 
         var query = _context.Organizations
+            .Include(x => x.OrganizationType)
             .AsQueryable();
 
 
@@ -165,6 +167,7 @@ public class OrganizationRepository
     {
 
         var model = await _context.Organizations
+            .Include(x => x.OrganizationType)
             .FirstOrDefaultAsync(
                 x => x.Id == entity.Id,
                 cancellationToken);
@@ -250,6 +253,7 @@ public class OrganizationRepository
     {
 
         var models = await _context.Organizations
+            .Include(x => x.OrganizationType)
             .Where(
                 x => x.OrganizationTypeId == organizationTypeId)
             .OrderBy(
@@ -278,6 +282,7 @@ public class OrganizationRepository
     {
 
         var model = await _context.Organizations
+            .Include(x => x.OrganizationType)
             .FirstOrDefaultAsync(
                 x => x.Name == name,
                 cancellationToken);
@@ -312,7 +317,16 @@ public class OrganizationRepository
             model.Address,
             model.Status,
             model.CreatedAt,
-            model.UpdatedAt);
+            model.UpdatedAt,
+            model.OrganizationType == null
+                ? null
+                : new OrganizationType(
+                    model.OrganizationType.Id,
+                    model.OrganizationType.Code,
+                    model.OrganizationType.Name,
+                    model.OrganizationType.Description,
+                    model.OrganizationType.CreatedAt,
+                    model.OrganizationType.UpdatedAt));
 
     }
 

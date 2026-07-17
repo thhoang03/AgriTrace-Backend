@@ -1,5 +1,6 @@
 using AgriTrace.Domain.Common;
 using AgriTrace.Domain.Common.Enums;
+using AgriTrace.Domain.Entities;
 
 public class Organization : BaseEntity
 {
@@ -10,6 +11,8 @@ public class Organization : BaseEntity
     public string? Address { get; private set; }
 
     public OrganizationStatus Status { get; private set; }
+
+    public OrganizationType? OrganizationType { get; private set; }
 
     private Organization() { }
 
@@ -36,7 +39,8 @@ public class Organization : BaseEntity
         string? address,
         OrganizationStatus status,
         DateTime createdAt,
-        DateTime? updatedAt)
+        DateTime? updatedAt,
+        OrganizationType? organizationType)
     {
         Id = id;
         OrganizationTypeId = organizationTypeId;
@@ -45,6 +49,7 @@ public class Organization : BaseEntity
         Status = status;
         CreatedAt = createdAt;
         UpdatedAt = updatedAt;
+        OrganizationType = organizationType;
     }
 
     public void UpdateInformation(
