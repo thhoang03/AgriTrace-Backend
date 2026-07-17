@@ -39,20 +39,17 @@ public static class DependencyInjection
     }
 
 
-
     private static void RegisterRepositories(
-   IServiceCollection services)
+        IServiceCollection services)
     {
         services.AddScoped<ICategoryRepository, CategoryRepository>();
-
         services.AddScoped<IProductReadRepository, ProductReadRepository>();
-
         services.AddScoped<IProductWriteRepository, ProductWriteRepository>();
-
         services.AddScoped<IOrganizationRepository, OrganizationRepository>();
-
+        services.AddScoped<IQualityInspectionRepository, QualityInspectionRepository>();
+        services.AddScoped<ICertificateRepository, CertificateRepository>();
         services.AddScoped<IBatchReadRepository, BatchReadRepository>();
-
         services.AddScoped<IBatchWriteRepository, BatchWriteRepository>();
     }
+
 }

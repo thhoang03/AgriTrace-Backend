@@ -94,11 +94,105 @@ public static class SeedData
     private static void SeedUnits(ModelBuilder builder)
     {
         builder.Entity<UnitDataModel>().HasData(
-            new UnitDataModel { Id = new Guid("40000000-0000-0000-0000-000000000001"), Code = "KG", Name = "Kilogram", CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-            new UnitDataModel { Id = new Guid("40000000-0000-0000-0000-000000000002"), Code = "GRAM", Name = "Gram", CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-            new UnitDataModel { Id = new Guid("40000000-0000-0000-0000-000000000003"), Code = "LITER", Name = "Liter", CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-            new UnitDataModel { Id = new Guid("40000000-0000-0000-0000-000000000004"), Code = "BOX", Name = "Box", CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) },
-            new UnitDataModel { Id = new Guid("40000000-0000-0000-0000-000000000005"), Code = "BALE", Name = "Bale", CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc) }
+            new UnitDataModel
+            {
+                Id = new Guid("40000000-0000-0000-0000-000000000001"),
+                Code = "KG",
+                Name = "Kilogram",
+                Symbol = "kg",
+                Description = "Metric unit of mass equal to 1000 grams",
+                Category = UnitCategory.Weight,
+                ConversionToBase = 1m,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UnitDataModel
+            {
+                Id = new Guid("40000000-0000-0000-0000-000000000002"),
+                Code = "GRAM",
+                Name = "Gram",
+                Symbol = "g",
+                Description = "Metric unit of mass equal to 1/1000 kilogram",
+                Category = UnitCategory.Weight,
+                ConversionToBase = 0.001m,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UnitDataModel
+            {
+                Id = new Guid("40000000-0000-0000-0000-000000000003"),
+                Code = "LITER",
+                Name = "Liter",
+                Symbol = "L",
+                Description = "Metric unit of volume equal to 1000 cubic centimeters",
+                Category = UnitCategory.Volume,
+                ConversionToBase = 1m,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UnitDataModel
+            {
+                Id = new Guid("40000000-0000-0000-0000-000000000004"),
+                Code = "MILLILITER",
+                Name = "Milliliter",
+                Symbol = "mL",
+                Description = "Metric unit of volume equal to 1/1000 liter",
+                Category = UnitCategory.Volume,
+                ConversionToBase = 0.001m,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UnitDataModel
+            {
+                Id = new Guid("40000000-0000-0000-0000-000000000005"),
+                Code = "BOX",
+                Name = "Box",
+                Symbol = "box",
+                Description = "Packaging unit containing a fixed number of items",
+                Category = UnitCategory.Count,
+                ConversionToBase = 1m,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UnitDataModel
+            {
+                Id = new Guid("40000000-0000-0000-0000-000000000006"),
+                Code = "BALE",
+                Name = "Bale",
+                Symbol = "bale",
+                Description = "Compressed bundle of agricultural produce",
+                Category = UnitCategory.Count,
+                ConversionToBase = 1m,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UnitDataModel
+            {
+                Id = new Guid("40000000-0000-0000-0000-000000000007"),
+                Code = "PIECE",
+                Name = "Piece",
+                Symbol = "pc",
+                Description = "Individual countable item",
+                Category = UnitCategory.Count,
+                ConversionToBase = 1m,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UnitDataModel
+            {
+                Id = new Guid("40000000-0000-0000-0000-000000000008"),
+                Code = "TON",
+                Name = "Metric Ton",
+                Symbol = "t",
+                Description = "Metric unit of mass equal to 1000 kilograms",
+                Category = UnitCategory.Weight,
+                ConversionToBase = 1000m,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UnitDataModel
+            {
+                Id = new Guid("40000000-0000-0000-0000-000000000009"),
+                Code = "SACK",
+                Name = "Sack",
+                Symbol = "sack",
+                Description = "Standard sack for bulk produce, typically 50 kg",
+                Category = UnitCategory.Weight,
+                ConversionToBase = 50m,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            }
         );
     }
 

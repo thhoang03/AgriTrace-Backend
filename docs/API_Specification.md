@@ -1743,6 +1743,7 @@ Các API trả danh sách hỗ trợ:
 | GET | /organization-types | Loại tổ chức |
 | GET | /event-types | Loại event |
 | GET | /categories | Danh mục sản phẩm |
+| GET | /units | Đơn vị tính (kg, ton, box) |
 
 ## 18. Error Code bổ sung
 
