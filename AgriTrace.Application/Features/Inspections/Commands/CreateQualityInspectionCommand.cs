@@ -13,7 +13,6 @@ public sealed record CreateQualityInspectionCommand(
     string Result,
     string? Notes)
     : IRequest<QualityInspectionDto>;
-
 public sealed class CreateQualityInspectionCommandHandler
     : IRequestHandler<CreateQualityInspectionCommand, QualityInspectionDto>
 {
@@ -60,10 +59,6 @@ public sealed class CreateQualityInspectionCommandValidator
         RuleFor(x => x.BatchId)
             .NotEmpty()
             .WithMessage("BatchId is required.");
-
-        RuleFor(x => x.InspectorId)
-            .NotEmpty()
-            .WithMessage("InspectorId is required.");
 
         RuleFor(x => x.Result)
             .NotEmpty()

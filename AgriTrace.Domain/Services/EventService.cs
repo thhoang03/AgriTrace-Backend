@@ -84,6 +84,19 @@ public class EventService : IEventService
 
 
 
+    public async Task<SupplyChainEvent?> GetByIdAsync(
+        Guid eventId,
+        CancellationToken cancellationToken = default)
+    {
+
+        return await _repository.GetByIdAsync(
+            eventId,
+            cancellationToken);
+
+    }
+
+
+
 
 
     public async Task<bool> VerifyHashChainAsync(

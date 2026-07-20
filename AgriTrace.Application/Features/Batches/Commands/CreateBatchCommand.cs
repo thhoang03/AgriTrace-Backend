@@ -12,7 +12,6 @@ namespace AgriTrace.Application.Features.Batches.Commands;
 public sealed record CreateBatchCommand(
     Guid ProductId,
     Guid UnitId,
-    string BatchCode,
     decimal Quantity,
     DateTime ProductionDate,
     DateTime? ExpiryDate)
@@ -41,9 +40,14 @@ public sealed class CreateBatchCommandHandler
         CancellationToken cancellationToken)
     {
 
+        // Server-side batch code generation (placeholder until a proper sequence service is built).
+        var batchCode = Guid.NewGuid().ToString("N")[..8].ToUpper();
+
+
+
         var batch = new Batch(
             command.ProductId,
-            command.BatchCode,
+            batchCode,
             command.Quantity,
             command.UnitId,
             command.ProductionDate,
@@ -80,12 +84,6 @@ public sealed class CreateBatchCommandValidator
 
         RuleFor(x => x.UnitId)
             .NotEmpty();
-
-
-
-        RuleFor(x => x.BatchCode)
-            .NotEmpty()
-            .MaximumLength(100);
 
 
 

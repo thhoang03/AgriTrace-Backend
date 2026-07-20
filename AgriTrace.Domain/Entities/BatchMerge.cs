@@ -25,4 +25,11 @@ public class BatchMerge : BaseEntity
 
         NewBatchId = newBatchId;
     }
+
+    public BatchMergeSource AddSource(Guid sourceBatchId, decimal quantity)
+    {
+        var source = new BatchMergeSource(Id, sourceBatchId, quantity);
+        _sources.Add(source);
+        return source;
+    }
 }

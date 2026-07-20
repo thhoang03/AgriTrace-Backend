@@ -13,7 +13,7 @@ namespace AgriTrace.Application.Contracts
         [JsonPropertyName("items")]
         public IReadOnlyList<T> Items { get; set; } = new List<T>();
 
-        [JsonPropertyName("pageNumber")]
+        [JsonPropertyName("page")]
         public int PageNumber { get; set; }
 
         [JsonPropertyName("pageSize")]

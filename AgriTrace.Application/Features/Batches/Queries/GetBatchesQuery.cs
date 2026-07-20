@@ -12,7 +12,7 @@ public sealed record GetBatchesQuery(
     Guid? ProductId,
     Guid? OrganizationId,
     string? Search,
-    int PageNumber,
+    int Page,
     int PageSize)
     : IRequest<PagedResult<BatchDto>>;
 
@@ -44,12 +44,18 @@ public sealed class GetBatchesQueryHandler
             request.ProductId,
             request.OrganizationId,
             request.Search,
-            request.PageNumber,
-            request.PageSize,
+                request.Page,
+                request.PageSize,
             cancellationToken);
 
         var dtoItems = pagedBatches.Items
-            .Select(b => b.Adapt<BatchDto>())
+            .Select(b =>
+            {
+                var dto = b.Adapt<BatchDto>();
+                dto.CurrentOrganizationId = b.CurrentOrganizationId;
+                dto.QrCodeUrl = b.QRCode;
+                return dto;
+            })
             .ToList();
 
         return new PagedResult<BatchDto>(

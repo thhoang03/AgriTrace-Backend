@@ -9,7 +9,7 @@ namespace AgriTrace.Application.Features.Organizations.Commands;
 
 public sealed record UpdateOrganizationCommand(
     Guid Id,
-    [Required] Guid OrganizationTypeId,
+    [Required] string Type,
     [Required][StringLength(200, MinimumLength = 1)] string Name,
     [StringLength(500)] string? Address) : IRequest<OrganizationDto>;
 
@@ -31,7 +31,10 @@ public sealed class UpdateOrganizationCommandHandler : IRequestHandler<UpdateOrg
         if (duplicate != null && duplicate.Id != request.Id)
             throw new ConflictException("Organization name already exists.");
 
-        existing.UpdateInformation(request.OrganizationTypeId, request.Name, request.Address);
+        // TODO Phase 8: resolve OrganizationType by code from IOrganizationTypeService.
+        var organizationTypeId = existing.OrganizationTypeId;
+
+        existing.UpdateInformation(organizationTypeId, request.Name, request.Address);
         await _organizationService.UpdateAsync(existing, cancellationToken);
 
         return existing.Adapt<OrganizationDto>();

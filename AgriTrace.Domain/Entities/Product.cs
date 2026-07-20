@@ -83,6 +83,17 @@ public class Product : BaseEntity
         MarkUpdated();
     }
 
+    // NOTE: The Product domain entity does not yet persist an IsActive flag (no DB column / migration
+    // in this phase). ChangeStatus toggles the in-memory field; persistence follows in a later phase
+    // (Phase 11 follow-up) once the column and mapping are added.
+    public bool IsActive { get; private set; } = true;
+
+    public void ChangeStatus(bool isActive)
+    {
+        IsActive = isActive;
+        MarkUpdated();
+    }
+
     private static void Validate(
         Guid organizationId,
         string name)

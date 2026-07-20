@@ -43,6 +43,34 @@ public class Recall : BaseEntity
         Status = RecallStatus.Pending;
     }
 
+    /// <summary>
+    /// Rehydrates a Recall from persisted storage. Infrastructure use only.
+    /// </summary>
+    public static Recall Rehydrate(
+        Guid id,
+        Guid batchId,
+        Guid createdBy,
+        string reason,
+        RecallSeverity severity,
+        RecallStatus status,
+        DateTime createdAt,
+        DateTime? updatedAt)
+    {
+        var recall = new Recall
+        {
+            Id = id,
+            BatchId = batchId,
+            CreatedBy = createdBy,
+            Reason = reason,
+            Severity = severity,
+            Status = status,
+            CreatedAt = createdAt,
+            UpdatedAt = updatedAt
+        };
+
+        return recall;
+    }
+
     public void StartProcessing()
     {
         Status = RecallStatus.Processing;

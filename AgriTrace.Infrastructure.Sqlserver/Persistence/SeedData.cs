@@ -285,6 +285,10 @@ public static class SeedData
 
     private static void SeedUsers(ModelBuilder builder)
     {
+        // Tất cả seeded users dùng password: Admin@123
+        // Hash được tạo bằng User.HashPassword() — PBKDF2/SHA256, 100 000 iterations.
+        // Format: {iterations}.{saltBase64}.{keyBase64}
+        // Để tạo hash mới: dotnet run --project tools/HashGen -- "YourPassword"
         builder.Entity<UserDataModel>().HasData(
             new UserDataModel
             {
@@ -292,7 +296,7 @@ public static class SeedData
                 OrganizationId = null,
                 FullName = "System Administrator",
                 Email = "admin@agritrace.com",
-                PasswordHash = "123",
+                PasswordHash = "100000.WO50AmM77hFBSqiT1aSFiw==.e1i6MrL9ZZlQF4h2CiK5+qvkR7zilfDmRnLCHfUsNx8=",
                 Role = UserRole.Admin,
                 IsActive = true,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
@@ -303,7 +307,7 @@ public static class SeedData
                 OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
                 FullName = "Nguyen Van A",
                 Email = "farmer.a@greenfarm.com",
-                PasswordHash = "123",
+                PasswordHash = "100000.a67yvmVEWhq7dIjEmejzIg==.8Q3q/IVS35pPn+kp951yFx+MHdVMm6EDdzXB4fqqEL0=",
                 Role = UserRole.Farmer,
                 IsActive = true,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
@@ -314,7 +318,7 @@ public static class SeedData
                 OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
                 FullName = "Tran Thi B",
                 Email = "manager.b@goldenbean.com",
-                PasswordHash = "123",
+                PasswordHash = "100000.szsbqUNhABlx1s1a8koCTw==.bCSGZ6J7LaqRKz2Jqh55P0VHIdpQHe7+amEZl8Dk62I=",
                 Role = UserRole.Manager,
                 IsActive = true,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
@@ -325,7 +329,7 @@ public static class SeedData
                 OrganizationId = new Guid("50000000-0000-0000-0000-000000000004"),
                 FullName = "Le Van C",
                 Email = "inspector.c@agriquality.com",
-                PasswordHash = "123",
+                PasswordHash = "100000.8wke5U2qoW8dhTwYKYXlzQ==.iEDJyugFAUFuNzc5U+3bwcVXt1iNNU/FTZQAzrMwN8I=",
                 Role = UserRole.Inspector,
                 IsActive = true,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)

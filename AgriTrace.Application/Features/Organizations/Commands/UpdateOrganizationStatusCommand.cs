@@ -8,7 +8,7 @@ namespace AgriTrace.Application.Features.Organizations.Commands;
 
 public record UpdateOrganizationStatusCommand(
     Guid Id,
-    bool IsActive) : IRequest<OrganizationDto>;
+    string Status) : IRequest<OrganizationDto>;
 
 public class UpdateOrganizationStatusCommandHandler : IRequestHandler<UpdateOrganizationStatusCommand, OrganizationDto>
 {
@@ -24,7 +24,7 @@ public class UpdateOrganizationStatusCommandHandler : IRequestHandler<UpdateOrga
         var organization = await _organizationService.GetByIdAsync(request.Id, cancellationToken)
             ?? throw new NotFoundException($"Organization {request.Id} not found.");
 
-        if (request.IsActive)
+        if (request.Status == "ACTIVE")
             organization.Activate();
         else
             organization.Deactivate();

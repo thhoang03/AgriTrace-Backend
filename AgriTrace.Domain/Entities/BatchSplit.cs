@@ -25,4 +25,11 @@ public class BatchSplit : BaseEntity
 
         SourceBatchId = sourceBatchId;
     }
+
+    public BatchSplitDetail AddDetail(Guid targetBatchId, decimal quantity)
+    {
+        var detail = new BatchSplitDetail(Id, targetBatchId, quantity);
+        _details.Add(detail);
+        return detail;
+    }
 }
