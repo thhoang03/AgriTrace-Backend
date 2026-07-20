@@ -50,6 +50,11 @@ public static class DependencyInjection
         services.AddScoped<ICertificateRepository, CertificateRepository>();
         services.AddScoped<IBatchReadRepository, BatchReadRepository>();
         services.AddScoped<IBatchWriteRepository, BatchWriteRepository>();
+        services.AddScoped<SupplyChainEventRepository>();
+        services.AddScoped<IEventRepository>(sp => sp.GetRequiredService<SupplyChainEventRepository>());
+        services.AddScoped<ISupplyChainEventRepository>(sp => sp.GetRequiredService<SupplyChainEventRepository>());
+        services.AddScoped<ISupplyChainEventReadRepository, SupplyChainEventReadRepository>();
+        services.AddScoped<ISupplyChainEventWriteRepository, SupplyChainEventWriteRepository>();
     }
 
 }

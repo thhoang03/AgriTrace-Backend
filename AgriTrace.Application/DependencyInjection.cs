@@ -38,6 +38,9 @@ namespace AgriTrace.Application
             services.AddScoped<IOrganizationService, OrganizationService>();
             services.AddScoped<IQualityInspectionService, QualityInspectionService>();
             services.AddScoped<ICertificateService, CertificateService>();
+            services.AddScoped<IEventService, EventService>();
+            services.AddScoped<ISupplyChainEventWriteService, SupplyChainEventWriteService>();
+            services.AddScoped<IHashChainService, HashChainService>();
 
             return services;
         }

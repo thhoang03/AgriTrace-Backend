@@ -10,7 +10,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Repositories;
 
 
 public class SupplyChainEventRepository
-    : ISupplyChainEventRepository
+    : ISupplyChainEventRepository, IEventRepository
 {
 
     private readonly ApplicationDbContext _context;
@@ -341,6 +341,11 @@ public class SupplyChainEventRepository
 
 
 
+
+    public Task<SupplyChainEvent?> GetLastEventByBatchAsync(
+        Guid batchId,
+        CancellationToken cancellationToken = default)
+        => GetLatestEventAsync(batchId, cancellationToken);
 
     public async Task<SupplyChainEvent?> GetLatestEventAsync(
         Guid batchId,
