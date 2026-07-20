@@ -19,6 +19,12 @@ public interface IEventService
 
 
 
+    Task<SupplyChainEvent?> GetByIdAsync(
+        Guid eventId,
+        CancellationToken cancellationToken = default);
+
+
+
     Task<bool> VerifyHashChainAsync(
         Guid batchId,
         CancellationToken cancellationToken = default);

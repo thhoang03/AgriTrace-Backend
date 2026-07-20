@@ -17,4 +17,12 @@ public interface IUserService
     Task<IReadOnlyList<User>> GetByRoleAsync(
         UserRole role,
         CancellationToken cancellationToken = default);
+
+    Task<User?> GetByRefreshTokenAsync(
+        string refreshToken,
+        CancellationToken cancellationToken = default);
+
+    Task<User?> GetByResetTokenAsync(
+        string resetToken,
+        CancellationToken cancellationToken = default);
 }

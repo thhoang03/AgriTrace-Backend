@@ -10,7 +10,7 @@ public sealed record GetProductsQuery(
     Guid? OrganizationId,
     Guid? CategoryId,
     string? Search,
-    int PageNumber,
+    int Page,
     int PageSize)
     : IRequest<PaginationResponse<ProductDto>>;
 
@@ -33,7 +33,7 @@ public sealed class GetProductsQueryHandler
             query.OrganizationId,
             query.CategoryId,
             query.Search,
-            query.PageNumber,
+            query.Page,
             query.PageSize,
             cancellationToken);
 
@@ -44,7 +44,7 @@ public sealed class GetProductsQueryHandler
         return new PaginationResponse<ProductDto>(
             items,
             paged.TotalCount,
-            query.PageNumber,
+            query.Page,
             query.PageSize);
     }
 }

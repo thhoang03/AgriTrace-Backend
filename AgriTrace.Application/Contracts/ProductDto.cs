@@ -13,4 +13,10 @@
     public string? CategoryName { get; init; }
 
     public string? UnitName { get; init; }
+
+    /// <summary>
+    /// Active flag for the product. The domain <c>Product</c> entity does not yet expose an IsActive
+    /// field, so this defaults to true until a domain property is introduced (Phase 11 follow-up).
+    /// </summary>
+    public bool IsActive { get; init; } = true;
 }

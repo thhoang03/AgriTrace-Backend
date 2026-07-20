@@ -11,7 +11,7 @@ namespace AgriTrace.Application.Features.Categories.Queries;
 
 public record GetCategoriesPagedQuery(
     string? Search,
-    int PageNumber,
+    int Page,
     int PageSize) : IRequest<PagedResult<CategoryDto>>;
 
 public class GetCategoriesPagedQueryHandler : IRequestHandler<GetCategoriesPagedQuery, PagedResult<CategoryDto>>
@@ -27,7 +27,7 @@ public class GetCategoriesPagedQueryHandler : IRequestHandler<GetCategoriesPaged
     {
         var pagedResult = await _categoryService.GetPagedAsync(
             request.Search,
-            request.PageNumber,
+            request.Page,
             request.PageSize,
             cancellationToken);
 

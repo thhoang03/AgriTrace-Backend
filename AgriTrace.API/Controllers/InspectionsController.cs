@@ -1,9 +1,10 @@
 using AgriTrace.API.Models;
+using AgriTrace.API.Services;
 using AgriTrace.Application.Features.Inspections.Commands;
 using AgriTrace.Application.Features.Inspections.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Net;
 
 namespace AgriTrace.API.Controllers;
 
@@ -11,14 +12,17 @@ namespace AgriTrace.API.Controllers;
 /// Manages quality inspections for agricultural batches.
 /// </summary>
 [ApiController]
+[Authorize]
 [Produces("application/json")]
 public sealed class InspectionsController : ControllerBase
 {
     private readonly IMediator _mediator;
+    private readonly ICurrentUserService _currentUser;
 
-    public InspectionsController(IMediator mediator)
+    public InspectionsController(IMediator mediator, ICurrentUserService currentUser)
     {
         _mediator = mediator;
+        _currentUser = currentUser;
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -26,22 +30,24 @@ public sealed class InspectionsController : ControllerBase
     // ─────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Create a new quality inspection for a batch.
-    /// Authorization: INSPECTOR
+    /// Tạo kiểm định
     /// </summary>
     [HttpPost("api/v1/batches/{batchId:guid}/inspections")]
+    [Authorize(Roles = "Inspector,Admin")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> CreateInspection(
         Guid batchId,
         [FromBody] CreateInspectionRequest request,
         CancellationToken cancellationToken)
     {
+        var inspectorId = _currentUser.UserId;
+
         var dto = await _mediator.Send(
             new CreateQualityInspectionCommand(
                 batchId,
-                request.InspectorId,
+                inspectorId,
                 request.Result,
                 request.Notes),
             cancellationToken);
@@ -53,20 +59,27 @@ public sealed class InspectionsController : ControllerBase
     }
 
     /// <summary>
-    /// Get all inspections for a specific batch.
-    /// Authorization: ADMIN | MANAGER | INSPECTOR
+    /// Danh sách kiểm định của Batch
     /// </summary>
     [HttpGet("api/v1/batches/{batchId:guid}/inspections")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetInspectionsByBatch(
         Guid batchId,
-        CancellationToken cancellationToken)
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken cancellationToken = default)
     {
-        var dtos = await _mediator.Send(
-            new GetQualityInspectionsByBatchQuery(batchId),
+        var result = await _mediator.Send(
+            new GetQualityInspectionsByBatchQuery(batchId, page, pageSize),
             cancellationToken);
 
-        var response = dtos.Select(ToResponse).ToList();
+        var items = result.Items.Select(ToResponse).ToList();
+
+        var response = new InspectionPagedResponse(
+            items,
+            result.TotalCount,
+            result.PageNumber,
+            result.PageSize);
 
         return Ok(response);
     }
@@ -77,12 +90,11 @@ public sealed class InspectionsController : ControllerBase
     // ─────────────────────────────────────────────────────────────
 
     /// <summary>
-    /// Get the details of a specific inspection.
-    /// Authorization: ADMIN | INSPECTOR
+    /// Chi tiết kiểm định
     /// </summary>
     [HttpGet("api/v1/inspections/{inspectionId:guid}")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetInspectionById(
         Guid inspectionId,
         CancellationToken cancellationToken)
@@ -94,8 +106,7 @@ public sealed class InspectionsController : ControllerBase
         if (dto is null)
         {
             return NotFound(
-                ApiResponse.Fail(
-                    HttpStatusCode.NotFound,
+                ErrorResponse.Fail(
                     $"Inspection '{inspectionId}' was not found."));
         }
 
@@ -103,13 +114,13 @@ public sealed class InspectionsController : ControllerBase
     }
 
     /// <summary>
-    /// Update the result and notes of an existing inspection.
-    /// Authorization: INSPECTOR
+    /// Cập nhật kiểm định
     /// </summary>
     [HttpPut("api/v1/inspections/{inspectionId:guid}")]
+    [Authorize(Roles = "Inspector,Admin")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateInspection(
         Guid inspectionId,
         [FromBody] UpdateInspectionRequest request,
@@ -122,28 +133,13 @@ public sealed class InspectionsController : ControllerBase
                 request.Notes),
             cancellationToken);
 
-        return Ok(new { message = "Cập nhật kiểm định thành công" });
+        return Ok(ApiResponse.Success("Cập nhật kiểm định thành công"));
     }
 
     // ─────────────────────────────────────────────────────────────
     // Lookup: GET /api/v1/inspection-results
+    // Migrated to LookupController in Phase 9.
     // ─────────────────────────────────────────────────────────────
-
-    /// <summary>
-    /// Get all available inspection result codes (Pending, PASS, FAIL).
-    /// Authorization: Authenticated
-    /// </summary>
-    [HttpGet("api/v1/inspection-results")]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-    public async Task<IActionResult> GetInspectionResults(
-        CancellationToken cancellationToken)
-    {
-        var results = await _mediator.Send(
-            new GetInspectionResultsQuery(),
-            cancellationToken);
-
-        return Ok(results);
-    }
 
     // ─────────────────────────────────────────────────────────────
     // Mapping helper
@@ -162,8 +158,7 @@ public sealed class InspectionsController : ControllerBase
             Status = dto.Status,
             Result = dto.Result,
             Notes = dto.Notes,
-            CreatedAt = dto.CreatedAt,
-            UpdatedAt = dto.UpdatedAt
+            CreatedAt = dto.CreatedAt
         };
     }
 }

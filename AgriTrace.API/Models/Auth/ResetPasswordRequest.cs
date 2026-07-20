@@ -1,0 +1,8 @@
+namespace AgriTrace.API.Models.Auth;
+
+public class ResetPasswordRequest
+{
+    public string Token { get; set; } = string.Empty;
+
+    public string NewPassword { get; set; } = string.Empty;
+}

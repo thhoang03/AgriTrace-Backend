@@ -1,4 +1,5 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using AgriTrace.API.Mapping;
@@ -8,8 +9,12 @@ using AgriTrace.Application.Features.Organizations.Queries;
 
 namespace AgriTrace.API.Controllers;
 
+/// <summary>
+/// Quản lý tổ chức (Organization).
+/// </summary>
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/organizations")]
+[Authorize]
 public sealed class OrganizationsController : ControllerBase
 {
     private readonly ISender _sender;
@@ -19,7 +24,11 @@ public sealed class OrganizationsController : ControllerBase
         _sender = sender;
     }
 
+    /// <summary>
+    /// Lấy danh sách tổ chức
+    /// </summary>
     [HttpGet]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse>> GetAll(
         Guid? organizationTypeId,
         int page = 1,
@@ -42,7 +51,12 @@ public sealed class OrganizationsController : ControllerBase
         return Ok(ApiResponse.Success(result));
     }
 
+    /// <summary>
+    /// Xem chi tiết tổ chức
+    /// </summary>
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse>> GetById(
         Guid id,
         CancellationToken cancellationToken)
@@ -56,23 +70,34 @@ public sealed class OrganizationsController : ControllerBase
                 result.ToResponse()));
     }
 
+    /// <summary>
+    /// Tạo tổ chức mới
+    /// </summary>
     [HttpPost]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ApiResponse>> Create(
         OrganizationRequest request,
         CancellationToken cancellationToken)
-    {
-        var organization = await _sender.Send(
+    {        var organization = await _sender.Send(
             request.ToCommand(),
             cancellationToken);
 
         return Created(
-            $"/api/organizations/{organization.Id}",
+            $"/api/v1/organizations/{organization.Id}",
             ApiResponse.Success(
-                organization,
-                HttpStatusCode.Created));
+                organization));
     }
 
+    /// <summary>
+    /// Cập nhật tổ chức
+    /// </summary>
     [HttpPut("{id:guid}")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse>> Update(
         Guid id,
         OrganizationRequest request,
@@ -87,14 +112,20 @@ public sealed class OrganizationsController : ControllerBase
                 "Organization updated successfully."));
     }
 
+    /// <summary>
+    /// Thay đổi trạng thái tổ chức
+    /// </summary>
     [HttpPatch("{id:guid}/status")]
+    [Authorize(Roles = "Admin")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse>> UpdateStatus(
         Guid id,
-        bool isActive,
+        [FromBody] StatusRequest request,
         CancellationToken cancellationToken)
     {
         await _sender.Send(
-            new UpdateOrganizationStatusCommand(id, isActive),
+            new UpdateOrganizationStatusCommand(id, request.Status),
             cancellationToken);
 
         return Ok(
@@ -102,6 +133,50 @@ public sealed class OrganizationsController : ControllerBase
                 "Organization status updated successfully."));
     }
 
+    /// <summary>
+    /// Lấy người dùng thuộc tổ chức
+    /// </summary>
+    [HttpGet("{id:guid}/users")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse>> GetUsers(
+        Guid id,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _sender.Send(
+            new GetOrganizationUsersQuery(id, page, pageSize),
+            cancellationToken);
+
+        return Ok(ApiResponse.Success(result));
+    }
+
+    /// <summary>
+    /// Lấy sản phẩm của tổ chức
+    /// </summary>
+    [HttpGet("{id:guid}/products")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    public async Task<ActionResult<ApiResponse>> GetProducts(
+        Guid id,
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        var result = await _sender.Send(
+            new GetOrganizationProductsQuery(id, page, pageSize),
+            cancellationToken);
+
+        var paged = new ProductPagedResponse(
+            result.Items.Select(x => x.ToListItemResponse()),
+            result.TotalCount,
+            result.PageNumber,
+            result.PageSize);
+
+        return Ok(ApiResponse.Success(paged));
+    }
+
+    // Not in swagger.yaml — internal-only endpoint, suppressed from OpenAPI docs (Phase 12 decision: keep suppressed).
+    [ApiExplorerSettings(IgnoreApi = true)]
     [HttpDelete("{id:guid}")]
     public async Task<ActionResult<ApiResponse>> Delete(
         Guid id,

@@ -18,10 +18,25 @@ public class UserDataModel : BaseDataModel
     public string? PasswordHash { get; set; }
 
 
+    public string? Phone { get; set; }
+
+
     public UserRole Role { get; set; }
 
 
     public bool IsActive { get; set; }
+
+
+    public string? RefreshToken { get; set; }
+
+
+    public DateTime? RefreshTokenExpiry { get; set; }
+
+
+    public string? ResetPasswordToken { get; set; }
+
+
+    public DateTime? ResetPasswordTokenExpiry { get; set; }
 
 
     // Navigation

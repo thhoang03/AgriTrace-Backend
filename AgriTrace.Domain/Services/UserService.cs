@@ -130,4 +130,25 @@ public class UserService : IUserService
             cancellationToken);
     }
 
+
+
+    public async Task<User?> GetByRefreshTokenAsync(
+        string refreshToken,
+        CancellationToken cancellationToken = default)
+    {
+        return await _repository.GetByRefreshTokenAsync(
+            refreshToken,
+            cancellationToken);
+    }
+
+
+
+    public async Task<User?> GetByResetTokenAsync(
+        string resetToken,
+        CancellationToken cancellationToken = default)
+    {
+        return await _repository.GetByResetTokenAsync(
+            resetToken,
+            cancellationToken);
+    }
 }

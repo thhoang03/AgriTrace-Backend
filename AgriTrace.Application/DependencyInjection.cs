@@ -1,5 +1,6 @@
 using System.Reflection;
 using AgriTrace.Application.Common.Behaviors;
+using AgriTrace.Application.Services;
 using AgriTrace.Domain.Interfaces.Inbound;
 using AgriTrace.Domain.Services;
 using FluentValidation;
@@ -38,6 +39,21 @@ namespace AgriTrace.Application
             services.AddScoped<IOrganizationService, OrganizationService>();
             services.AddScoped<IQualityInspectionService, QualityInspectionService>();
             services.AddScoped<ICertificateService, CertificateService>();
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<ITokenService, TokenService>();
+
+            // Phase 8: events, split/merge, recalls, notifications
+            services.AddScoped<IHashChainService, HashChainService>();
+            services.AddScoped<IEventService, EventService>();
+            services.AddScoped<IEventTypeService, EventTypeService>();
+            services.AddScoped<IBatchSplitService, BatchSplitService>();
+            services.AddScoped<IBatchMergeService, BatchMergeService>();
+            services.AddScoped<IRecallService, RecallService>();
+            services.AddScoped<INotificationService, NotificationService>();
+
+            // Phase 9: public trace, analytics, lookup
+            services.AddScoped<IUnitService, UnitService>();
+            services.AddScoped<IOrganizationTypeService, OrganizationTypeService>();
 
             return services;
         }

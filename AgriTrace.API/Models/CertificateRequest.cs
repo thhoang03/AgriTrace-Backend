@@ -8,9 +8,10 @@ namespace AgriTrace.API.Models;
 public class IssueCertificateRequest
 {
     /// <summary>
-    /// Optional related inspection Id.
+    /// Related inspection Id.
     /// </summary>
-    public Guid? InspectionId { get; set; }
+    [Required]
+    public Guid InspectionId { get; set; }
 
     /// <summary>
     /// Certificate type.
@@ -25,7 +26,8 @@ public class IssueCertificateRequest
     public string FileUrl { get; set; } = null!;
 
     /// <summary>
-    /// Optional issued date.
+    /// Issued date.
     /// </summary>
-    public DateTime? IssuedDate { get; set; }
+    [Required]
+    public DateOnly IssuedDate { get; set; }
 }

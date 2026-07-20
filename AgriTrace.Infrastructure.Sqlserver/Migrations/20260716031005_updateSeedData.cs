@@ -71,10 +71,10 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     { new Guid("40000000-0000-0000-0000-000000000005"), "BALE", new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Bale", null }
                 });
 
-            migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "Id", "CreatedAt", "Email", "FullName", "IsActive", "OrganizationId", "PasswordHash", "Role", "UpdatedAt" },
-                values: new object[] { new Guid("70000000-0000-0000-0000-000000000001"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "admin@agritrace.com", "System Administrator", true, null, "123", "Admin", null });
+            migrationBuilder.Sql(@"
+INSERT INTO [Users] ([Id], [CreatedAt], [Email], [FullName], [IsActive], [OrganizationId], [PasswordHash], [Role], [UpdatedAt])
+VALUES ('70000000-0000-0000-0000-000000000001', '2026-01-01T00:00:00.0000000Z', N'admin@agritrace.com', N'System Administrator', CAST(1 AS bit), NULL, N'100000.WO50AmM77hFBSqiT1aSFiw==.e1i6MrL9ZZlQF4h2CiK5+qvkR7zilfDmRnLCHfUsNx8=', CAST(1 AS int), NULL);
+");
 
             migrationBuilder.InsertData(
                 table: "Products",
@@ -87,15 +87,13 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     { new Guid("60000000-0000-0000-0000-000000000004"), new Guid("30000000-0000-0000-0000-000000000003"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "Jasmine Rice", new Guid("50000000-0000-0000-0000-000000000002"), new Guid("40000000-0000-0000-0000-000000000002"), null }
                 });
 
-            migrationBuilder.InsertData(
-                table: "Users",
-                columns: new[] { "Id", "CreatedAt", "Email", "FullName", "IsActive", "OrganizationId", "PasswordHash", "Role", "UpdatedAt" },
-                values: new object[,]
-                {
-                    { new Guid("70000000-0000-0000-0000-000000000002"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "farmer.a@greenfarm.com", "Nguyen Van A", true, new Guid("50000000-0000-0000-0000-000000000001"), "123", "Farmer", null },
-                    { new Guid("70000000-0000-0000-0000-000000000003"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "manager.b@goldenbean.com", "Tran Thi B", true, new Guid("50000000-0000-0000-0000-000000000002"), "123", "Manager", null },
-                    { new Guid("70000000-0000-0000-0000-000000000004"), new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), "inspector.c@agriquality.com", "Le Van C", true, new Guid("50000000-0000-0000-0000-000000000004"), "123", "Inspector", null }
-                });
+            migrationBuilder.Sql(@"
+INSERT INTO [Users] ([Id], [CreatedAt], [Email], [FullName], [IsActive], [OrganizationId], [PasswordHash], [Role], [UpdatedAt])
+VALUES 
+('70000000-0000-0000-0000-000000000002', '2026-01-01T00:00:00.0000000Z', N'farmer.a@greenfarm.com', N'Nguyen Van A', CAST(1 AS bit), '50000000-0000-0000-0000-000000000001', N'100000.a67yvmVEWhq7dIjEmejzIg==.8Q3q/IVS35pPn+kp951yFx+MHdVMm6EDdzXB4fqqEL0=', CAST(3 AS int), NULL),
+('70000000-0000-0000-0000-000000000003', '2026-01-01T00:00:00.0000000Z', N'manager.b@goldenbean.com', N'Tran Thi B', CAST(1 AS bit), '50000000-0000-0000-0000-000000000002', N'100000.szsbqUNhABlx1s1a8koCTw==.bCSGZ6J7LaqRKz2Jqh55P0VHIdpQHe7+amEZl8Dk62I=', CAST(2 AS int), NULL),
+('70000000-0000-0000-0000-000000000004', '2026-01-01T00:00:00.0000000Z', N'inspector.c@agriquality.com', N'Le Van C', CAST(1 AS bit), '50000000-0000-0000-0000-000000000004', N'100000.8wke5U2qoW8dhTwYKYXlzQ==.iEDJyugFAUFuNzc5U+3bwcVXt1iNNU/FTZQAzrMwN8I=', CAST(5 AS int), NULL);
+");
         }
 
         /// <inheritdoc />

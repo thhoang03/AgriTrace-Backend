@@ -33,6 +33,30 @@ public class Notification : BaseEntity
         IsRead = false;
     }
 
+    /// <summary>
+    /// Rehydrates a Notification from persisted storage. Infrastructure use only.
+    /// </summary>
+    public static Notification Rehydrate(
+        Guid id,
+        Guid userId,
+        string title,
+        string message,
+        bool isRead,
+        DateTime createdAt,
+        DateTime? updatedAt)
+    {
+        return new Notification
+        {
+            Id = id,
+            UserId = userId,
+            Title = title,
+            Message = message,
+            IsRead = isRead,
+            CreatedAt = createdAt,
+            UpdatedAt = updatedAt
+        };
+    }
+
     public void MarkAsRead()
     {
         if (IsRead)
