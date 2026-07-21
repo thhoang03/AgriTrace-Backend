@@ -42,9 +42,25 @@ public class UserConfiguration
 
 
 
+        builder.Property(x => x.Phone)
+            .HasMaxLength(30);
+
+
+
+        builder.Property(x => x.RefreshToken)
+            .HasMaxLength(200);
+
+
+
+        builder.Property(x => x.ResetPasswordToken)
+            .HasMaxLength(200);
+
+
+
         builder.Property(x => x.Role)
             .HasMaxLength(50)
-            .IsRequired();
+            .IsRequired()
+            .HasConversion<string>();
 
 
 

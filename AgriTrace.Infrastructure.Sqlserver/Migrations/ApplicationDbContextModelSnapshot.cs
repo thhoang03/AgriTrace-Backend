@@ -71,6 +71,13 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.Property<Guid?>("RootBatchId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("SourceQuantity")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid?>("SplitId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -92,6 +99,12 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasIndex("ParentBatchId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("QRCode");
+
+                    b.HasIndex("RootBatchId");
+
+                    b.HasIndex("SplitId");
 
                     b.HasIndex("UnitId");
 
@@ -227,15 +240,15 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000001"),
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Nhóm rau củ quả tươi",
+                            Description = "Fresh vegetables and tubers",
                             IsActive = true,
-                            Name = "Rau củ"
+                            Name = "Vegetables"
                         },
                         new
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000002"),
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Các loại cà phê",
+                            Description = "Various types of coffee",
                             IsActive = true,
                             Name = "Coffee"
                         },
@@ -243,7 +256,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000003"),
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Gạo các loại",
+                            Description = "Various types of rice",
                             IsActive = true,
                             Name = "Rice"
                         },
@@ -251,7 +264,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000004"),
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Trái cây tươi",
+                            Description = "Fresh fruits",
                             IsActive = true,
                             Name = "Fruits"
                         },
@@ -259,7 +272,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         {
                             Id = new Guid("30000000-0000-0000-0000-000000000005"),
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Description = "Thảo mộc và gia vị",
+                            Description = "Herbs and spices",
                             IsActive = true,
                             Name = "Herbs"
                         });
@@ -464,6 +477,44 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasIndex("OrganizationTypeId");
 
                     b.ToTable("Organizations", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("50000000-0000-0000-0000-000000000001"),
+                            Address = "Tan Lac, Hoa Binh Province",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Green Farm Co.",
+                            OrganizationTypeId = new Guid("10000000-0000-0000-0000-000000000001"),
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("50000000-0000-0000-0000-000000000002"),
+                            Address = "Buon Ma Thuot, Dak Lak Province",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Golden Bean Processor",
+                            OrganizationTypeId = new Guid("10000000-0000-0000-0000-000000000002"),
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("50000000-0000-0000-0000-000000000003"),
+                            Address = "Binh Tan, Ho Chi Minh City",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Fresh Link Distributor",
+                            OrganizationTypeId = new Guid("10000000-0000-0000-0000-000000000003"),
+                            Status = 1
+                        },
+                        new
+                        {
+                            Id = new Guid("50000000-0000-0000-0000-000000000004"),
+                            Address = "Cau Giay, Hanoi City",
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Agri Quality Inspection",
+                            OrganizationTypeId = new Guid("10000000-0000-0000-0000-000000000005"),
+                            Status = 1
+                        });
                 });
 
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.OrganizationTypeDataModel", b =>
@@ -528,6 +579,20 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             Code = "RETAILER",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Retailer"
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000005"),
+                            Code = "INSPECTION",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Inspection"
+                        },
+                        new
+                        {
+                            Id = new Guid("10000000-0000-0000-0000-000000000006"),
+                            Code = "SYSTEM",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "System"
                         });
                 });
 
@@ -568,6 +633,44 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasIndex("UnitId");
 
                     b.ToTable("Products", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("60000000-0000-0000-0000-000000000001"),
+                            CategoryId = new Guid("30000000-0000-0000-0000-000000000001"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Organic Tomato",
+                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
+                            UnitId = new Guid("40000000-0000-0000-0000-000000000001")
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0000-0000-0000-000000000002"),
+                            CategoryId = new Guid("30000000-0000-0000-0000-000000000004"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Dragon Fruit",
+                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
+                            UnitId = new Guid("40000000-0000-0000-0000-000000000004")
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0000-0000-0000-000000000003"),
+                            CategoryId = new Guid("30000000-0000-0000-0000-000000000002"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Arabica Coffee",
+                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
+                            UnitId = new Guid("40000000-0000-0000-0000-000000000005")
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0000-0000-0000-000000000004"),
+                            CategoryId = new Guid("30000000-0000-0000-0000-000000000003"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Jasmine Rice",
+                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
+                            UnitId = new Guid("40000000-0000-0000-0000-000000000002")
+                        });
                 });
 
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.QualityInspectionDataModel", b =>
@@ -726,18 +829,33 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<int>("Category")
+                        .HasColumnType("int");
+
                     b.Property<string>("Code")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
+                    b.Property<decimal?>("ConversionToBase")
+                        .HasPrecision(18, 6)
+                        .HasColumnType("decimal(18,6)");
+
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Symbol")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -748,6 +866,107 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         .IsUnique();
 
                     b.ToTable("Units", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("40000000-0000-0000-0000-000000000001"),
+                            Category = 1,
+                            Code = "KG",
+                            ConversionToBase = 1m,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Metric unit of mass equal to 1000 grams",
+                            Name = "Kilogram",
+                            Symbol = "kg"
+                        },
+                        new
+                        {
+                            Id = new Guid("40000000-0000-0000-0000-000000000002"),
+                            Category = 1,
+                            Code = "GRAM",
+                            ConversionToBase = 0.001m,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Metric unit of mass equal to 1/1000 kilogram",
+                            Name = "Gram",
+                            Symbol = "g"
+                        },
+                        new
+                        {
+                            Id = new Guid("40000000-0000-0000-0000-000000000003"),
+                            Category = 2,
+                            Code = "LITER",
+                            ConversionToBase = 1m,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Metric unit of volume equal to 1000 cubic centimeters",
+                            Name = "Liter",
+                            Symbol = "L"
+                        },
+                        new
+                        {
+                            Id = new Guid("40000000-0000-0000-0000-000000000004"),
+                            Category = 2,
+                            Code = "MILLILITER",
+                            ConversionToBase = 0.001m,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Metric unit of volume equal to 1/1000 liter",
+                            Name = "Milliliter",
+                            Symbol = "mL"
+                        },
+                        new
+                        {
+                            Id = new Guid("40000000-0000-0000-0000-000000000005"),
+                            Category = 3,
+                            Code = "BOX",
+                            ConversionToBase = 1m,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Packaging unit containing a fixed number of items",
+                            Name = "Box",
+                            Symbol = "box"
+                        },
+                        new
+                        {
+                            Id = new Guid("40000000-0000-0000-0000-000000000006"),
+                            Category = 3,
+                            Code = "BALE",
+                            ConversionToBase = 1m,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Compressed bundle of agricultural produce",
+                            Name = "Bale",
+                            Symbol = "bale"
+                        },
+                        new
+                        {
+                            Id = new Guid("40000000-0000-0000-0000-000000000007"),
+                            Category = 3,
+                            Code = "PIECE",
+                            ConversionToBase = 1m,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Individual countable item",
+                            Name = "Piece",
+                            Symbol = "pc"
+                        },
+                        new
+                        {
+                            Id = new Guid("40000000-0000-0000-0000-000000000008"),
+                            Category = 1,
+                            Code = "TON",
+                            ConversionToBase = 1000m,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Metric unit of mass equal to 1000 kilograms",
+                            Name = "Metric Ton",
+                            Symbol = "t"
+                        },
+                        new
+                        {
+                            Id = new Guid("40000000-0000-0000-0000-000000000009"),
+                            Category = 1,
+                            Code = "SACK",
+                            ConversionToBase = 50m,
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Description = "Standard sack for bulk produce, typically 50 kg",
+                            Name = "Sack",
+                            Symbol = "sack"
+                        });
                 });
 
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.UserDataModel", b =>
@@ -783,6 +1002,24 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
+                    b.Property<string>("Phone")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("RefreshToken")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("RefreshTokenExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ResetPasswordToken")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("ResetPasswordTokenExpiry")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasMaxLength(50)
@@ -799,6 +1036,51 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasIndex("OrganizationId");
 
                     b.ToTable("Users", (string)null);
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("70000000-0000-0000-0000-000000000001"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "admin@agritrace.com",
+                            FullName = "System Administrator",
+                            IsActive = true,
+                            PasswordHash = "100000.WO50AmM77hFBSqiT1aSFiw==.e1i6MrL9ZZlQF4h2CiK5+qvkR7zilfDmRnLCHfUsNx8=",
+                            Role = "Admin"
+                        },
+                        new
+                        {
+                            Id = new Guid("70000000-0000-0000-0000-000000000002"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "farmer.a@greenfarm.com",
+                            FullName = "Nguyen Van A",
+                            IsActive = true,
+                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
+                            PasswordHash = "100000.a67yvmVEWhq7dIjEmejzIg==.8Q3q/IVS35pPn+kp951yFx+MHdVMm6EDdzXB4fqqEL0=",
+                            Role = "Farmer"
+                        },
+                        new
+                        {
+                            Id = new Guid("70000000-0000-0000-0000-000000000003"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "manager.b@goldenbean.com",
+                            FullName = "Tran Thi B",
+                            IsActive = true,
+                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
+                            PasswordHash = "100000.szsbqUNhABlx1s1a8koCTw==.bCSGZ6J7LaqRKz2Jqh55P0VHIdpQHe7+amEZl8Dk62I=",
+                            Role = "Manager"
+                        },
+                        new
+                        {
+                            Id = new Guid("70000000-0000-0000-0000-000000000004"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Email = "inspector.c@agriquality.com",
+                            FullName = "Le Van C",
+                            IsActive = true,
+                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000004"),
+                            PasswordHash = "100000.8wke5U2qoW8dhTwYKYXlzQ==.iEDJyugFAUFuNzc5U+3bwcVXt1iNNU/FTZQAzrMwN8I=",
+                            Role = "Inspector"
+                        });
                 });
 
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.BatchDataModel", b =>
@@ -827,7 +1109,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasOne("AgriTrace.Infrastructure.Sqlserver.Models.UnitDataModel", "Unit")
                         .WithMany()
                         .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("CurrentOrganization");
@@ -967,7 +1249,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.QualityInspectionDataModel", b =>
                 {
                     b.HasOne("AgriTrace.Infrastructure.Sqlserver.Models.BatchDataModel", "Batch")
-                        .WithMany("Inspections")
+                        .WithMany("QualityInspections")
                         .HasForeignKey("BatchId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1067,7 +1349,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
 
                     b.Navigation("Events");
 
-                    b.Navigation("Inspections");
+                    b.Navigation("QualityInspections");
 
                     b.Navigation("Recalls");
                 });

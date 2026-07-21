@@ -43,6 +43,26 @@ public class Certificate : BaseEntity
         IssuedDate = issuedDate;
     }
 
+    public Certificate(
+        Guid id,
+        Guid batchId,
+        Guid? inspectionId,
+        string certificateType,
+        string fileUrl,
+        DateTime? issuedDate,
+        DateTime createdAt,
+        DateTime? updatedAt)
+        : base(id, createdAt, updatedAt)
+    {
+        Validate(batchId, certificateType, fileUrl);
+
+        BatchId = batchId;
+        InspectionId = inspectionId;
+        CertificateType = certificateType.Trim();
+        FileUrl = fileUrl.Trim();
+        IssuedDate = issuedDate;
+    }
+
     public void UpdateInformation(
         string certificateType,
         string fileUrl,

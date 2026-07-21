@@ -1,10 +1,16 @@
 ﻿using AgriTrace.Domain.Common.Enums;
 
+
 namespace AgriTrace.Infrastructure.Sqlserver.Models;
 
 
 public class BatchDataModel : BaseDataModel
 {
+
+    // =========================
+    // Basic Information
+    // =========================
+
 
     public Guid ProductId { get; set; }
 
@@ -17,6 +23,10 @@ public class BatchDataModel : BaseDataModel
 
 
     public string BatchCode { get; set; } = string.Empty;
+
+
+
+    public string? QRCode { get; set; }
 
 
 
@@ -36,57 +46,116 @@ public class BatchDataModel : BaseDataModel
 
 
 
+    public decimal SourceQuantity { get; set; }
+
+
+
     public BatchStatus Status { get; set; }
 
 
 
-    public string? QRCode { get; set; }
 
 
+
+
+    // =========================
+    // Traceability
+    // =========================
 
 
     public Guid? ParentBatchId { get; set; }
+
 
 
     public Guid? RootBatchId { get; set; }
 
 
 
+    public Guid? SplitId { get; set; }
 
 
 
+
+
+
+
+
+    // =========================
     // Navigation
+    // =========================
 
 
     public ProductDataModel Product { get; set; } = null!;
 
 
+
     public OrganizationDataModel CurrentOrganization { get; set; } = null!;
+
 
 
     public UnitDataModel Unit { get; set; } = null!;
 
 
 
+
+
+    // Parent - Child Batch
+
+
     public BatchDataModel? ParentBatch { get; set; }
+
 
 
     public ICollection<BatchDataModel> ChildBatches { get; set; }
         = new List<BatchDataModel>();
 
 
+
+
+
+
+
+
+    // Supply Chain Events
+
+
     public ICollection<SupplyChainEventDataModel> Events { get; set; }
         = new List<SupplyChainEventDataModel>();
 
 
-    public ICollection<QualityInspectionDataModel> Inspections { get; set; }
+
+
+
+
+
+    // Quality Inspection
+
+
+    public ICollection<QualityInspectionDataModel> QualityInspections { get; set; }
         = new List<QualityInspectionDataModel>();
+
+
+
+
+
+
+
+    // Certificates
 
 
     public ICollection<CertificateDataModel> Certificates { get; set; }
         = new List<CertificateDataModel>();
 
+
+
+
+
+
+
+    // Recall
+
+
     public ICollection<RecallDataModel> Recalls { get; set; }
-    = new List<RecallDataModel>();
+        = new List<RecallDataModel>();
 
 }

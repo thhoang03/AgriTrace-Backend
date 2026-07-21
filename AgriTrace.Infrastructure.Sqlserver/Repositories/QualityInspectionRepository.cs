@@ -1,4 +1,4 @@
-﻿using AgriTrace.Domain.Common;
+using AgriTrace.Domain.Common;
 using AgriTrace.Domain.Entities;
 using AgriTrace.Domain.Interfaces.Outbound;
 using AgriTrace.Infrastructure.Sqlserver.Models;
@@ -295,6 +295,8 @@ public class QualityInspectionRepository
 
         return new QualityInspection(
 
+            model.Id,
+
             model.BatchId,
 
             model.InspectorId,
@@ -303,7 +305,11 @@ public class QualityInspectionRepository
 
             model.Result,
 
-            model.Notes
+            model.Notes,
+
+            model.CreatedAt,
+
+            model.UpdatedAt
 
         );
 

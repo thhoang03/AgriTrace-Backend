@@ -100,10 +100,15 @@ public sealed class ProductWriteRepository : IProductWriteRepository
     private static Product ToEntity(ProductDataModel model)
     {
         return new Product(
+            model.Id,
             model.OrganizationId,
             model.CategoryId,
             model.UnitId,
-            model.Name);
+            model.Name,
+            model.CreatedAt,
+            model.UpdatedAt,
+            null,
+            null);
     }
 
     private static ProductDataModel ToModel(Product entity)

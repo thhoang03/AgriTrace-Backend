@@ -329,7 +329,9 @@ public class RecallRepository
         RecallDataModel model)
     {
 
-        return new Recall(
+        return Recall.Rehydrate(
+
+            model.Id,
 
             model.BatchId,
 
@@ -337,7 +339,13 @@ public class RecallRepository
 
             model.Reason ?? string.Empty,
 
-            (RecallSeverity)model.Severity
+            (RecallSeverity)model.Severity,
+
+            (RecallStatus)model.Status,
+
+            model.CreatedAt,
+
+            model.UpdatedAt
 
         );
 

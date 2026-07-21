@@ -1,27 +1,28 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 
 namespace AgriTrace.API.Models;
 
-public class CategoryPagedResponse
+/// <summary>
+/// Paged response for categories. Matches swagger <c>CategoryPagedResponse</c> (extends <see cref="PagedMeta"/>).
+/// </summary>
+public class CategoryPagedResponse : PagedMeta
 {
-    public int TotalCount { get; set; }
-    public int PageNumber { get; set; }
-    public int PageSize { get; set; }
-    public int TotalPages { get; set; }
+    [JsonPropertyName("items")]
     public List<CategoryResponse> Items { get; set; } = new();
 
     public CategoryPagedResponse()
     {
     }
 
-    public CategoryPagedResponse(IEnumerable<CategoryResponse> items, int totalCount, int pageNumber, int pageSize)
+    public CategoryPagedResponse(IEnumerable<CategoryResponse> items, int totalCount, int page, int pageSize)
     {
         Items = items.ToList();
         TotalCount = totalCount;
-        PageNumber = pageNumber;
+        Page = page;
         PageSize = pageSize;
-        TotalPages = (int)Math.Ceiling(totalCount / (double)pageSize);
+        TotalPages = pageSize == 0 ? 0 : (int)Math.Ceiling(totalCount / (double)pageSize);
     }
 }

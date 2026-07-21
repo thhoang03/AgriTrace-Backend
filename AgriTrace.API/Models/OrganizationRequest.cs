@@ -2,18 +2,22 @@
 
 namespace AgriTrace.API.Models
 {
+    /// <summary>
+    /// Request body for creating/updating an organization. Matches swagger <c>OrganizationRequest</c>.
+    /// </summary>
     public class OrganizationRequest
     {
         [Required]
-        [StringLength(150, MinimumLength = 1)]
-        public string OrganizationName { get; set; }
+        [StringLength(200, MinimumLength = 1)]
+        public string Name { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Organization type. One of: FARM, PROCESSOR, DISTRIBUTOR, RETAILER, INSPECTOR_ORG.
+        /// </summary>
         [Required]
-        [StringLength(150,MinimumLength =1)]
-        public string Address { get; set; }
+        public string Type { get; set; } = string.Empty;
 
-        [Required]
-        public Guid OrganizationTypeId { get; set; }
-
+        [StringLength(500)]
+        public string? Address { get; set; }
     }
 }

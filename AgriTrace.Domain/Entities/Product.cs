@@ -46,6 +46,26 @@ public class Product : BaseEntity
         Name = name.Trim();
     }
 
+    public Product(
+        Guid id,
+        Guid organizationId,
+        Guid? categoryId,
+        Guid? unitId,
+        string name,
+        DateTime createdAt,
+        DateTime? updatedAt,
+        Category? category,
+        Unit? unit)
+        : base(id, createdAt, updatedAt)
+    {
+        OrganizationId = organizationId;
+        CategoryId = categoryId;
+        UnitId = unitId;
+        Name = name;
+        Category = category;
+        Unit = unit;
+    }
+
     public void UpdateInformation(
         Guid? categoryId,
         Guid? unitId,
@@ -60,6 +80,17 @@ public class Product : BaseEntity
         UnitId = unitId;
         Name = name.Trim();
 
+        MarkUpdated();
+    }
+
+    // NOTE: The Product domain entity does not yet persist an IsActive flag (no DB column / migration
+    // in this phase). ChangeStatus toggles the in-memory field; persistence follows in a later phase
+    // (Phase 11 follow-up) once the column and mapping are added.
+    public bool IsActive { get; private set; } = true;
+
+    public void ChangeStatus(bool isActive)
+    {
+        IsActive = isActive;
         MarkUpdated();
     }
 
