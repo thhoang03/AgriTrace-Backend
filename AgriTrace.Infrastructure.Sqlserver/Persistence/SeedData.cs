@@ -18,8 +18,9 @@ public static class SeedData
         SeedOrganizations(builder);
         SeedProducts(builder);
         SeedUsers(builder);
-        SeedRecalls(builder);
         SeedBatches(builder);
+        SeedRecalls(builder);
+        SeedNotifications(builder);
     }
 
 
@@ -259,7 +260,7 @@ public static class SeedData
                 Id = new Guid("60000000-0000-0000-0000-000000000002"),
                 OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
                 CategoryId = new Guid("30000000-0000-0000-0000-000000000004"),
-                UnitId = new Guid("40000000-0000-0000-0000-000000000004"),
+                UnitId = new Guid("40000000-0000-0000-0000-000000000001"),
                 Name = "Dragon Fruit",
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
@@ -277,7 +278,7 @@ public static class SeedData
                 Id = new Guid("60000000-0000-0000-0000-000000000004"),
                 OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
                 CategoryId = new Guid("30000000-0000-0000-0000-000000000003"),
-                UnitId = new Guid("40000000-0000-0000-0000-000000000002"),
+                UnitId = new Guid("40000000-0000-0000-0000-000000000009"),
                 Name = "Jasmine Rice",
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             }
@@ -362,7 +363,7 @@ public static class SeedData
                 Id = new Guid("80000000-0000-0000-0000-000000000002"),
                 ProductId = new Guid("60000000-0000-0000-0000-000000000002"),      // Dragon Fruit
                 CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000001"), // Green Farm
-                UnitId = new Guid("40000000-0000-0000-0000-000000000004"),         // Milliliter (theo Product seed)
+                UnitId = new Guid("40000000-0000-0000-0000-000000000001"),         // Kg (theo Product seed)
                 BatchCode = "DRAGONFRUIT-20260108-001",
                 ProductionDate = new DateTime(2026, 1, 8, 0, 0, 0, DateTimeKind.Utc),
                 ExpiryDate = new DateTime(2026, 1, 25, 0, 0, 0, DateTimeKind.Utc),
@@ -394,13 +395,13 @@ public static class SeedData
                 Id = new Guid("80000000-0000-0000-0000-000000000004"),
                 ProductId = new Guid("60000000-0000-0000-0000-000000000004"),      // Jasmine Rice
                 CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000002"), // Golden Bean
-                UnitId = new Guid("40000000-0000-0000-0000-000000000002"),         // Gram
+                UnitId = new Guid("40000000-0000-0000-0000-000000000009"),         // Sack
                 BatchCode = "RICE-20260112-001",
                 ProductionDate = new DateTime(2026, 1, 12, 0, 0, 0, DateTimeKind.Utc),
                 ExpiryDate = new DateTime(2027, 1, 12, 0, 0, 0, DateTimeKind.Utc),
-                Quantity = 1000m,
-                RemainingQuantity = 1000m,
-                SourceQuantity = 1000m,
+                Quantity = 20m,
+                RemainingQuantity = 20m,
+                SourceQuantity = 20m,
                 Status = BatchStatus.Recalled,
                 RootBatchId = new Guid("80000000-0000-0000-0000-000000000004"),
                 CreatedAt = new DateTime(2026, 1, 12, 0, 0, 0, DateTimeKind.Utc)
@@ -428,7 +429,7 @@ public static class SeedData
                 CreatedBy = new Guid("70000000-0000-0000-0000-000000000003"),      // Manager (Golden Bean)
                 Reason = "Khách hàng phản ánh dị vật lẫn trong bao bì đóng gói.",
                 Severity = (int)RecallSeverity.Critical,
-                Status = (int)RecallStatus.Pending,
+                Status = (int)RecallStatus.Processing,
                 CreatedAt = new DateTime(2026, 1, 16, 0, 0, 0, DateTimeKind.Utc)
             },
             new RecallDataModel
@@ -440,6 +441,94 @@ public static class SeedData
                 Severity = (int)RecallSeverity.Low,
                 Status = (int)RecallStatus.Completed,
                 CreatedAt = new DateTime(2026, 1, 18, 0, 0, 0, DateTimeKind.Utc)
+            }
+        );
+    }
+    private static void SeedNotifications(ModelBuilder builder)
+    {
+        builder.Entity<NotificationDataModel>().HasData(
+            // Admin — cảnh báo thu hồi mới tạo (chưa đọc)
+            new NotificationDataModel
+            {
+                Id = new Guid("A0000000-0000-0000-0000-000000000001"),
+                UserId = new Guid("70000000-0000-0000-0000-000000000001"), // Admin
+                Title = "Cảnh báo thu hồi lô hàng",
+                Message = "Lô Dragon Fruit (DRAGONFRUIT-20260108-001) đã bị thu hồi do phát hiện dư lượng thuốc bảo vệ thực vật vượt ngưỡng cho phép.",
+                IsRead = false,
+                CreatedAt = new DateTime(2026, 1, 15, 8, 30, 0, DateTimeKind.Utc)
+            },
+            // Admin — đã đọc thông báo hệ thống trước đó
+            new NotificationDataModel
+            {
+                Id = new Guid("A0000000-0000-0000-0000-000000000002"),
+                UserId = new Guid("70000000-0000-0000-0000-000000000001"), // Admin
+                Title = "Khởi tạo hệ thống",
+                Message = "Hệ thống AgriTrace đã được khởi tạo thành công với dữ liệu mẫu ban đầu.",
+                IsRead = true,
+                CreatedAt = new DateTime(2026, 1, 1, 9, 0, 0, DateTimeKind.Utc),
+                UpdatedAt = new DateTime(2026, 1, 1, 9, 15, 0, DateTimeKind.Utc)
+            },
+            // Farmer (Nguyen Van A) — nhắc trạng thái lô hàng, chưa đọc
+            new NotificationDataModel
+            {
+                Id = new Guid("A0000000-0000-0000-0000-000000000003"),
+                UserId = new Guid("70000000-0000-0000-0000-000000000002"), // Farmer
+                Title = "Cập nhật trạng thái lô hàng",
+                Message = "Lô Organic Tomato (TOMATO-20260105-001) đã chuyển sang trạng thái Harvested.",
+                IsRead = false,
+                CreatedAt = new DateTime(2026, 1, 5, 14, 0, 0, DateTimeKind.Utc)
+            },
+            // Farmer — cảnh báo thu hồi liên quan tới lô của mình, đã đọc
+            new NotificationDataModel
+            {
+                Id = new Guid("A0000000-0000-0000-0000-000000000004"),
+                UserId = new Guid("70000000-0000-0000-0000-000000000002"), // Farmer
+                Title = "Lô hàng của bạn bị thu hồi",
+                Message = "Lô Dragon Fruit (DRAGONFRUIT-20260108-001) do bạn cung cấp đã bị thu hồi. Vui lòng kiểm tra chi tiết.",
+                IsRead = true,
+                CreatedAt = new DateTime(2026, 1, 15, 9, 0, 0, DateTimeKind.Utc),
+                UpdatedAt = new DateTime(2026, 1, 16, 10, 0, 0, DateTimeKind.Utc)
+            },
+            // Manager (Tran Thi B) — phản ánh khách hàng, chưa đọc
+            new NotificationDataModel
+            {
+                Id = new Guid("A0000000-0000-0000-0000-000000000005"),
+                UserId = new Guid("70000000-0000-0000-0000-000000000003"), // Manager
+                Title = "Phản ánh chất lượng sản phẩm",
+                Message = "Lô Jasmine Rice (RICE-20260112-001) nhận được phản ánh dị vật lẫn trong bao bì đóng gói từ khách hàng.",
+                IsRead = false,
+                CreatedAt = new DateTime(2026, 1, 16, 11, 0, 0, DateTimeKind.Utc)
+            },
+            // Manager — nhắc duyệt batch, chưa đọc
+            new NotificationDataModel
+            {
+                Id = new Guid("A0000000-0000-0000-0000-000000000006"),
+                UserId = new Guid("70000000-0000-0000-0000-000000000003"), // Manager
+                Title = "Lô hàng đang vận chuyển",
+                Message = "Lô Arabica Coffee (COFFEE-20260110-001) hiện đang trong trạng thái Transporting, còn lại 150kg.",
+                IsRead = false,
+                CreatedAt = new DateTime(2026, 1, 10, 16, 0, 0, DateTimeKind.Utc)
+            },
+            // Inspector (Le Van C) — nhắc lịch kiểm định, đã đọc
+            new NotificationDataModel
+            {
+                Id = new Guid("A0000000-0000-0000-0000-000000000007"),
+                UserId = new Guid("70000000-0000-0000-0000-000000000004"), // Inspector
+                Title = "Yêu cầu kiểm tra bổ sung",
+                Message = "Lô Dragon Fruit (DRAGONFRUIT-20260108-001) cần kiểm tra bổ sung sau lần thu hồi trước liên quan đến lỗi nhãn mác.",
+                IsRead = true,
+                CreatedAt = new DateTime(2026, 1, 18, 8, 0, 0, DateTimeKind.Utc),
+                UpdatedAt = new DateTime(2026, 1, 18, 8, 20, 0, DateTimeKind.Utc)
+            },
+            // Inspector — chưa đọc
+            new NotificationDataModel
+            {
+                Id = new Guid("A0000000-0000-0000-0000-000000000008"),
+                UserId = new Guid("70000000-0000-0000-0000-000000000004"), // Inspector
+                Title = "Lịch kiểm định mới",
+                Message = "Có 2 lô hàng đang chờ kiểm định chất lượng trong tuần này.",
+                IsRead = false,
+                CreatedAt = new DateTime(2026, 1, 20, 7, 30, 0, DateTimeKind.Utc)
             }
         );
     }
