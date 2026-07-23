@@ -352,6 +352,111 @@ public static class SeedData
             }
         );
     }
+    private static void SeedBatches(ModelBuilder builder)
+    {
+        builder.Entity<BatchDataModel>().HasData(
+            new BatchDataModel
+            {
+                Id = new Guid("80000000-0000-0000-0000-000000000001"),
+                ProductId = new Guid("60000000-0000-0000-0000-000000000001"),      // Organic Tomato
+                CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000001"), // Green Farm
+                UnitId = new Guid("40000000-0000-0000-0000-000000000001"),         // KG
+                BatchCode = "TOMATO-20260105-001",
+                ProductionDate = new DateTime(2026, 1, 5, 0, 0, 0, DateTimeKind.Utc),
+                ExpiryDate = new DateTime(2026, 1, 20, 0, 0, 0, DateTimeKind.Utc),
+                Quantity = 500m,
+                RemainingQuantity = 500m,
+                SourceQuantity = 500m,
+                Status = BatchStatus.Harvested,
+                RootBatchId = new Guid("80000000-0000-0000-0000-000000000001"),
+                CreatedAt = new DateTime(2026, 1, 5, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new BatchDataModel
+            {
+                Id = new Guid("80000000-0000-0000-0000-000000000002"),
+                ProductId = new Guid("60000000-0000-0000-0000-000000000002"),      // Dragon Fruit
+                CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000001"), // Green Farm
+                UnitId = new Guid("40000000-0000-0000-0000-000000000004"),         // Milliliter (theo Product seed)
+                BatchCode = "DRAGONFRUIT-20260108-001",
+                ProductionDate = new DateTime(2026, 1, 8, 0, 0, 0, DateTimeKind.Utc),
+                ExpiryDate = new DateTime(2026, 1, 25, 0, 0, 0, DateTimeKind.Utc),
+                Quantity = 300m,
+                RemainingQuantity = 300m,
+                SourceQuantity = 300m,
+                Status = BatchStatus.Recalled,
+                RootBatchId = new Guid("80000000-0000-0000-0000-000000000002"),
+                CreatedAt = new DateTime(2026, 1, 8, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new BatchDataModel
+            {
+                Id = new Guid("80000000-0000-0000-0000-000000000003"),
+                ProductId = new Guid("60000000-0000-0000-0000-000000000003"),      // Arabica Coffee
+                CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000002"), // Golden Bean
+                UnitId = new Guid("40000000-0000-0000-0000-000000000005"),         // Box
+                BatchCode = "COFFEE-20260110-001",
+                ProductionDate = new DateTime(2026, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                ExpiryDate = new DateTime(2027, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                Quantity = 200m,
+                RemainingQuantity = 150m,
+                SourceQuantity = 200m,
+                Status = BatchStatus.Transporting,
+                RootBatchId = new Guid("80000000-0000-0000-0000-000000000003"),
+                CreatedAt = new DateTime(2026, 1, 10, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new BatchDataModel
+            {
+                Id = new Guid("80000000-0000-0000-0000-000000000004"),
+                ProductId = new Guid("60000000-0000-0000-0000-000000000004"),      // Jasmine Rice
+                CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000002"), // Golden Bean
+                UnitId = new Guid("40000000-0000-0000-0000-000000000002"),         // Gram
+                BatchCode = "RICE-20260112-001",
+                ProductionDate = new DateTime(2026, 1, 12, 0, 0, 0, DateTimeKind.Utc),
+                ExpiryDate = new DateTime(2027, 1, 12, 0, 0, 0, DateTimeKind.Utc),
+                Quantity = 1000m,
+                RemainingQuantity = 1000m,
+                SourceQuantity = 1000m,
+                Status = BatchStatus.Recalled,
+                RootBatchId = new Guid("80000000-0000-0000-0000-000000000004"),
+                CreatedAt = new DateTime(2026, 1, 12, 0, 0, 0, DateTimeKind.Utc)
+            }
+        );
+    }
+
+    private static void SeedRecalls(ModelBuilder builder)
+    {
+        builder.Entity<RecallDataModel>().HasData(
+            new RecallDataModel
+            {
+                Id = new Guid("90000000-0000-0000-0000-000000000001"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000002"),        // Dragon Fruit batch
+                CreatedBy = new Guid("70000000-0000-0000-0000-000000000001"),      // Admin
+                Reason = "Phát hiện dư lượng thuốc bảo vệ thực vật vượt ngưỡng cho phép.",
+                Severity = (int)RecallSeverity.High,
+                Status = (int)RecallStatus.Processing,
+                CreatedAt = new DateTime(2026, 1, 15, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new RecallDataModel
+            {
+                Id = new Guid("90000000-0000-0000-0000-000000000002"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000004"),        // Jasmine Rice batch
+                CreatedBy = new Guid("70000000-0000-0000-0000-000000000003"),      // Manager (Golden Bean)
+                Reason = "Khách hàng phản ánh dị vật lẫn trong bao bì đóng gói.",
+                Severity = (int)RecallSeverity.Critical,
+                Status = (int)RecallStatus.Pending,
+                CreatedAt = new DateTime(2026, 1, 16, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new RecallDataModel
+            {
+                Id = new Guid("90000000-0000-0000-0000-000000000003"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000002"),        // Dragon Fruit batch (recall lần 2)
+                CreatedBy = new Guid("70000000-0000-0000-0000-000000000001"),      // Admin
+                Reason = "Kiểm tra bổ sung sau lần thu hồi trước, lỗi nhẹ về nhãn mác.",
+                Severity = (int)RecallSeverity.Low,
+                Status = (int)RecallStatus.Completed,
+                CreatedAt = new DateTime(2026, 1, 18, 0, 0, 0, DateTimeKind.Utc)
+            }
+        );
+    }
 
     private static void SeedBatches(ModelBuilder builder)
     {
