@@ -15,10 +15,8 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AgriTrace.Infrastructure.Sqlserver.Persistence;
 
-
 public static class SeedData
 {
-
     public static void Seed(ModelBuilder builder)
     {
         SeedOrganizationTypes(builder);
@@ -29,13 +27,12 @@ public static class SeedData
         SeedProducts(builder);
         SeedUsers(builder);
         SeedBatches(builder);
+        SeedRecalls(builder);
         SeedSupplyChainEvents(builder);
         SeedQualityInspections(builder);
         SeedCertificates(builder);
-        SeedRecalls(builder);
         SeedNotifications(builder);
     }
-
 
     private static void SeedOrganizationTypes(ModelBuilder builder)
     {
@@ -80,8 +77,6 @@ public static class SeedData
         );
     }
 
-
-
     private static void SeedEventTypes(ModelBuilder builder)
     {
         builder.Entity<EventTypeDataModel>().HasData(
@@ -96,6 +91,7 @@ public static class SeedData
             new EventTypeDataModel { Id = new Guid("20000000-0000-0000-0000-000000000009"), Code = "RECALL", Name = "Recall" }
         );
     }
+
     private static void SeedCategories(ModelBuilder builder)
     {
         builder.Entity<CategoryDataModel>().HasData(
@@ -212,7 +208,6 @@ public static class SeedData
         );
     }
 
-
     private static void SeedOrganizations(ModelBuilder builder)
     {
         builder.Entity<OrganizationDataModel>().HasData(
@@ -254,7 +249,6 @@ public static class SeedData
             }
         );
     }
-
 
     private static void SeedProducts(ModelBuilder builder)
     {
@@ -298,13 +292,8 @@ public static class SeedData
         );
     }
 
-
     private static void SeedUsers(ModelBuilder builder)
     {
-        // Tất cả seeded users dùng password: Admin@123
-        // Hash được tạo bằng User.HashPassword() — PBKDF2/SHA256, 100 000 iterations.
-        // Format: {iterations}.{saltBase64}.{keyBase64}
-        // Để tạo hash mới: dotnet run --project tools/HashGen -- "YourPassword"
         builder.Entity<UserDataModel>().HasData(
             new UserDataModel
             {
@@ -359,32 +348,102 @@ public static class SeedData
             new BatchDataModel
             {
                 Id = new Guid("80000000-0000-0000-0000-000000000001"),
-                ProductId = new Guid("60000000-0000-0000-0000-000000000001"), // Organic Tomato
-                CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000001"), // Farm
-                UnitId = new Guid("40000000-0000-0000-0000-000000000001"), // KG
-                BatchCode = "BATCH-TOMATO-001",
-                ProductionDate = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc),
-                ExpiryDate = new DateTime(2026, 6, 15, 0, 0, 0, DateTimeKind.Utc),
-                Quantity = 1000,
-                RemainingQuantity = 800,
-                SourceQuantity = 1000,
+                ProductId = new Guid("60000000-0000-0000-0000-000000000001"),      // Organic Tomato
+                CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000001"), // Green Farm
+                UnitId = new Guid("40000000-0000-0000-0000-000000000001"),         // KG
+                BatchCode = "TOMATO-20260105-001",
+                ProductionDate = new DateTime(2026, 1, 5, 0, 0, 0, DateTimeKind.Utc),
+                ExpiryDate = new DateTime(2026, 1, 20, 0, 0, 0, DateTimeKind.Utc),
+                Quantity = 500m,
+                RemainingQuantity = 500m,
+                SourceQuantity = 500m,
                 Status = BatchStatus.Harvested,
-                CreatedAt = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc)
+                RootBatchId = new Guid("80000000-0000-0000-0000-000000000001"),
+                CreatedAt = new DateTime(2026, 1, 5, 0, 0, 0, DateTimeKind.Utc)
             },
             new BatchDataModel
             {
                 Id = new Guid("80000000-0000-0000-0000-000000000002"),
-                ProductId = new Guid("60000000-0000-0000-0000-000000000003"), // Arabica Coffee
-                CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000002"), // Processor
-                UnitId = new Guid("40000000-0000-0000-0000-000000000005"), // Box
-                BatchCode = "BATCH-COFFEE-001",
-                ProductionDate = new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Utc),
-                ExpiryDate = new DateTime(2027, 5, 1, 0, 0, 0, DateTimeKind.Utc),
-                Quantity = 500,
-                RemainingQuantity = 500,
-                SourceQuantity = 500,
-                Status = BatchStatus.Processing,
-                CreatedAt = new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Utc)
+                ProductId = new Guid("60000000-0000-0000-0000-000000000002"),      // Dragon Fruit
+                CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000001"), // Green Farm
+                UnitId = new Guid("40000000-0000-0000-0000-000000000004"),         // Milliliter (theo Product seed)
+                BatchCode = "DRAGONFRUIT-20260108-001",
+                ProductionDate = new DateTime(2026, 1, 8, 0, 0, 0, DateTimeKind.Utc),
+                ExpiryDate = new DateTime(2026, 1, 25, 0, 0, 0, DateTimeKind.Utc),
+                Quantity = 300m,
+                RemainingQuantity = 300m,
+                SourceQuantity = 300m,
+                Status = BatchStatus.Recalled,
+                RootBatchId = new Guid("80000000-0000-0000-0000-000000000002"),
+                CreatedAt = new DateTime(2026, 1, 8, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new BatchDataModel
+            {
+                Id = new Guid("80000000-0000-0000-0000-000000000003"),
+                ProductId = new Guid("60000000-0000-0000-0000-000000000003"),      // Arabica Coffee
+                CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000002"), // Golden Bean
+                UnitId = new Guid("40000000-0000-0000-0000-000000000005"),         // Box
+                BatchCode = "COFFEE-20260110-001",
+                ProductionDate = new DateTime(2026, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                ExpiryDate = new DateTime(2027, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                Quantity = 200m,
+                RemainingQuantity = 150m,
+                SourceQuantity = 200m,
+                Status = BatchStatus.Transporting,
+                RootBatchId = new Guid("80000000-0000-0000-0000-000000000003"),
+                CreatedAt = new DateTime(2026, 1, 10, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new BatchDataModel
+            {
+                Id = new Guid("80000000-0000-0000-0000-000000000004"),
+                ProductId = new Guid("60000000-0000-0000-0000-000000000004"),      // Jasmine Rice
+                CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000002"), // Golden Bean
+                UnitId = new Guid("40000000-0000-0000-0000-000000000002"),         // Gram
+                BatchCode = "RICE-20260112-001",
+                ProductionDate = new DateTime(2026, 1, 12, 0, 0, 0, DateTimeKind.Utc),
+                ExpiryDate = new DateTime(2027, 1, 12, 0, 0, 0, DateTimeKind.Utc),
+                Quantity = 1000m,
+                RemainingQuantity = 1000m,
+                SourceQuantity = 1000m,
+                Status = BatchStatus.Recalled,
+                RootBatchId = new Guid("80000000-0000-0000-0000-000000000004"),
+                CreatedAt = new DateTime(2026, 1, 12, 0, 0, 0, DateTimeKind.Utc)
+            }
+        );
+    }
+
+    private static void SeedRecalls(ModelBuilder builder)
+    {
+        builder.Entity<RecallDataModel>().HasData(
+            new RecallDataModel
+            {
+                Id = new Guid("90000000-0000-0000-0000-000000000001"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000002"),        // Dragon Fruit batch
+                CreatedBy = new Guid("70000000-0000-0000-0000-000000000001"),      // Admin
+                Reason = "Phát hiện dư lượng thuốc bảo vệ thực vật vượt ngưỡng cho phép.",
+                Severity = (int)RecallSeverity.High,
+                Status = (int)RecallStatus.Processing,
+                CreatedAt = new DateTime(2026, 1, 15, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new RecallDataModel
+            {
+                Id = new Guid("90000000-0000-0000-0000-000000000002"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000004"),        // Jasmine Rice batch
+                CreatedBy = new Guid("70000000-0000-0000-0000-000000000003"),      // Manager (Golden Bean)
+                Reason = "Khách hàng phản ánh dị vật lẫn trong bao bì đóng gói.",
+                Severity = (int)RecallSeverity.Critical,
+                Status = (int)RecallStatus.Pending,
+                CreatedAt = new DateTime(2026, 1, 16, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new RecallDataModel
+            {
+                Id = new Guid("90000000-0000-0000-0000-000000000003"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000002"),        // Dragon Fruit batch (recall lần 2)
+                CreatedBy = new Guid("70000000-0000-0000-0000-000000000001"),      // Admin
+                Reason = "Kiểm tra bổ sung sau lần thu hồi trước, lỗi nhẹ về nhãn mác.",
+                Severity = (int)RecallSeverity.Low,
+                Status = (int)RecallStatus.Completed,
+                CreatedAt = new DateTime(2026, 1, 18, 0, 0, 0, DateTimeKind.Utc)
             }
         );
     }
@@ -447,22 +506,6 @@ public static class SeedData
                 FileUrl = "https://agritrace.com/certs/cert-001.pdf",
                 IssuedDate = new DateTime(2026, 6, 2, 10, 0, 0, DateTimeKind.Utc),
                 CreatedAt = new DateTime(2026, 6, 2, 10, 0, 0, DateTimeKind.Utc)
-            }
-        );
-    }
-
-    private static void SeedRecalls(ModelBuilder builder)
-    {
-        builder.Entity<RecallDataModel>().HasData(
-            new RecallDataModel
-            {
-                Id = new Guid("C0000000-0000-0000-0000-000000000001"),
-                BatchId = new Guid("80000000-0000-0000-0000-000000000002"),
-                CreatedBy = new Guid("70000000-0000-0000-0000-000000000001"), // Admin
-                Reason = "Packaging defect",
-                Severity = 1,
-                Status = 1, // Example status: 1 = Initiated
-                CreatedAt = new DateTime(2026, 6, 10, 0, 0, 0, DateTimeKind.Utc)
             }
         );
     }

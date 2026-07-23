@@ -143,5 +143,10 @@ public class BatchSplitRepository : IBatchSplitRepository
 
         return split;
     }
+
+    public Task SaveSplitAsync(Batch sourceBatch, IReadOnlyList<Batch> childBatches, BatchSplit batchSplit, IReadOnlyList<BatchSplitDetail> details, SupplyChainEvent splitEvent, CancellationToken cancellationToken = default)
+    {
+        throw new NotImplementedException();
+    }
 }
 
