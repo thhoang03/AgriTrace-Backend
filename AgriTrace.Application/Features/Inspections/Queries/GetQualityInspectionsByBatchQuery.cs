@@ -1,14 +1,18 @@
 using AgriTrace.Application.Contracts;
+using AgriTrace.Domain.Common;
 using AgriTrace.Domain.Interfaces.Inbound;
 using MediatR;
 
 namespace AgriTrace.Application.Features.Inspections.Queries;
 
-public sealed record GetQualityInspectionsByBatchQuery(Guid BatchId)
-    : IRequest<IReadOnlyList<QualityInspectionDto>>;
+public sealed record GetQualityInspectionsByBatchQuery(
+    Guid BatchId,
+    int Page,
+    int PageSize)
+    : IRequest<PagedResult<QualityInspectionDto>>;
 
 public sealed class GetQualityInspectionsByBatchQueryHandler
-    : IRequestHandler<GetQualityInspectionsByBatchQuery, IReadOnlyList<QualityInspectionDto>>
+    : IRequestHandler<GetQualityInspectionsByBatchQuery, PagedResult<QualityInspectionDto>>
 {
     private readonly IQualityInspectionService _service;
 
@@ -18,7 +22,7 @@ public sealed class GetQualityInspectionsByBatchQueryHandler
         _service = service;
     }
 
-    public async Task<IReadOnlyList<QualityInspectionDto>> Handle(
+    public async Task<PagedResult<QualityInspectionDto>> Handle(
         GetQualityInspectionsByBatchQuery query,
         CancellationToken cancellationToken)
     {
@@ -26,7 +30,7 @@ public sealed class GetQualityInspectionsByBatchQueryHandler
             query.BatchId,
             cancellationToken);
 
-        return inspections
+        var all = inspections
             .Select(i => new QualityInspectionDto
             {
                 Id = i.Id,
@@ -38,7 +42,17 @@ public sealed class GetQualityInspectionsByBatchQueryHandler
                 CreatedAt = i.CreatedAt,
                 UpdatedAt = i.UpdatedAt
             })
-            .ToList()
-            .AsReadOnly();
+            .ToList();
+
+        var pageItems = all
+            .Skip((query.Page - 1) * query.PageSize)
+            .Take(query.PageSize)
+            .ToList();
+
+        return new PagedResult<QualityInspectionDto>(
+            pageItems,
+            all.Count,
+            query.Page,
+            query.PageSize);
     }
 }

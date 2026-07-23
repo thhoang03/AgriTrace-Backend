@@ -11,10 +11,8 @@ namespace AgriTrace.Application.Features.Batches.Commands;
 
 public sealed record UpdateBatchCommand(
     Guid Id,
-    string BatchCode,
-    decimal Quantity,
-    DateTime ProductionDate,
-    DateTime? ExpiryDate)
+    decimal? Quantity,
+    DateOnly? ExpiryDate)
     : IRequest<BatchDto>;
 
 
@@ -55,16 +53,27 @@ public sealed class UpdateBatchCommandHandler
 
         if (batch == null)
         {
-            throw new NotFoundException("Batch not found.");
+            throw new AgriTrace.Application.Common.Exceptions.NotFoundException("Batch not found.");
         }
 
 
 
+        // Only quantity and expiryDate are updatable; preserve existing batch code and production date.
+        var quantity =
+            command.Quantity ?? batch.Quantity;
+
+        DateTime? expiryDate =
+            command.ExpiryDate.HasValue
+                ? command.ExpiryDate.Value.ToDateTime(TimeOnly.MinValue)
+                : batch.ExpiryDate;
+
+
+
         batch.UpdateInformation(
-            command.BatchCode,
-            command.Quantity,
-            command.ProductionDate,
-            command.ExpiryDate);
+            batch.BatchCode,
+            quantity,
+            batch.ProductionDate,
+            expiryDate);
 
 
 
@@ -94,22 +103,9 @@ public sealed class UpdateBatchCommandValidator
             .NotEmpty();
 
 
-        RuleFor(x => x.BatchCode)
-            .NotEmpty()
-            .MaximumLength(100);
-
-
         RuleFor(x => x.Quantity)
-            .GreaterThan(0);
-
-
-        RuleFor(x => x.ProductionDate)
-            .NotEmpty();
-
-
-        RuleFor(x => x.ExpiryDate)
-            .GreaterThan(x => x.ProductionDate)
-            .When(x => x.ExpiryDate.HasValue);
+            .GreaterThan(0)
+            .When(x => x.Quantity.HasValue);
 
     }
 

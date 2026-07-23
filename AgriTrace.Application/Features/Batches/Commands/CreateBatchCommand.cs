@@ -1,5 +1,15 @@
 using AgriTrace.Application.Contracts;
-using AgriTrace.Domain.Entities;
+using AgriTrace.Domain.Entities.Batches;
+using AgriTrace.Domain.Entities.Categories;
+using AgriTrace.Domain.Entities.Certificates;
+using AgriTrace.Domain.Entities.Events;
+using AgriTrace.Domain.Entities.Notifications;
+using AgriTrace.Domain.Entities.Organizations;
+using AgriTrace.Domain.Entities.Products;
+using AgriTrace.Domain.Entities.QualityInspections;
+using AgriTrace.Domain.Entities.Recalls;
+using AgriTrace.Domain.Entities.Units;
+using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Inbound;
 using FluentValidation;
 using Mapster;
@@ -12,7 +22,6 @@ namespace AgriTrace.Application.Features.Batches.Commands;
 public sealed record CreateBatchCommand(
     Guid ProductId,
     Guid UnitId,
-    string BatchCode,
     decimal Quantity,
     DateTime ProductionDate,
     DateTime? ExpiryDate)
@@ -41,9 +50,14 @@ public sealed class CreateBatchCommandHandler
         CancellationToken cancellationToken)
     {
 
+        // Server-side batch code generation (placeholder until a proper sequence service is built).
+        var batchCode = Guid.NewGuid().ToString("N")[..8].ToUpper();
+
+
+
         var batch = new Batch(
             command.ProductId,
-            command.BatchCode,
+            batchCode,
             command.Quantity,
             command.UnitId,
             command.ProductionDate,
@@ -80,12 +94,6 @@ public sealed class CreateBatchCommandValidator
 
         RuleFor(x => x.UnitId)
             .NotEmpty();
-
-
-
-        RuleFor(x => x.BatchCode)
-            .NotEmpty()
-            .MaximumLength(100);
 
 
 

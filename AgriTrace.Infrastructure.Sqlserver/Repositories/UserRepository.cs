@@ -1,6 +1,15 @@
-﻿using AgriTrace.Domain.Common;
-using AgriTrace.Domain.Common.Enums;
-using AgriTrace.Domain.Entities;
+using AgriTrace.Domain.Common;
+using AgriTrace.Domain.Entities.Batches;
+using AgriTrace.Domain.Entities.Categories;
+using AgriTrace.Domain.Entities.Certificates;
+using AgriTrace.Domain.Entities.Events;
+using AgriTrace.Domain.Entities.Notifications;
+using AgriTrace.Domain.Entities.Organizations;
+using AgriTrace.Domain.Entities.Products;
+using AgriTrace.Domain.Entities.QualityInspections;
+using AgriTrace.Domain.Entities.Recalls;
+using AgriTrace.Domain.Entities.Units;
+using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Outbound;
 using AgriTrace.Infrastructure.Sqlserver.Models;
 using AgriTrace.Infrastructure.Sqlserver.Persistence;
@@ -292,16 +301,55 @@ public class UserRepository
 
 
 
+    public async Task<User?> GetByRefreshTokenAsync(
+        string refreshToken,
+        CancellationToken cancellationToken = default)
+    {
+        var model = await _context.Users
+            .FirstOrDefaultAsync(
+                x => x.RefreshToken == refreshToken,
+                cancellationToken);
+
+        return model == null
+            ? null
+            : ToEntity(model);
+    }
+
+
+    public async Task<User?> GetByResetTokenAsync(
+        string resetToken,
+        CancellationToken cancellationToken = default)
+    {
+        var model = await _context.Users
+            .FirstOrDefaultAsync(
+                x => x.ResetPasswordToken == resetToken,
+                cancellationToken);
+
+        return model == null
+            ? null
+            : ToEntity(model);
+    }
+
+
     private static User ToEntity(
         UserDataModel model)
     {
 
-        return new User(
+        return User.Rehydrate(
+            model.Id,
             model.OrganizationId,
-            model.Email,
-            model.PasswordHash,
             model.FullName,
-            model.Role);
+            model.Email,
+            model.PasswordHash!,
+            model.Phone,
+            model.Role,
+            model.IsActive,
+            model.CreatedAt,
+            model.UpdatedAt,
+            model.RefreshToken,
+            model.RefreshTokenExpiry,
+            model.ResetPasswordToken,
+            model.ResetPasswordTokenExpiry);
 
     }
 
@@ -335,12 +383,32 @@ public class UserRepository
                 entity.FullName,
 
 
+            Phone =
+                entity.Phone,
+
+
             Role =
                 entity.Role,
 
 
             IsActive =
                 entity.IsActive,
+
+
+            RefreshToken =
+                entity.RefreshToken,
+
+
+            RefreshTokenExpiry =
+                entity.RefreshTokenExpiry,
+
+
+            ResetPasswordToken =
+                entity.ResetPasswordToken,
+
+
+            ResetPasswordTokenExpiry =
+                entity.ResetPasswordTokenExpiry,
 
 
             CreatedAt =

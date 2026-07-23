@@ -1,0 +1,89 @@
+using AgriTrace.Application.Common.Exceptions;
+using AgriTrace.Domain.Entities.Batches;
+using AgriTrace.Domain.Entities.Categories;
+using AgriTrace.Domain.Entities.Certificates;
+using AgriTrace.Domain.Entities.Events;
+using AgriTrace.Domain.Entities.Notifications;
+using AgriTrace.Domain.Entities.Organizations;
+using AgriTrace.Domain.Entities.Products;
+using AgriTrace.Domain.Entities.QualityInspections;
+using AgriTrace.Domain.Entities.Recalls;
+using AgriTrace.Domain.Entities.Units;
+using AgriTrace.Domain.Entities.Users;
+using AgriTrace.Domain.Interfaces.Inbound;
+using MediatR;
+
+namespace AgriTrace.Application.Features.Recalls.Commands;
+
+/// <summary>
+/// Result of creating a recall.
+/// </summary>
+public class RecallCreatedResult
+{
+    public Guid RecallId { get; set; }
+}
+
+public record CreateRecallCommand(
+    Guid BatchId,
+    string Reason,
+    int Severity,
+    Guid CreatedByUserId) : IRequest<RecallCreatedResult>;
+
+public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, RecallCreatedResult>
+{
+    private readonly IRecallService _recallService;
+    private readonly IBatchReadService _batchReadService;
+    private readonly IBatchWriteService _batchWriteService;
+    private readonly IUserService _userService;
+
+    public CreateRecallCommandHandler(
+        IRecallService recallService,
+        IBatchReadService batchReadService,
+        IBatchWriteService batchWriteService,
+        IUserService userService)
+    {
+        _recallService = recallService;
+        _batchReadService = batchReadService;
+        _batchWriteService = batchWriteService;
+        _userService = userService;
+    }
+
+    public async Task<RecallCreatedResult> Handle(CreateRecallCommand request, CancellationToken cancellationToken)
+    {
+        if (request.Severity is < 1 or > 3)
+        {
+            throw new ArgumentException("Severity must be between 1 and 3.");
+        }
+
+        var batch = await _batchReadService.GetByIdAsync(request.BatchId, cancellationToken)
+            ?? throw new NotFoundException($"Batch {request.BatchId} not found.");
+
+        // CreatedBy comes from the auth context in Phase 10; fall back to any user until then.
+        var createdBy = request.CreatedByUserId;
+        if (createdBy == Guid.Empty)
+        {
+            var users = await _userService.GetAllAsync(cancellationToken);
+            createdBy = users.FirstOrDefault()?.Id
+                ?? throw new ArgumentException(
+                    "Cannot create recall without a creating user (no users exist and auth is not yet wired).");
+        }
+
+        var recall = new Recall(
+            request.BatchId,
+            createdBy,
+            request.Reason,
+            (RecallSeverity)request.Severity);
+
+        var created = await _recallService.CreateAsync(recall, cancellationToken);
+
+        // Setting the batch status to Recalled.
+        batch.Recall();
+        await _batchWriteService.UpdateAsync(batch, cancellationToken);
+
+        return new RecallCreatedResult
+        {
+            RecallId = created.Id
+        };
+    }
+}
+

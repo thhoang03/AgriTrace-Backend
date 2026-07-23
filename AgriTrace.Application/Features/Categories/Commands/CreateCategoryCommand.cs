@@ -3,7 +3,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using AgriTrace.Application.Common.Exceptions;
 using AgriTrace.Application.Contracts;
-using AgriTrace.Domain.Entities;
+using AgriTrace.Domain.Entities.Batches;
+using AgriTrace.Domain.Entities.Categories;
+using AgriTrace.Domain.Entities.Certificates;
+using AgriTrace.Domain.Entities.Events;
+using AgriTrace.Domain.Entities.Notifications;
+using AgriTrace.Domain.Entities.Organizations;
+using AgriTrace.Domain.Entities.Products;
+using AgriTrace.Domain.Entities.QualityInspections;
+using AgriTrace.Domain.Entities.Recalls;
+using AgriTrace.Domain.Entities.Units;
+using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Inbound;
 using Mapster;
 using MediatR;
@@ -36,3 +46,4 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
         return created.Adapt<CategoryDto>();
     }
 }
+

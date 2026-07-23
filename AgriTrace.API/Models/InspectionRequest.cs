@@ -8,12 +8,6 @@ namespace AgriTrace.API.Models;
 public class CreateInspectionRequest
 {
     /// <summary>
-    /// The Id of the inspector (User) performing this inspection.
-    /// </summary>
-    [Required]
-    public Guid InspectorId { get; set; }
-
-    /// <summary>
     /// Inspection result: "PASS" or "FAIL".
     /// </summary>
     [Required]

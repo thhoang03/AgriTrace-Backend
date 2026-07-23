@@ -1,5 +1,15 @@
-﻿using AgriTrace.Domain.Common;
-using AgriTrace.Domain.Entities;
+using AgriTrace.Domain.Common;
+using AgriTrace.Domain.Entities.Batches;
+using AgriTrace.Domain.Entities.Categories;
+using AgriTrace.Domain.Entities.Certificates;
+using AgriTrace.Domain.Entities.Events;
+using AgriTrace.Domain.Entities.Notifications;
+using AgriTrace.Domain.Entities.Organizations;
+using AgriTrace.Domain.Entities.Products;
+using AgriTrace.Domain.Entities.QualityInspections;
+using AgriTrace.Domain.Entities.Recalls;
+using AgriTrace.Domain.Entities.Units;
+using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Outbound;
 using AgriTrace.Infrastructure.Sqlserver.Models;
 using AgriTrace.Infrastructure.Sqlserver.Persistence;
@@ -342,11 +352,6 @@ public class SupplyChainEventRepository
 
 
 
-    public Task<SupplyChainEvent?> GetLastEventByBatchAsync(
-        Guid batchId,
-        CancellationToken cancellationToken = default)
-        => GetLatestEventAsync(batchId, cancellationToken);
-
     public async Task<SupplyChainEvent?> GetLatestEventAsync(
         Guid batchId,
         CancellationToken cancellationToken = default)
@@ -368,6 +373,13 @@ public class SupplyChainEventRepository
             : ToEntity(model);
 
     }
+
+
+    // IEventRepository member (alias of GetLatestEventAsync used by EventService hash chaining).
+    public Task<SupplyChainEvent?> GetLastEventByBatchAsync(
+        Guid batchId,
+        CancellationToken cancellationToken = default)
+        => GetLatestEventAsync(batchId, cancellationToken);
 
 
 

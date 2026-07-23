@@ -10,7 +10,7 @@ using MediatR;
 namespace AgriTrace.Application.Features.Organizations.Queries;
 
 public record GetOrganizationsPagedQuery(
-    int PageNumber,
+    int Page,
     int PageSize) : IRequest<PagedResult<OrganizationDto>>;
 
 public class GetOrganizationsPagedQueryHandler : IRequestHandler<GetOrganizationsPagedQuery, PagedResult<OrganizationDto>>
@@ -25,7 +25,7 @@ public class GetOrganizationsPagedQueryHandler : IRequestHandler<GetOrganization
     public async Task<PagedResult<OrganizationDto>> Handle(GetOrganizationsPagedQuery request, CancellationToken cancellationToken)
     {
         var pagedResult = await _organizationService.GetPagedAsync(
-            request.PageNumber,
+            request.Page,
             request.PageSize,
             cancellationToken);
 

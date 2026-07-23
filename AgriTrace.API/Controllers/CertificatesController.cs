@@ -2,6 +2,7 @@ using AgriTrace.API.Models;
 using AgriTrace.Application.Features.Certificates.Commands;
 using AgriTrace.Application.Features.Certificates.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgriTrace.API.Controllers;
@@ -10,6 +11,7 @@ namespace AgriTrace.API.Controllers;
 /// Manages certificates for agricultural batches.
 /// </summary>
 [ApiController]
+[Authorize]
 [Produces("application/json")]
 public sealed class CertificatesController : ControllerBase
 {
@@ -21,31 +23,43 @@ public sealed class CertificatesController : ControllerBase
     }
 
     /// <summary>
-    /// Get all certificates for a specific batch.
-    /// Authorization: Authenticated
+    /// Danh sách chứng nhận của Batch
     /// </summary>
     [HttpGet("api/v1/batches/{batchId:guid}/certificates")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetCertificatesByBatch(
         Guid batchId,
-        CancellationToken cancellationToken)
+        int page = 1,
+        int pageSize = 20,
+        CancellationToken cancellationToken = default)
     {
         var dtos = await _mediator.Send(
             new GetCertificatesByBatchQuery(batchId),
             cancellationToken);
 
-        var response = dtos.Select(ToResponse).ToList();
+        var all = dtos.Select(ToResponse).ToList();
+
+        var pageItems = all
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var response = new CertificatePagedResponse(
+            pageItems,
+            all.Count,
+            page,
+            pageSize);
 
         return Ok(response);
     }
 
     /// <summary>
-    /// Issue a new certificate for a batch.
-    /// Authorization: INSPECTOR
+    /// Cấp chứng nhận
     /// </summary>
     [HttpPost("api/v1/batches/{batchId:guid}/certificates")]
+    [Authorize(Roles = "Inspector,Admin")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> IssueCertificate(
         Guid batchId,
         [FromBody] IssueCertificateRequest request,
@@ -67,12 +81,11 @@ public sealed class CertificatesController : ControllerBase
     }
 
     /// <summary>
-    /// Get the details of a specific certificate.
-    /// Authorization: Authenticated
+    /// Chi tiết chứng nhận
     /// </summary>
     [HttpGet("api/v1/certificates/{certificateId:guid}")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetCertificateById(
         Guid certificateId,
         CancellationToken cancellationToken)
@@ -84,8 +97,7 @@ public sealed class CertificatesController : ControllerBase
         if (dto is null)
         {
             return NotFound(
-                ApiResponse.Fail(
-                    System.Net.HttpStatusCode.NotFound,
+                ErrorResponse.Fail(
                     $"Certificate '{certificateId}' was not found."));
         }
 
@@ -93,12 +105,12 @@ public sealed class CertificatesController : ControllerBase
     }
 
     /// <summary>
-    /// Revoke an existing certificate.
-    /// Authorization: ADMIN
+    /// Thu hồi chứng nhận
     /// </summary>
     [HttpDelete("api/v1/certificates/{certificateId:guid}")]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
+    [Authorize(Roles = "Inspector,Admin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RevokeCertificate(
         Guid certificateId,
         CancellationToken cancellationToken)
@@ -121,9 +133,8 @@ public sealed class CertificatesController : ControllerBase
             InspectionId = dto.InspectionId,
             CertificateType = dto.CertificateType,
             FileUrl = dto.FileUrl,
-            IssuedDate = dto.IssuedDate,
-            CreatedAt = dto.CreatedAt,
-            UpdatedAt = dto.UpdatedAt
+            IssuedDate = dto.IssuedDate.HasValue ? DateOnly.FromDateTime(dto.IssuedDate.Value) : null,
+            CreatedAt = dto.CreatedAt
         };
     }
 }

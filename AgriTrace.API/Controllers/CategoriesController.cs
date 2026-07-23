@@ -3,12 +3,17 @@ using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Features.Categories.Commands;
 using AgriTrace.Application.Features.Categories.Queries;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace AgriTrace.API.Controllers;
 
+/// <summary>
+/// Quản lý danh mục Category (loại sản phẩm).
+/// </summary>
 [ApiController]
 [Route("api/v1/categories")]
+[Authorize]
 [Produces("application/json")]
 public class CategoriesController : ControllerBase
 {
@@ -19,6 +24,9 @@ public class CategoriesController : ControllerBase
         _sender = sender;
     }
 
+    /// <summary>
+    /// Lấy danh sách Category
+    /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<IActionResult> GetAll([FromQuery] CategoryQuery query, CancellationToken cancellationToken)
@@ -26,7 +34,7 @@ public class CategoriesController : ControllerBase
         var search = query.Search?.Trim();
         var result = await _sender.Send(new GetCategoriesPagedQuery(
             search,
-            query.PageNumber,
+            query.Page,
             query.PageSize), cancellationToken);
 
         var response = new CategoryPagedResponse(
@@ -38,63 +46,81 @@ public class CategoriesController : ControllerBase
         return Ok(response);
     }
 
-    [HttpGet("{id:guid}")]
+    /// <summary>
+    /// Chi tiết Category
+    /// </summary>
+    [HttpGet("{categoryId:guid}")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> GetById(Guid categoryId, CancellationToken cancellationToken)
     {
-        var category = await _sender.Send(new GetCategoryByIdQuery(id), cancellationToken);
+        var category = await _sender.Send(new GetCategoryByIdQuery(categoryId), cancellationToken);
         return Ok(ToResponse(category));
     }
 
+    /// <summary>
+    /// Tạo Category mới
+    /// </summary>
     [HttpPost]
+    [Authorize(Roles = "Admin,Manager")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Create([FromBody] CategoryRequest request, CancellationToken cancellationToken)
     {
         var created = await _sender.Send(new CreateCategoryCommand(
             request.Name,
             request.Description), cancellationToken);
 
-        return CreatedAtAction(nameof(GetById), new { id = created.Id }, ToResponse(created));
+        return CreatedAtAction(nameof(GetById), new { categoryId = created.Id }, ToResponse(created));
     }
 
-    [HttpPut("{id:guid}")]
+    /// <summary>
+    /// Cập nhật Category
+    /// </summary>
+    [HttpPut("{categoryId:guid}")]
+    [Authorize(Roles = "Admin,Manager")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Update(Guid id, [FromBody] CategoryRequest request, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Update(Guid categoryId, [FromBody] CategoryRequest request, CancellationToken cancellationToken)
     {
         var updated = await _sender.Send(new UpdateCategoryCommand(
-            id,
+            categoryId,
             request.Name,
             request.Description), cancellationToken);
 
         return Ok(ToResponse(updated));
     }
 
-    [HttpPatch("{id:guid}/status")]
+    /// <summary>
+    /// Thay đổi trạng thái Category
+    /// </summary>
+    [HttpPatch("{categoryId:guid}/status")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] UpdateCategoryStatusRequest request, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateStatus(Guid categoryId, [FromBody] ActiveStatusRequest request, CancellationToken cancellationToken)
     {
         var updated = await _sender.Send(new UpdateCategoryStatusCommand(
-            id,
+            categoryId,
             request.IsActive), cancellationToken);
 
         return Ok(ToResponse(updated));
     }
 
-    [HttpDelete("{id:guid}")]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status409Conflict)]
-    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    /// <summary>
+    /// Xóa Category
+    /// </summary>
+    [HttpDelete("{categoryId:guid}")]
+    [Authorize(Roles = "Admin,Manager")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Delete(Guid categoryId, CancellationToken cancellationToken)
     {
-        await _sender.Send(new DeleteCategoryCommand(id), cancellationToken);
-        return Ok(ApiResponse.Success(null));
+        await _sender.Send(new DeleteCategoryCommand(categoryId), cancellationToken);
+        return NoContent();
     }
 
     private static CategoryResponse ToResponse(CategoryDto category)
@@ -104,9 +130,7 @@ public class CategoriesController : ControllerBase
             CategoryId = category.Id,
             Name = category.Name,
             Description = category.Description,
-            IsActive = category.IsActive,
-            CreatedAt = category.CreatedAt,
-            UpdatedAt = category.UpdatedAt
+            IsActive = category.IsActive
         };
     }
 }

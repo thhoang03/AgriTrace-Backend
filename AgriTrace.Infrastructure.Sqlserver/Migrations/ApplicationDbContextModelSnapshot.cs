@@ -71,6 +71,13 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.Property<Guid?>("RootBatchId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal>("SourceQuantity")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<Guid?>("SplitId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
@@ -92,6 +99,12 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasIndex("ParentBatchId");
 
                     b.HasIndex("ProductId");
+
+                    b.HasIndex("QRCode");
+
+                    b.HasIndex("RootBatchId");
+
+                    b.HasIndex("SplitId");
 
                     b.HasIndex("UnitId");
 
@@ -989,9 +1002,28 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
 
-                    b.Property<int>("Role")
+                    b.Property<string>("Phone")
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("RefreshToken")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("RefreshTokenExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("ResetPasswordToken")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("ResetPasswordTokenExpiry")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
                         .HasMaxLength(50)
-                        .HasColumnType("int");
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -1013,7 +1045,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             Email = "admin@agritrace.com",
                             FullName = "System Administrator",
                             IsActive = true,
-                            PasswordHash = "123",
+                            PasswordHash = "100000.WO50AmM77hFBSqiT1aSFiw==.e1i6MrL9ZZlQF4h2CiK5+qvkR7zilfDmRnLCHfUsNx8=",
                             Role = "Admin"
                         },
                         new
@@ -1024,7 +1056,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             FullName = "Nguyen Van A",
                             IsActive = true,
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
-                            PasswordHash = "123",
+                            PasswordHash = "100000.a67yvmVEWhq7dIjEmejzIg==.8Q3q/IVS35pPn+kp951yFx+MHdVMm6EDdzXB4fqqEL0=",
                             Role = "Farmer"
                         },
                         new
@@ -1035,7 +1067,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             FullName = "Tran Thi B",
                             IsActive = true,
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
-                            PasswordHash = "123",
+                            PasswordHash = "100000.szsbqUNhABlx1s1a8koCTw==.bCSGZ6J7LaqRKz2Jqh55P0VHIdpQHe7+amEZl8Dk62I=",
                             Role = "Manager"
                         },
                         new
@@ -1046,7 +1078,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             FullName = "Le Van C",
                             IsActive = true,
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000004"),
-                            PasswordHash = "123",
+                            PasswordHash = "100000.8wke5U2qoW8dhTwYKYXlzQ==.iEDJyugFAUFuNzc5U+3bwcVXt1iNNU/FTZQAzrMwN8I=",
                             Role = "Inspector"
                         });
                 });
@@ -1077,7 +1109,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasOne("AgriTrace.Infrastructure.Sqlserver.Models.UnitDataModel", "Unit")
                         .WithMany()
                         .HasForeignKey("UnitId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("CurrentOrganization");
@@ -1217,7 +1249,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.QualityInspectionDataModel", b =>
                 {
                     b.HasOne("AgriTrace.Infrastructure.Sqlserver.Models.BatchDataModel", "Batch")
-                        .WithMany("Inspections")
+                        .WithMany("QualityInspections")
                         .HasForeignKey("BatchId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -1317,7 +1349,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
 
                     b.Navigation("Events");
 
-                    b.Navigation("Inspections");
+                    b.Navigation("QualityInspections");
 
                     b.Navigation("Recalls");
                 });

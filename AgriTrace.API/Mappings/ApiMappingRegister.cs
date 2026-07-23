@@ -1,8 +1,20 @@
+using System;
 using AgriTrace.API.Models;
 using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Features.Organizations.Commands;
 using AgriTrace.Application.Features.Products.Commands;
 using AgriTrace.Application.Features.Batches.Commands;
+using AgriTrace.Domain.Entities.Batches;
+using AgriTrace.Domain.Entities.Categories;
+using AgriTrace.Domain.Entities.Certificates;
+using AgriTrace.Domain.Entities.Events;
+using AgriTrace.Domain.Entities.Notifications;
+using AgriTrace.Domain.Entities.Organizations;
+using AgriTrace.Domain.Entities.Products;
+using AgriTrace.Domain.Entities.QualityInspections;
+using AgriTrace.Domain.Entities.Recalls;
+using AgriTrace.Domain.Entities.Units;
+using AgriTrace.Domain.Entities.Users;
 
 namespace AgriTrace.API.Mapping;
 
@@ -22,10 +34,11 @@ internal static class ApiMappings
     public static CreateProductCommand ToCommand(
         this ProductRequest request)
     {
+        // TODO Phase 8+: resolve UnitId (Guid) from request.Unit (string) via a unit lookup service.
         return new CreateProductCommand(
             request.OrganizationId,
             request.CategoryId,
-            request.UnitId,
+            null,
             request.Name);
     }
 
@@ -35,10 +48,11 @@ internal static class ApiMappings
         this ProductRequest request,
         Guid id)
     {
+        // TODO Phase 8+: resolve UnitId (Guid) from request.Unit (string) via a unit lookup service.
         return new UpdateProductCommand(
             id,
             request.CategoryId,
-            request.UnitId,
+            null,
             request.Name);
     }
 
@@ -53,8 +67,8 @@ internal static class ApiMappings
         this OrganizationRequest request)
     {
         return new CreateOrganizationCommand(
-            request.OrganizationTypeId,
-            request.OrganizationName,
+            request.Type,
+            request.Name,
             request.Address);
     }
 
@@ -66,8 +80,8 @@ internal static class ApiMappings
     {
         return new UpdateOrganizationCommand(
             id,
-            request.OrganizationTypeId,
-            request.OrganizationName,
+            request.Type,
+            request.Name,
             request.Address);
     }
 
@@ -80,15 +94,14 @@ internal static class ApiMappings
 
 
     public static CreateBatchCommand ToCommand(
-        this BatchRequest request)
+        this CreateBatchRequest request)
     {
         return new CreateBatchCommand(
             request.ProductId,
             request.UnitId,
-            request.BatchCode,
             request.Quantity,
-            request.ProductionDate,
-            request.ExpiryDate);
+            request.ProductionDate.ToDateTime(TimeOnly.MinValue),
+            request.ExpiryDate?.ToDateTime(TimeOnly.MinValue));
     }
 
 
@@ -96,14 +109,12 @@ internal static class ApiMappings
 
 
     public static UpdateBatchCommand ToCommand(
-        this BatchRequest request,
-        Guid id)
+        this UpdateBatchRequest request,
+        Guid batchId)
     {
         return new UpdateBatchCommand(
-            id,
-            request.BatchCode,
+            batchId,
             request.Quantity,
-            request.ProductionDate,
             request.ExpiryDate);
     }
 
@@ -121,18 +132,38 @@ internal static class ApiMappings
     //=======PRODUCT=======
 
 
-    public static ProductResponse ToResponse(
+    public static ProductDetailResponse ToResponse(
         this ProductDto dto)
     {
-        return new ProductResponse
+        return new ProductDetailResponse
         {
             Id = dto.Id,
             Name = dto.Name,
+            Category = dto.CategoryId.HasValue
+                ? new ProductCategoryRef
+                {
+                    Id = dto.CategoryId.Value,
+                    Name = dto.CategoryName ?? string.Empty
+                }
+                : null,
+            Unit = dto.UnitName,
             OrganizationId = dto.OrganizationId,
+            Status = dto.Status
+        };
+    }
+
+    public static ProductListItemResponse ToListItemResponse(
+        this ProductDto dto)
+    {
+        return new ProductListItemResponse
+        {
+            Id = dto.Id,
+            Name = dto.Name,
             CategoryId = dto.CategoryId,
-            UnitId = dto.UnitId,
             CategoryName = dto.CategoryName,
-            UnitName = dto.UnitName
+            Unit = dto.UnitName,
+            OrganizationId = dto.OrganizationId,
+            Status = dto.Status
         };
     }
 
@@ -144,18 +175,20 @@ internal static class ApiMappings
     //=======ORGANIZATION========
 
 
-    public static OrgranizationResponse ToResponse(
+    /// <summary>
+    /// Maps an <see cref="OrganizationDto"/> to the swagger <c>OrganizationDetail</c> response shape.
+    /// The organization "type" string is derived from the configured organization type code.
+    /// </summary>
+    public static OrganizationDetailResponse ToResponse(
         this OrganizationDto dto)
     {
-        return new OrgranizationResponse
+        return new OrganizationDetailResponse
         {
             OrganizationId = dto.Id,
-            OrganizationName = dto.Name,
-            Address = dto.Address ?? string.Empty,
-            OrganizationTypeId = dto.OrganizationTypeId,
-            OrganizationStatus = dto.Status.ToString(),
-            CreatedAt = dto.CreatedAt,
-            UpdatedAt = dto.UpdatedAt
+            Name = dto.Name,
+            Address = dto.Address,
+            Type = dto.OrganizationTypeCode,
+            Status = dto.Status.ToString()
         };
     }
 
@@ -167,20 +200,47 @@ internal static class ApiMappings
     //=======BATCH========
 
 
-    public static BatchResponse ToResponse(
+    public static BatchDetailResponse ToResponse(
         this BatchDto dto)
     {
-        return new BatchResponse
+        return new BatchDetailResponse
         {
-            Id = dto.Id,
+            BatchId = dto.Id,
             ProductId = dto.ProductId,
-            UnitId = dto.UnitId,
+            ProductName = dto.ProductName,
+            CategoryId = dto.CategoryId,
+            CategoryName = dto.CategoryName,
             BatchCode = dto.BatchCode,
             Quantity = dto.Quantity,
-            RemainingQuantity = dto.RemainingQuantity,
-            ProductionDate = dto.ProductionDate,
-            ExpiryDate = dto.ExpiryDate,
-            Status = dto.Status.ToString()
+            UnitId = dto.UnitId,
+            UnitCode = dto.UnitCode,
+            ProductionDate = DateOnly.FromDateTime(dto.ProductionDate),
+            ExpiryDate = dto.ExpiryDate.HasValue ? DateOnly.FromDateTime(dto.ExpiryDate.Value) : null,
+            Status = (int)dto.Status,
+            CurrentOrganizationId = dto.CurrentOrganizationId,
+            OrganizationName = dto.OrganizationName,
+            QrCodeUrl = dto.QrCodeUrl,
+            CreatedAt = dto.CreatedAt
+        };
+    }
+
+    public static BatchListItemResponse ToListItemResponse(
+        this BatchDto dto)
+    {
+        return new BatchListItemResponse
+        {
+            BatchId = dto.Id,
+            ProductId = dto.ProductId,
+            ProductName = dto.ProductName,
+            BatchCode = dto.BatchCode,
+            Quantity = dto.Quantity,
+            UnitId = dto.UnitId,
+            UnitCode = dto.UnitCode,
+            Status = (int)dto.Status,
+            StatusName = dto.Status.ToString(),
+            CurrentOrganizationId = dto.CurrentOrganizationId,
+            QrCodeUrl = dto.QrCodeUrl,
+            CreatedAt = dto.CreatedAt
         };
     }
 

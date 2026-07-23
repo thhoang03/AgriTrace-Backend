@@ -1,5 +1,15 @@
 using AgriTrace.Application.Contracts;
-using AgriTrace.Domain.Entities;
+using AgriTrace.Domain.Entities.Batches;
+using AgriTrace.Domain.Entities.Categories;
+using AgriTrace.Domain.Entities.Certificates;
+using AgriTrace.Domain.Entities.Events;
+using AgriTrace.Domain.Entities.Notifications;
+using AgriTrace.Domain.Entities.Organizations;
+using AgriTrace.Domain.Entities.Products;
+using AgriTrace.Domain.Entities.QualityInspections;
+using AgriTrace.Domain.Entities.Recalls;
+using AgriTrace.Domain.Entities.Units;
+using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Inbound;
 using FluentValidation;
 using MediatR;
@@ -8,10 +18,10 @@ namespace AgriTrace.Application.Features.Certificates.Commands;
 
 public sealed record IssueCertificateCommand(
     Guid BatchId,
-    Guid? InspectionId,
+    Guid InspectionId,
     string CertificateType,
     string FileUrl,
-    DateTime? IssuedDate)
+    DateOnly IssuedDate)
     : IRequest<CertificateDto>;
 
 public sealed class IssueCertificateCommandHandler
@@ -34,7 +44,7 @@ public sealed class IssueCertificateCommandHandler
             command.InspectionId,
             command.CertificateType,
             command.FileUrl,
-            command.IssuedDate);
+            command.IssuedDate.ToDateTime(TimeOnly.MinValue));
 
         var created = await _service.CreateAsync(certificate, cancellationToken);
 
@@ -61,6 +71,10 @@ public sealed class IssueCertificateCommandValidator
             .NotEmpty()
             .WithMessage("BatchId is required.");
 
+        RuleFor(x => x.InspectionId)
+            .NotEmpty()
+            .WithMessage("InspectionId is required.");
+
         RuleFor(x => x.CertificateType)
             .NotEmpty()
             .WithMessage("CertificateType is required.");
@@ -68,5 +82,10 @@ public sealed class IssueCertificateCommandValidator
         RuleFor(x => x.FileUrl)
             .NotEmpty()
             .WithMessage("FileUrl is required.");
+
+        RuleFor(x => x.IssuedDate)
+            .NotEmpty()
+            .WithMessage("IssuedDate is required.");
     }
 }
+

@@ -1,7 +1,10 @@
+using System.Text;
 using AgriTrace.API;
 using AgriTrace.Application;
 using AgriTrace.Infrastructure.Sqlserver;
 using AgriTrace.Infrastructure.Sqlserver.Persistence;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -10,9 +13,24 @@ builder.Services.AddPresentation();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructureSqlServer(builder.Configuration);
 
-// Register Swashbuckle Swagger
-builder.Services.AddSwaggerGen();
+// JWT Bearer authentication (Phase 10).
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Secret"]!))
+        };
+    });
 
+// Register Swashbuckle Swagger is configured in AddPresentation() (DependencyInjection.cs).
 
 builder.Services.AddCors(options =>
 {
@@ -33,13 +51,19 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "AgriTrace API v1");
+        c.ConfigObject.PersistAuthorization = true;
+    });
 }
 
 
 app.UseCors("AllowAll");
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

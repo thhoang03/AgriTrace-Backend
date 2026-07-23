@@ -1,4 +1,14 @@
-using AgriTrace.Domain.Common.Enums;
+using AgriTrace.Domain.Entities.Batches;
+using AgriTrace.Domain.Entities.Categories;
+using AgriTrace.Domain.Entities.Certificates;
+using AgriTrace.Domain.Entities.Events;
+using AgriTrace.Domain.Entities.Notifications;
+using AgriTrace.Domain.Entities.Organizations;
+using AgriTrace.Domain.Entities.Products;
+using AgriTrace.Domain.Entities.QualityInspections;
+using AgriTrace.Domain.Entities.Recalls;
+using AgriTrace.Domain.Entities.Units;
+using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Infrastructure.Sqlserver.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -18,6 +28,12 @@ public static class SeedData
         SeedOrganizations(builder);
         SeedProducts(builder);
         SeedUsers(builder);
+        SeedBatches(builder);
+        SeedSupplyChainEvents(builder);
+        SeedQualityInspections(builder);
+        SeedCertificates(builder);
+        SeedRecalls(builder);
+        SeedNotifications(builder);
     }
 
 
@@ -285,6 +301,10 @@ public static class SeedData
 
     private static void SeedUsers(ModelBuilder builder)
     {
+        // Tất cả seeded users dùng password: Admin@123
+        // Hash được tạo bằng User.HashPassword() — PBKDF2/SHA256, 100 000 iterations.
+        // Format: {iterations}.{saltBase64}.{keyBase64}
+        // Để tạo hash mới: dotnet run --project tools/HashGen -- "YourPassword"
         builder.Entity<UserDataModel>().HasData(
             new UserDataModel
             {
@@ -292,7 +312,7 @@ public static class SeedData
                 OrganizationId = null,
                 FullName = "System Administrator",
                 Email = "admin@agritrace.com",
-                PasswordHash = "123",
+                PasswordHash = "100000.WO50AmM77hFBSqiT1aSFiw==.e1i6MrL9ZZlQF4h2CiK5+qvkR7zilfDmRnLCHfUsNx8=",
                 Role = UserRole.Admin,
                 IsActive = true,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
@@ -303,7 +323,7 @@ public static class SeedData
                 OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
                 FullName = "Nguyen Van A",
                 Email = "farmer.a@greenfarm.com",
-                PasswordHash = "123",
+                PasswordHash = "100000.a67yvmVEWhq7dIjEmejzIg==.8Q3q/IVS35pPn+kp951yFx+MHdVMm6EDdzXB4fqqEL0=",
                 Role = UserRole.Farmer,
                 IsActive = true,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
@@ -314,7 +334,7 @@ public static class SeedData
                 OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
                 FullName = "Tran Thi B",
                 Email = "manager.b@goldenbean.com",
-                PasswordHash = "123",
+                PasswordHash = "100000.szsbqUNhABlx1s1a8koCTw==.bCSGZ6J7LaqRKz2Jqh55P0VHIdpQHe7+amEZl8Dk62I=",
                 Role = UserRole.Manager,
                 IsActive = true,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
@@ -325,7 +345,7 @@ public static class SeedData
                 OrganizationId = new Guid("50000000-0000-0000-0000-000000000004"),
                 FullName = "Le Van C",
                 Email = "inspector.c@agriquality.com",
-                PasswordHash = "123",
+                PasswordHash = "100000.8wke5U2qoW8dhTwYKYXlzQ==.iEDJyugFAUFuNzc5U+3bwcVXt1iNNU/FTZQAzrMwN8I=",
                 Role = UserRole.Inspector,
                 IsActive = true,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
@@ -333,4 +353,132 @@ public static class SeedData
         );
     }
 
+    private static void SeedBatches(ModelBuilder builder)
+    {
+        builder.Entity<BatchDataModel>().HasData(
+            new BatchDataModel
+            {
+                Id = new Guid("80000000-0000-0000-0000-000000000001"),
+                ProductId = new Guid("60000000-0000-0000-0000-000000000001"), // Organic Tomato
+                CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000001"), // Farm
+                UnitId = new Guid("40000000-0000-0000-0000-000000000001"), // KG
+                BatchCode = "BATCH-TOMATO-001",
+                ProductionDate = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc),
+                ExpiryDate = new DateTime(2026, 6, 15, 0, 0, 0, DateTimeKind.Utc),
+                Quantity = 1000,
+                RemainingQuantity = 800,
+                SourceQuantity = 1000,
+                Status = BatchStatus.Harvested,
+                CreatedAt = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new BatchDataModel
+            {
+                Id = new Guid("80000000-0000-0000-0000-000000000002"),
+                ProductId = new Guid("60000000-0000-0000-0000-000000000003"), // Arabica Coffee
+                CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000002"), // Processor
+                UnitId = new Guid("40000000-0000-0000-0000-000000000005"), // Box
+                BatchCode = "BATCH-COFFEE-001",
+                ProductionDate = new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Utc),
+                ExpiryDate = new DateTime(2027, 5, 1, 0, 0, 0, DateTimeKind.Utc),
+                Quantity = 500,
+                RemainingQuantity = 500,
+                SourceQuantity = 500,
+                Status = BatchStatus.Processing,
+                CreatedAt = new DateTime(2026, 5, 1, 0, 0, 0, DateTimeKind.Utc)
+            }
+        );
+    }
+
+    private static void SeedSupplyChainEvents(ModelBuilder builder)
+    {
+        builder.Entity<SupplyChainEventDataModel>().HasData(
+            new SupplyChainEventDataModel
+            {
+                Id = new Guid("90000000-0000-0000-0000-000000000001"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000001"),
+                EventTypeId = new Guid("20000000-0000-0000-0000-000000000001"), // HARVEST
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"), // Farm
+                PerformedByUserId = new Guid("70000000-0000-0000-0000-000000000002"), // Farmer
+                EventData = "Harvested 1000kg of tomatoes",
+                Location = "Green Farm Field 1",
+                EventTime = new DateTime(2026, 6, 1, 8, 0, 0, DateTimeKind.Utc),
+                CreatedAt = new DateTime(2026, 6, 1, 8, 0, 0, DateTimeKind.Utc)
+            },
+            new SupplyChainEventDataModel
+            {
+                Id = new Guid("90000000-0000-0000-0000-000000000002"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000002"),
+                EventTypeId = new Guid("20000000-0000-0000-0000-000000000003"), // PROCESSING
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"), // Processor
+                PerformedByUserId = new Guid("70000000-0000-0000-0000-000000000003"), // Manager
+                EventData = "Processed and roasted coffee beans",
+                Location = "Golden Bean Factory",
+                EventTime = new DateTime(2026, 5, 2, 10, 0, 0, DateTimeKind.Utc),
+                CreatedAt = new DateTime(2026, 5, 2, 10, 0, 0, DateTimeKind.Utc)
+            }
+        );
+    }
+
+    private static void SeedQualityInspections(ModelBuilder builder)
+    {
+        builder.Entity<QualityInspectionDataModel>().HasData(
+            new QualityInspectionDataModel
+            {
+                Id = new Guid("A0000000-0000-0000-0000-000000000001"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000001"),
+                InspectorId = new Guid("70000000-0000-0000-0000-000000000004"), // Inspector
+                Status = InspectionStatus.Passed,
+                Result = "All standards met. No pesticide residue found.",
+                Notes = "Excellent quality.",
+                CreatedAt = new DateTime(2026, 6, 2, 9, 0, 0, DateTimeKind.Utc)
+            }
+        );
+    }
+
+    private static void SeedCertificates(ModelBuilder builder)
+    {
+        builder.Entity<CertificateDataModel>().HasData(
+            new CertificateDataModel
+            {
+                Id = new Guid("B0000000-0000-0000-0000-000000000001"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000001"),
+                InspectionId = new Guid("A0000000-0000-0000-0000-000000000001"),
+                CertificateType = "Organic Certification",
+                FileUrl = "https://agritrace.com/certs/cert-001.pdf",
+                IssuedDate = new DateTime(2026, 6, 2, 10, 0, 0, DateTimeKind.Utc),
+                CreatedAt = new DateTime(2026, 6, 2, 10, 0, 0, DateTimeKind.Utc)
+            }
+        );
+    }
+
+    private static void SeedRecalls(ModelBuilder builder)
+    {
+        builder.Entity<RecallDataModel>().HasData(
+            new RecallDataModel
+            {
+                Id = new Guid("C0000000-0000-0000-0000-000000000001"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000002"),
+                CreatedBy = new Guid("70000000-0000-0000-0000-000000000001"), // Admin
+                Reason = "Packaging defect",
+                Severity = 1,
+                Status = 1, // Example status: 1 = Initiated
+                CreatedAt = new DateTime(2026, 6, 10, 0, 0, 0, DateTimeKind.Utc)
+            }
+        );
+    }
+
+    private static void SeedNotifications(ModelBuilder builder)
+    {
+        builder.Entity<NotificationDataModel>().HasData(
+            new NotificationDataModel
+            {
+                Id = new Guid("D0000000-0000-0000-0000-000000000001"),
+                UserId = new Guid("70000000-0000-0000-0000-000000000002"), // Farmer
+                Title = "Harvest Event Recorded",
+                Message = "Your harvest event for batch BATCH-TOMATO-001 has been successfully recorded.",
+                IsRead = false,
+                CreatedAt = new DateTime(2026, 6, 1, 8, 5, 0, DateTimeKind.Utc)
+            }
+        );
+    }
 }

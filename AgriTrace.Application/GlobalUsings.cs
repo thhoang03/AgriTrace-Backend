@@ -1,0 +1,11 @@
+global using AgriTrace.Domain.Entities.Batches;
+global using AgriTrace.Domain.Entities.Categories;
+global using AgriTrace.Domain.Entities.Certificates;
+global using AgriTrace.Domain.Entities.Events;
+global using AgriTrace.Domain.Entities.Notifications;
+global using AgriTrace.Domain.Entities.Organizations;
+global using AgriTrace.Domain.Entities.Products;
+global using AgriTrace.Domain.Entities.QualityInspections;
+global using AgriTrace.Domain.Entities.Recalls;
+global using AgriTrace.Domain.Entities.Units;
+global using AgriTrace.Domain.Entities.Users;
