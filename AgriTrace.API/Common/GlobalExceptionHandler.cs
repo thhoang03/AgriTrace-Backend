@@ -64,6 +64,9 @@ namespace AgriTrace.API.Common
                 case ConflictException:
                     return (HttpStatusCode.Conflict, exception.Message, SingleError(exception.Message));
 
+                case ForbiddenException:
+                    return (HttpStatusCode.Forbidden, exception.Message, SingleError(exception.Message));
+
                 case UnauthorizedAccessException:
                     return (HttpStatusCode.Unauthorized, exception.Message, SingleError(exception.Message));
 

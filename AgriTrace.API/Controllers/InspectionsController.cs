@@ -65,7 +65,7 @@ public sealed class InspectionsController : ControllerBase
     /// Tạo kiểm định
     /// </summary>
     [HttpPost("api/v1/batches/{batchId:guid}/inspections")]
-    [Authorize(Roles = "Inspector,Admin")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -149,7 +149,7 @@ public sealed class InspectionsController : ControllerBase
     /// Cập nhật kiểm định
     /// </summary>
     [HttpPut("api/v1/inspections/{inspectionId:guid}")]
-    [Authorize(Roles = "Inspector,Admin")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]

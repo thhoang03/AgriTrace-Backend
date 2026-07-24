@@ -4,6 +4,7 @@ using AgriTrace.Infrastructure.Sqlserver.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgriTrace.Infrastructure.Sqlserver.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260724084743_EnsureOneManagerAndStaffPerOrg")]
+    partial class EnsureOneManagerAndStaffPerOrg
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1336,7 +1339,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             FullName = "Tran Van A",
                             IsActive = true,
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
-                            PasswordHash = "100000.a1msUgi5QIhbZpEXRt1RLw==.pBgsOLFf8fuOYD0kIrZE1QjF3Zw5mNqwItZaWY0Nu+A=",
+                            PasswordHash = "100000.mgrA1000farm0000mgrA1000farm0000mgrA1000farm0000==",
                             Role = "Manager"
                         },
                         new
@@ -1358,7 +1361,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             FullName = "Le Van B",
                             IsActive = true,
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
-                            PasswordHash = "100000.jaBwHVU9d0AVr3qmA2kLWw==.IdJpm8+lGT/Z25/5KZl5eoOK9SQ+keuCylWiWKYMgKY=",
+                            PasswordHash = "100000.stfB2000bean0000stfB2000bean0000stfB2000bean0000==",
                             Role = "Staff"
                         },
                         new
@@ -1380,7 +1383,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             FullName = "Pham Thi D",
                             IsActive = true,
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000004"),
-                            PasswordHash = "100000.p1jNharWhbkY18w7UEmMNQ==.h5cbCKyGjyeFUhtrKcOOXPT0nNpAcAtrSZJY3GtOV3Y=",
+                            PasswordHash = "100000.mgrC3000qual0000mgrC3000qual0000mgrC3000qual0000==",
                             Role = "Manager"
                         },
                         new
@@ -1391,7 +1394,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             FullName = "Pham Van D",
                             IsActive = true,
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000003"),
-                            PasswordHash = "100000.kvsoLjDUX9yZUnO8qQ25bA==.WfdZNGvGSz5VLRa6KbjtFdMlu+Ac0wFDRY4OLYjZsxw=",
+                            PasswordHash = "100000.abc123def456ghi789jkl012mno345pqr678stu901vwx234yzA5678==",
                             Role = "Staff"
                         },
                         new
@@ -1402,7 +1405,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             FullName = "Hoang Van E",
                             IsActive = true,
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000003"),
-                            PasswordHash = "100000.44b24E3eLoX/Tn/6Ss3n/w==.7rXza6oxS2cigQoMHeKjYexG9a3ZT5FWdzQY1gApa/Q=",
+                            PasswordHash = "100000.mgrD4000link0000mgrD4000link0000mgrD4000link0000==",
                             Role = "Manager"
                         },
                         new
@@ -1413,7 +1416,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             FullName = "Nguyen Thi E",
                             IsActive = true,
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000005"),
-                            PasswordHash = "100000.GU+TnccSHk98rWkw0cQXEw==.ebiU7auk5qcdnKJlpraFuOV/h+ev7/Q9rUF9SjkQolk=",
+                            PasswordHash = "100000.xyz789abc012def345ghi678jkl901mno234pqr567stu890vwx123yzA4567==",
                             Role = "Manager"
                         },
                         new
@@ -1424,7 +1427,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             FullName = "Tran Thi F",
                             IsActive = true,
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000005"),
-                            PasswordHash = "100000.po4yuFgTHgXEsj6fk4vYBQ==.0eVPEQ+X+wtF52FX7Y6T6LSlMzE7+eV46LYl6Yglff0=",
+                            PasswordHash = "100000.stfE5000mart0000stfE5000mart0000stfE5000mart0000==",
                             Role = "Staff"
                         },
                         new
@@ -1435,7 +1438,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             FullName = "System Operator",
                             IsActive = true,
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000006"),
-                            PasswordHash = "100000.ZCEfWZ2DeDBafl7sSoMR+w==.vS5N2A5Y2xxC3dQylLJes39s1xHrhN/mNbLz5D1/KVo=",
+                            PasswordHash = "100000.sys0000ops0000sys0000ops0000sys0000ops0000sys0000ops0000==",
                             Role = "Manager"
                         },
                         new
@@ -1446,7 +1449,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             FullName = "System Staff",
                             IsActive = true,
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000006"),
-                            PasswordHash = "100000.jlzfdeBqq5BkzvHyVkVUkw==.R3KvBcnhxzGqNbNFgJG3HPc1ozb7L+8OUUHjIUQAgOw=",
+                            PasswordHash = "100000.stfF6000sys0000stfF6000sys0000stfF6000sys0000==",
                             Role = "Staff"
                         });
                 });

@@ -57,7 +57,7 @@ public sealed class CertificatesController : ControllerBase
     /// Cấp chứng nhận
     /// </summary>
     [HttpPost("api/v1/batches/{batchId:guid}/certificates")]
-    [Authorize(Roles = "Inspector,Admin")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<IActionResult> IssueCertificate(
@@ -108,7 +108,7 @@ public sealed class CertificatesController : ControllerBase
     /// Thu hồi chứng nhận
     /// </summary>
     [HttpDelete("api/v1/certificates/{certificateId:guid}")]
-    [Authorize(Roles = "Inspector,Admin")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RevokeCertificate(

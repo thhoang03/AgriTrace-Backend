@@ -2907,7 +2907,7 @@ components:
           type: string
           nullable: true
       additionalProperties: false
-      description: "Request body for creating a user. Matches swagger `CreateUserRequest`.\r\norganizationId is nullable; role is a required string enum (ADMIN, MANAGER, STAFF, FARMER, INSPECTOR, CONSUMER)."
+      description: "Request body for creating a user. Matches swagger `CreateUserRequest`.\r\norganizationId is nullable; role is a required string enum (ADMIN, MANAGER, STAFF)."
     ErrorResponse:
       type: object
       properties:

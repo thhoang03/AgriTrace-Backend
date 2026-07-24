@@ -15,9 +15,6 @@ using MediatR;
 
 namespace AgriTrace.Application.Features.Events.Commands;
 
-/// <summary>
-/// Result of creating an event. Mirrors swagger <c>EventCreatedData</c>.
-/// </summary>
 public class EventCreatedResult
 {
     public Guid EventId { get; set; }
@@ -39,15 +36,21 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
     private readonly IEventService _eventService;
     private readonly IBatchReadService _batchReadService;
     private readonly IUserService _userService;
+    private readonly IOrganizationService _organizationService;
+    private readonly IEventTypeService _eventTypeService;
 
     public CreateEventCommandHandler(
         IEventService eventService,
         IBatchReadService batchReadService,
-        IUserService userService)
+        IUserService userService,
+        IOrganizationService organizationService,
+        IEventTypeService eventTypeService)
     {
         _eventService = eventService;
         _batchReadService = batchReadService;
         _userService = userService;
+        _organizationService = organizationService;
+        _eventTypeService = eventTypeService;
     }
 
     public async Task<EventCreatedResult> Handle(CreateEventCommand request, CancellationToken cancellationToken)
@@ -55,12 +58,6 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
         var batch = await _batchReadService.GetByIdAsync(request.BatchId, cancellationToken)
             ?? throw new NotFoundException($"Batch {request.BatchId} not found.");
 
-        // Organization is taken from the batch's current owner.
-        var organizationId = batch.CurrentOrganizationId;
-
-        // PerformedByUserId comes from the auth context in a later phase. Until then the controller
-        // may pass Guid.Empty; the SupplyChainEvent entity requires a non-empty performer, so we
-        // fall back to any existing user to keep the record valid (documented Phase 10 follow-up).
         var performedByUserId = request.PerformedByUserId;
         if (performedByUserId == Guid.Empty)
         {
@@ -71,6 +68,40 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
 
             performedByUserId = fallback.Id;
         }
+
+        var user = await _userService.GetByIdAsync(performedByUserId, cancellationToken)
+            ?? throw new NotFoundException($"User {performedByUserId} not found.");
+
+        var eventType = await _eventTypeService.GetByIdAsync(request.EventTypeId, cancellationToken)
+            ?? throw new NotFoundException($"EventType {request.EventTypeId} not found.");
+
+        string? orgTypeCode = null;
+        if (user.OrganizationId.HasValue)
+        {
+            var organization = await _organizationService.GetByIdAsync(user.OrganizationId.Value, cancellationToken);
+            if (organization != null)
+            {
+                orgTypeCode = organization.OrganizationType?.Code;
+            }
+        }
+
+        bool isAdmin = user.Role == UserRole.Admin;
+        bool isInspectionCrossOrg = orgTypeCode == "INSPECTION" && eventType.Code == "INSPECTION";
+
+        if (!isAdmin && !isInspectionCrossOrg)
+        {
+            if (!AgriTrace.Domain.Common.EventPermissionRules.IsAllowed(orgTypeCode ?? string.Empty, eventType.Code))
+            {
+                throw new ForbiddenException($"Organization type '{orgTypeCode}' is not allowed to create event type '{eventType.Code}'.");
+            }
+        }
+
+        if (!isInspectionCrossOrg && user.OrganizationId.HasValue && batch.CurrentOrganizationId != user.OrganizationId.Value)
+        {
+            throw new ForbiddenException($"Batch {request.BatchId} is not owned by the current user's organization.");
+        }
+
+        var organizationId = batch.CurrentOrganizationId;
 
         var entity = new SupplyChainEvent(
             request.BatchId,

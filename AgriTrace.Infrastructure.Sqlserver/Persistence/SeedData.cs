@@ -88,7 +88,9 @@ public static class SeedData
             new EventTypeDataModel { Id = new Guid("20000000-0000-0000-0000-000000000006"), Code = "DISTRIBUTION", Name = "Distribution" },
             new EventTypeDataModel { Id = new Guid("20000000-0000-0000-0000-000000000007"), Code = "RETAIL", Name = "Retail" },
             new EventTypeDataModel { Id = new Guid("20000000-0000-0000-0000-000000000008"), Code = "INSPECTION", Name = "Inspection" },
-            new EventTypeDataModel { Id = new Guid("20000000-0000-0000-0000-000000000009"), Code = "RECALL", Name = "Recall" }
+            new EventTypeDataModel { Id = new Guid("20000000-0000-0000-0000-000000000009"), Code = "RECALL", Name = "Recall" },
+            new EventTypeDataModel { Id = new Guid("20000000-0000-0000-0000-00000000000a"), Code = "SPLIT", Name = "Split" },
+            new EventTypeDataModel { Id = new Guid("20000000-0000-0000-0000-00000000000b"), Code = "MERGE", Name = "Merge" }
         );
     }
 
@@ -246,6 +248,24 @@ public static class SeedData
                 Address = "Cau Giay, Hanoi City",
                 Status = OrganizationStatus.Active,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new OrganizationDataModel
+            {
+                Id = new Guid("50000000-0000-0000-0000-000000000005"),
+                OrganizationTypeId = new Guid("10000000-0000-0000-0000-000000000004"),
+                Name = "Fresh Market Retailer",
+                Address = "District 1, Ho Chi Minh City",
+                Status = OrganizationStatus.Active,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new OrganizationDataModel
+            {
+                Id = new Guid("50000000-0000-0000-0000-000000000006"),
+                OrganizationTypeId = new Guid("10000000-0000-0000-0000-000000000006"),
+                Name = "System Operator",
+                Address = "Hanoi City",
+                Status = OrganizationStatus.Active,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             }
         );
     }
@@ -311,9 +331,20 @@ public static class SeedData
                 Id = new Guid("70000000-0000-0000-0000-000000000002"),
                 OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
                 FullName = "Nguyen Van A",
-                Email = "farmer.a@greenfarm.com",
+                Email = "staff.a@greenfarm.com",
                 PasswordHash = "100000.a67yvmVEWhq7dIjEmejzIg==.8Q3q/IVS35pPn+kp951yFx+MHdVMm6EDdzXB4fqqEL0=",
-                Role = UserRole.Farmer,
+                Role = UserRole.Staff,
+                IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UserDataModel
+            {
+                Id = new Guid("70000000-0000-0000-0000-000000000009"),
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
+                FullName = "Tran Van A",
+                Email = "manager.a@greenfarm.com",
+                PasswordHash = "100000.a1msUgi5QIhbZpEXRt1RLw==.pBgsOLFf8fuOYD0kIrZE1QjF3Zw5mNqwItZaWY0Nu+A=",
+                Role = UserRole.Manager,
                 IsActive = true,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
@@ -330,12 +361,100 @@ public static class SeedData
             },
             new UserDataModel
             {
+                Id = new Guid("70000000-0000-0000-0000-00000000000a"),
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
+                FullName = "Le Van B",
+                Email = "staff.b@goldenbean.com",
+                PasswordHash = "100000.jaBwHVU9d0AVr3qmA2kLWw==.IdJpm8+lGT/Z25/5KZl5eoOK9SQ+keuCylWiWKYMgKY=",
+                Role = UserRole.Staff,
+                IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UserDataModel
+            {
                 Id = new Guid("70000000-0000-0000-0000-000000000004"),
                 OrganizationId = new Guid("50000000-0000-0000-0000-000000000004"),
                 FullName = "Le Van C",
-                Email = "inspector.c@agriquality.com",
+                Email = "staff.c@agriquality.com",
                 PasswordHash = "100000.8wke5U2qoW8dhTwYKYXlzQ==.iEDJyugFAUFuNzc5U+3bwcVXt1iNNU/FTZQAzrMwN8I=",
-                Role = UserRole.Inspector,
+                Role = UserRole.Staff,
+                IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UserDataModel
+            {
+                Id = new Guid("70000000-0000-0000-0000-00000000000c"),
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000004"),
+                FullName = "Pham Thi D",
+                Email = "manager.c@agriquality.com",
+                PasswordHash = "100000.p1jNharWhbkY18w7UEmMNQ==.h5cbCKyGjyeFUhtrKcOOXPT0nNpAcAtrSZJY3GtOV3Y=",
+                Role = UserRole.Manager,
+                IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UserDataModel
+            {
+                Id = new Guid("70000000-0000-0000-0000-000000000005"),
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000003"),
+                FullName = "Pham Van D",
+                Email = "staff.d@freshlink.com",
+                PasswordHash = "100000.kvsoLjDUX9yZUnO8qQ25bA==.WfdZNGvGSz5VLRa6KbjtFdMlu+Ac0wFDRY4OLYjZsxw=",
+                Role = UserRole.Staff,
+                IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UserDataModel
+            {
+                Id = new Guid("70000000-0000-0000-0000-00000000000b"),
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000003"),
+                FullName = "Hoang Van E",
+                Email = "manager.d@freshlink.com",
+                PasswordHash = "100000.44b24E3eLoX/Tn/6Ss3n/w==.7rXza6oxS2cigQoMHeKjYexG9a3ZT5FWdzQY1gApa/Q=",
+                Role = UserRole.Manager,
+                IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UserDataModel
+            {
+                Id = new Guid("70000000-0000-0000-0000-000000000006"),
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000005"),
+                FullName = "Nguyen Thi E",
+                Email = "manager.e@freshmarket.com",
+                PasswordHash = "100000.GU+TnccSHk98rWkw0cQXEw==.ebiU7auk5qcdnKJlpraFuOV/h+ev7/Q9rUF9SjkQolk=",
+                Role = UserRole.Manager,
+                IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UserDataModel
+            {
+                Id = new Guid("70000000-0000-0000-0000-00000000000d"),
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000005"),
+                FullName = "Tran Thi F",
+                Email = "staff.e@freshmarket.com",
+                PasswordHash = "100000.po4yuFgTHgXEsj6fk4vYBQ==.0eVPEQ+X+wtF52FX7Y6T6LSlMzE7+eV46LYl6Yglff0=",
+                Role = UserRole.Staff,
+                IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UserDataModel
+            {
+                Id = new Guid("70000000-0000-0000-0000-000000000007"),
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000006"),
+                FullName = "System Operator",
+                Email = "manager.f@systemop.com",
+                PasswordHash = "100000.ZCEfWZ2DeDBafl7sSoMR+w==.vS5N2A5Y2xxC3dQylLJes39s1xHrhN/mNbLz5D1/KVo=",
+                Role = UserRole.Manager,
+                IsActive = true,
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new UserDataModel
+            {
+                Id = new Guid("70000000-0000-0000-0000-00000000000e"),
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000006"),
+                FullName = "System Staff",
+                Email = "staff.f@systemop.com",
+                PasswordHash = "100000.jlzfdeBqq5BkzvHyVkVUkw==.R3KvBcnhxzGqNbNFgJG3HPc1ozb7L+8OUUHjIUQAgOw=",
+                Role = UserRole.Staff,
                 IsActive = true,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             }
@@ -471,21 +590,21 @@ public static class SeedData
                 CreatedAt = new DateTime(2026, 1, 1, 9, 0, 0, DateTimeKind.Utc),
                 UpdatedAt = new DateTime(2026, 1, 1, 9, 15, 0, DateTimeKind.Utc)
             },
-            // Farmer (Nguyen Van A) - batch status reminder (unread)
+            // Staff (Nguyen Van A) - batch status reminder (unread)
             new NotificationDataModel
             {
                 Id = new Guid("A0000000-0000-0000-0000-000000000003"),
-                UserId = new Guid("70000000-0000-0000-0000-000000000002"), // Farmer
+                UserId = new Guid("70000000-0000-0000-0000-000000000002"), // Staff
                 Title = "Batch Status Updated",
                 Message = "Batch Organic Tomato (TOMATO-20260105-001) has transitioned to Harvested status.",
                 IsRead = false,
                 CreatedAt = new DateTime(2026, 1, 5, 14, 0, 0, DateTimeKind.Utc)
             },
-            // Farmer - recall alert for their batch (read)
+            // Staff - recall alert for their batch (read)
             new NotificationDataModel
             {
                 Id = new Guid("A0000000-0000-0000-0000-000000000004"),
-                UserId = new Guid("70000000-0000-0000-0000-000000000002"), // Farmer
+                UserId = new Guid("70000000-0000-0000-0000-000000000002"), // Staff
                 Title = "Your Batch Has Been Recalled",
                 Message = "Batch Dragon Fruit (DRAGONFRUIT-20260108-001) supplied by you has been recalled. Please check the details.",
                 IsRead = true,
@@ -512,22 +631,22 @@ public static class SeedData
                 IsRead = false,
                 CreatedAt = new DateTime(2026, 1, 10, 16, 0, 0, DateTimeKind.Utc)
             },
-            // Inspector (Le Van C) - additional inspection reminder (read)
+            // Staff (Le Van C) - additional inspection reminder (read)
             new NotificationDataModel
             {
                 Id = new Guid("A0000000-0000-0000-0000-000000000007"),
-                UserId = new Guid("70000000-0000-0000-0000-000000000004"), // Inspector
+                UserId = new Guid("70000000-0000-0000-0000-000000000004"), // Staff
                 Title = "Additional Inspection Required",
                 Message = "Batch Dragon Fruit (DRAGONFRUIT-20260108-001) requires additional inspection following the previous recall related to a labeling defect.",
                 IsRead = true,
                 CreatedAt = new DateTime(2026, 1, 18, 8, 0, 0, DateTimeKind.Utc),
                 UpdatedAt = new DateTime(2026, 1, 18, 8, 20, 0, DateTimeKind.Utc)
             },
-            // Inspector - new inspection schedule (unread)
+            // Staff - new inspection schedule (unread)
             new NotificationDataModel
             {
                 Id = new Guid("A0000000-0000-0000-0000-000000000008"),
-                UserId = new Guid("70000000-0000-0000-0000-000000000004"), // Inspector
+                UserId = new Guid("70000000-0000-0000-0000-000000000004"), // Staff
                 Title = "New Inspection Schedule",
                 Message = "There are 2 batches awaiting quality inspection this week.",
                 IsRead = false,
@@ -607,3 +726,4 @@ public static class SeedData
         );
     }
 }
+
