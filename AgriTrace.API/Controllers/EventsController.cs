@@ -15,6 +15,7 @@ namespace AgriTrace.API.Controllers;
 /// </summary>
 [ApiController]
 [Authorize]
+[ApiExplorerSettings(IgnoreApi = true)]
 public sealed class EventsController : ControllerBase
 {
     private readonly ISender _sender;

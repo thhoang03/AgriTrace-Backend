@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using AgriTrace.Application.Common.Exceptions;
 using AgriTrace.Application.Contracts;
 using AgriTrace.Domain.Common;
-using AgriTrace.Domain.Entities;
+using AgriTrace.Domain.Entities.Categories;
 using AgriTrace.Domain.Interfaces.Inbound;
 using Mapster;
 using MediatR;
@@ -44,3 +44,4 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
         }
     }
 }
+

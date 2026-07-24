@@ -11,6 +11,14 @@ public class RecallDto
 
     public string? BatchCode { get; set; }
 
+    public Guid? ProductId { get; set; }
+
+    public string? ProductName { get; set; }
+
+    public Guid? OrganizationId { get; set; }
+
+    public string? OrganizationName { get; set; }
+
     public Guid CreatedBy { get; set; }
 
     public string? CreatedByName { get; set; }
