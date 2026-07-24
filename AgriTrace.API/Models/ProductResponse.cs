@@ -2,22 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
+using AgriTrace.Domain.Entities.Products;
 
 namespace AgriTrace.API.Models;
 
 /// <summary>
-/// Detailed product response. Matches swagger <c>ProductDetail</c>.
+/// Detailed product response.
+/// Exposes both <c>id</c> and <c>productId</c>, plus <c>unitId</c> for frontend compatibility.
 /// </summary>
-/// <remarks>
-/// ID Type Note: swagger declares product/category/organization ids as integer, but the domain uses <c>Guid</c>.
-/// Per the documented Phase 1 decision the API keeps <c>Guid</c> (annotation deferred to Phase 11).
-/// <c>isActive</c> is sourced from the product response DTO; the domain <c>Product</c> entity does not yet
-/// carry an IsActive flag, so it defaults to true until a domain field is introduced (Phase 11 follow-up).
-/// </remarks>
 public class ProductDetailResponse
 {
     [JsonPropertyName("productId")]
     public Guid Id { get; set; }
+
+    [JsonPropertyName("id")]
+    public Guid ItemId => Id;
 
     [JsonPropertyName("name")]
     public string Name { get; set; } = null!;
@@ -28,6 +27,9 @@ public class ProductDetailResponse
     [JsonPropertyName("unit")]
     public string? Unit { get; set; }
 
+    [JsonPropertyName("unitId")]
+    public Guid? UnitId { get; set; }
+
     [JsonPropertyName("organizationId")]
     public Guid OrganizationId { get; set; }
 
@@ -36,7 +38,7 @@ public class ProductDetailResponse
 }
 
 /// <summary>
-/// Category reference used by <see cref="ProductDetailResponse"/>. Matches swagger <c>ProductDetail.category</c>.
+/// Category reference used by <see cref="ProductDetailResponse"/>.
 /// </summary>
 public class ProductCategoryRef
 {
@@ -48,12 +50,16 @@ public class ProductCategoryRef
 }
 
 /// <summary>
-/// List item product response. Matches swagger <c>ProductListItem</c>.
+/// List item product response.
+/// Exposes both <c>id</c> and <c>productId</c>, plus <c>unitId</c>.
 /// </summary>
 public class ProductListItemResponse
 {
     [JsonPropertyName("productId")]
     public Guid Id { get; set; }
+
+    [JsonPropertyName("id")]
+    public Guid ItemId => Id;
 
     [JsonPropertyName("name")]
     public string Name { get; set; } = null!;
@@ -67,6 +73,9 @@ public class ProductListItemResponse
     [JsonPropertyName("unit")]
     public string? Unit { get; set; }
 
+    [JsonPropertyName("unitId")]
+    public Guid? UnitId { get; set; }
+
     [JsonPropertyName("organizationId")]
     public Guid OrganizationId { get; set; }
 
@@ -75,7 +84,7 @@ public class ProductListItemResponse
 }
 
 /// <summary>
-/// Paged response for products. Matches swagger <c>ProductPagedResponse</c>.
+/// Paged response for products.
 /// </summary>
 public class ProductPagedResponse : PagedMeta
 {
@@ -97,12 +106,15 @@ public class ProductPagedResponse : PagedMeta
 }
 
 /// <summary>
-/// Created data for a product. Matches swagger <c>ProductCreatedData</c>.
+/// Created data for a product.
 /// </summary>
 public class ProductCreatedData
 {
     [JsonPropertyName("productId")]
     public Guid Id { get; set; }
+
+    [JsonPropertyName("id")]
+    public Guid ItemId => Id;
 
     [JsonPropertyName("name")]
     public string Name { get; set; } = null!;

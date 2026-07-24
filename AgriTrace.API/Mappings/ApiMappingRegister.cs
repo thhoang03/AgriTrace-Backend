@@ -34,25 +34,33 @@ internal static class ApiMappings
     public static CreateProductCommand ToCommand(
         this ProductRequest request)
     {
-        // TODO Phase 8+: resolve UnitId (Guid) from request.Unit (string) via a unit lookup service.
+        Guid? unitId = request.UnitId;
+        if (!unitId.HasValue && !string.IsNullOrWhiteSpace(request.Unit) && Guid.TryParse(request.Unit, out var parsedGuid))
+        {
+            unitId = parsedGuid;
+        }
+
         return new CreateProductCommand(
-            request.OrganizationId,
+            request.OrganizationId ?? Guid.Empty,
             request.CategoryId,
-            null,
+            unitId,
             request.Name);
     }
-
-
 
     public static UpdateProductCommand ToCommand(
         this ProductRequest request,
         Guid id)
     {
-        // TODO Phase 8+: resolve UnitId (Guid) from request.Unit (string) via a unit lookup service.
+        Guid? unitId = request.UnitId;
+        if (!unitId.HasValue && !string.IsNullOrWhiteSpace(request.Unit) && Guid.TryParse(request.Unit, out var parsedGuid))
+        {
+            unitId = parsedGuid;
+        }
+
         return new UpdateProductCommand(
             id,
             request.CategoryId,
-            null,
+            unitId,
             request.Name);
     }
 
@@ -147,6 +155,7 @@ internal static class ApiMappings
                 }
                 : null,
             Unit = dto.UnitName,
+            UnitId = dto.UnitId,
             OrganizationId = dto.OrganizationId,
             Status = dto.Status
         };
@@ -162,6 +171,7 @@ internal static class ApiMappings
             CategoryId = dto.CategoryId,
             CategoryName = dto.CategoryName,
             Unit = dto.UnitName,
+            UnitId = dto.UnitId,
             OrganizationId = dto.OrganizationId,
             Status = dto.Status
         };

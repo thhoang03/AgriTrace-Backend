@@ -130,7 +130,7 @@ public sealed class ProductsController : ControllerBase
     /// Xóa Product
     /// </summary>
     [HttpDelete("{productId:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse>> Delete(
         Guid productId,
@@ -140,7 +140,7 @@ public sealed class ProductsController : ControllerBase
             new DeleteProductCommand(productId),
             cancellationToken);
 
-        return NoContent();
+        return Ok(ApiResponse.Success("Product deleted successfully."));
     }
 
     /// <summary>

@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -41,14 +41,34 @@ public sealed class OrganizationsController : ControllerBase
                 new GetOrganizationsByTypeQuery(organizationTypeId.Value),
                 cancellationToken);
 
-            return Ok(ApiResponse.Success(byType));
+            var items = byType.Select(x => new OrganizationListItem
+            {
+                OrganizationId = x.Id,
+                Name = x.Name,
+                Type = x.OrganizationTypeCode,
+                Status = x.Status.ToString()
+            });
+
+            return Ok(ApiResponse.Success(items));
         }
 
         var result = await _sender.Send(
             new GetOrganizationsPagedQuery(page, pageSize),
             cancellationToken);
 
-        return Ok(ApiResponse.Success(result));
+        var paged = new OrganizationPagedResponse(
+            result.Items.Select(x => new OrganizationListItem
+            {
+                OrganizationId = x.Id,
+                Name = x.Name,
+                Type = x.OrganizationTypeCode,
+                Status = x.Status.ToString()
+            }),
+            result.TotalCount,
+            result.PageNumber,
+            result.PageSize);
+
+        return Ok(ApiResponse.Success(paged));
     }
 
     /// <summary>
