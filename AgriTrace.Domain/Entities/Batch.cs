@@ -675,6 +675,13 @@ public class Batch : BaseEntity
 
     }
 
+    public bool CanBeRecalled()
+    {
+        return Status != BatchStatus.Recalled;
+    }
+
+
+
 
 
 
