@@ -4,6 +4,7 @@ using AgriTrace.Infrastructure.Sqlserver.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgriTrace.Infrastructure.Sqlserver.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260722101059_SeedNotifications")]
+    partial class SeedNotifications
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -141,7 +144,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             RootBatchId = new Guid("80000000-0000-0000-0000-000000000002"),
                             SourceQuantity = 300m,
                             Status = 7,
-                            UnitId = new Guid("40000000-0000-0000-0000-000000000001")
+                            UnitId = new Guid("40000000-0000-0000-0000-000000000004")
                         },
                         new
                         {
@@ -168,12 +171,12 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             ExpiryDate = new DateTime(2027, 1, 12, 0, 0, 0, 0, DateTimeKind.Utc),
                             ProductId = new Guid("60000000-0000-0000-0000-000000000004"),
                             ProductionDate = new DateTime(2026, 1, 12, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Quantity = 20m,
-                            RemainingQuantity = 20m,
+                            Quantity = 1000m,
+                            RemainingQuantity = 1000m,
                             RootBatchId = new Guid("80000000-0000-0000-0000-000000000004"),
-                            SourceQuantity = 20m,
+                            SourceQuantity = 1000m,
                             Status = 7,
-                            UnitId = new Guid("40000000-0000-0000-0000-000000000009")
+                            UnitId = new Guid("40000000-0000-0000-0000-000000000002")
                         });
                 });
 
@@ -299,9 +302,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.ToTable("Categories", (string)null);
 
                     b.HasData(
@@ -383,18 +383,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasIndex("InspectionId");
 
                     b.ToTable("Certificates", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("b0000000-0000-0000-0000-000000000001"),
-                            BatchId = new Guid("80000000-0000-0000-0000-000000000001"),
-                            CertificateType = "Organic Certification",
-                            CreatedAt = new DateTime(2026, 6, 2, 10, 0, 0, 0, DateTimeKind.Utc),
-                            FileUrl = "https://agritrace.com/certs/cert-001.pdf",
-                            InspectionId = new Guid("a0000000-0000-0000-0000-000000000001"),
-                            IssuedDate = new DateTime(2026, 6, 2, 10, 0, 0, 0, DateTimeKind.Utc)
-                        });
                 });
 
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.EventTypeDataModel", b =>
@@ -528,12 +516,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasData(
                         new
                         {
-                            Id = new Guid("d0000000-0000-0000-0000-000000000001"),
-                            CreatedAt = new DateTime(2026, 6, 1, 8, 5, 0, 0, DateTimeKind.Utc),
-                            IsRead = false,
-                            Message = "Your harvest event for batch BATCH-TOMATO-001 has been successfully recorded.",
-                            Title = "Harvest Event Recorded",
-                            UserId = new Guid("70000000-0000-0000-0000-000000000002")
                             Id = new Guid("a0000000-0000-0000-0000-000000000001"),
                             CreatedAt = new DateTime(2026, 1, 15, 8, 30, 0, 0, DateTimeKind.Utc),
                             IsRead = false,
@@ -815,7 +797,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Dragon Fruit",
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
-                            UnitId = new Guid("40000000-0000-0000-0000-000000000001")
+                            UnitId = new Guid("40000000-0000-0000-0000-000000000004")
                         },
                         new
                         {
@@ -833,7 +815,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Jasmine Rice",
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
-                            UnitId = new Guid("40000000-0000-0000-0000-000000000009")
+                            UnitId = new Guid("40000000-0000-0000-0000-000000000002")
                         });
                 });
 
@@ -874,18 +856,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasIndex("InspectorId");
 
                     b.ToTable("QualityInspections", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000001"),
-                            BatchId = new Guid("80000000-0000-0000-0000-000000000001"),
-                            CreatedAt = new DateTime(2026, 6, 2, 9, 0, 0, 0, DateTimeKind.Utc),
-                            InspectorId = new Guid("70000000-0000-0000-0000-000000000004"),
-                            Notes = "Excellent quality.",
-                            Result = "All standards met. No pesticide residue found.",
-                            Status = 2
-                        });
                 });
 
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.RecallDataModel", b =>
@@ -955,7 +925,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             CreatedBy = new Guid("70000000-0000-0000-0000-000000000003"),
                             Reason = "Khách hàng phản ánh dị vật lẫn trong bao bì đóng gói.",
                             Severity = 4,
-                            Status = 2
+                            Status = 1
                         },
                         new
                         {
@@ -1029,32 +999,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasIndex("UserDataModelId");
 
                     b.ToTable("SupplyChainEvents", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("90000000-0000-0000-0000-000000000001"),
-                            BatchId = new Guid("80000000-0000-0000-0000-000000000001"),
-                            CreatedAt = new DateTime(2026, 6, 1, 8, 0, 0, 0, DateTimeKind.Utc),
-                            EventData = "Harvested 1000kg of tomatoes",
-                            EventTime = new DateTime(2026, 6, 1, 8, 0, 0, 0, DateTimeKind.Utc),
-                            EventTypeId = new Guid("20000000-0000-0000-0000-000000000001"),
-                            Location = "Green Farm Field 1",
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
-                            PerformedByUserId = new Guid("70000000-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            Id = new Guid("90000000-0000-0000-0000-000000000002"),
-                            BatchId = new Guid("80000000-0000-0000-0000-000000000002"),
-                            CreatedAt = new DateTime(2026, 5, 2, 10, 0, 0, 0, DateTimeKind.Utc),
-                            EventData = "Processed and roasted coffee beans",
-                            EventTime = new DateTime(2026, 5, 2, 10, 0, 0, 0, DateTimeKind.Utc),
-                            EventTypeId = new Guid("20000000-0000-0000-0000-000000000003"),
-                            Location = "Golden Bean Factory",
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
-                            PerformedByUserId = new Guid("70000000-0000-0000-0000-000000000003")
-                        });
                 });
 
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.UnitDataModel", b =>

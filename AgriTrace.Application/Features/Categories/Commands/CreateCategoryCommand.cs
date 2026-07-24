@@ -14,6 +14,8 @@ using AgriTrace.Domain.Entities.QualityInspections;
 using AgriTrace.Domain.Entities.Recalls;
 using AgriTrace.Domain.Entities.Units;
 using AgriTrace.Domain.Entities.Users;
+using AgriTrace.Domain.Common;
+using AgriTrace.Domain.Entities;
 using AgriTrace.Domain.Interfaces.Inbound;
 using Mapster;
 using MediatR;
@@ -41,9 +43,16 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
         }
 
         var category = new Category(request.Name, request.Description);
-        var created = await _categoryService.CreateAsync(category, cancellationToken);
 
-        return created.Adapt<CategoryDto>();
+        try
+        {
+            var created = await _categoryService.CreateAsync(category, cancellationToken);
+            return created.Adapt<CategoryDto>();
+        }
+        catch (DuplicateEntityException)
+        {
+            throw new ConflictException("Category name already exists.");
+        }
     }
 }
 

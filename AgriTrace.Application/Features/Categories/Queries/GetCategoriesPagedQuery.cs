@@ -12,7 +12,9 @@ namespace AgriTrace.Application.Features.Categories.Queries;
 public record GetCategoriesPagedQuery(
     string? Search,
     int Page,
-    int PageSize) : IRequest<PagedResult<CategoryDto>>;
+    int PageSize,
+    string? SortBy,
+    string? SortDir) : IRequest<PagedResult<CategoryDto>>;
 
 public class GetCategoriesPagedQueryHandler : IRequestHandler<GetCategoriesPagedQuery, PagedResult<CategoryDto>>
 {
@@ -29,6 +31,8 @@ public class GetCategoriesPagedQueryHandler : IRequestHandler<GetCategoriesPaged
             request.Search,
             request.Page,
             request.PageSize,
+            request.SortBy,
+            request.SortDir,
             cancellationToken);
 
         var dtoItems = pagedResult.Items.Adapt<List<CategoryDto>>();

@@ -35,7 +35,9 @@ public class CategoriesController : ControllerBase
         var result = await _sender.Send(new GetCategoriesPagedQuery(
             search,
             query.Page,
-            query.PageSize), cancellationToken);
+            query.PageSize,
+            query.SortBy,
+            query.SortDir), cancellationToken);
 
         var response = new CategoryPagedResponse(
             result.Items.Select(ToResponse),
@@ -130,7 +132,8 @@ public class CategoriesController : ControllerBase
             CategoryId = category.Id,
             Name = category.Name,
             Description = category.Description,
-            IsActive = category.IsActive
+            IsActive = category.IsActive,
+            CreatedAt = category.CreatedAt
         };
     }
 }

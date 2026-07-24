@@ -24,6 +24,8 @@ public interface ICategoryService
         string? search,
         int pageNumber,
         int pageSize,
+        string? sortBy,
+        string? sortDir,
         CancellationToken cancellationToken = default);
 
     Task<bool> HasProductsAsync(

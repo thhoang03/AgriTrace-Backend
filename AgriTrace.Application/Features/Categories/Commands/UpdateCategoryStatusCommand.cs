@@ -30,8 +30,15 @@ public class UpdateCategoryStatusCommandHandler : IRequestHandler<UpdateCategory
             throw new NotFoundException($"Category {request.Id} not found.");
         }
 
-        category.ChangeStatus(request.IsActive);
-        await _categoryService.UpdateAsync(category, cancellationToken);
+        try
+        {
+            category.ChangeStatus(request.IsActive);
+            await _categoryService.UpdateAsync(category, cancellationToken);
+        }
+        catch
+        {
+            throw new ConflictException("Failed to update status.");
+        }
 
         return category.Adapt<CategoryDto>();
     }
