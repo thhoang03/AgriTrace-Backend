@@ -121,8 +121,13 @@ public sealed class ProductsController : ControllerBase
             request.ToCommand(productId),
             cancellationToken);
 
+        var updated = await _sender.Send(
+            new GetProductByIdQuery(productId),
+            cancellationToken);
+
         return Ok(
             ApiResponse.Success(
+                updated?.ToResponse(),
                 "Product updated successfully."));
     }
 
@@ -171,7 +176,11 @@ public sealed class ProductsController : ControllerBase
             new UpdateProductStatusCommand(productId, targetStatus),
             cancellationToken);
 
-        return Ok(ApiResponse.Success("Product status updated successfully."));
+        var updated = await _sender.Send(
+            new GetProductByIdQuery(productId),
+            cancellationToken);
+
+        return Ok(ApiResponse.Success(updated?.ToResponse(), "Product status updated successfully."));
     }
 
     /// <summary>

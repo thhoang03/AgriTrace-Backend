@@ -74,7 +74,7 @@ public sealed class SupplyChainEventsController : ControllerBase
             new GetEventsByBatchQuery(batchId),
             cancellationToken);
 
-        return Ok(dtos.Select(ToResponse).ToList());
+        return Ok(ApiResponse.Success(dtos.Select(ToResponse).ToList()));
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -104,7 +104,7 @@ public sealed class SupplyChainEventsController : ControllerBase
                     $"Event '{eventId}' was not found."));
         }
 
-        return Ok(ToResponse(dto));
+        return Ok(ApiResponse.Success(ToResponse(dto)));
     }
 
     // ─────────────────────────────────────────────────────────────

@@ -45,7 +45,7 @@ public class CategoriesController : ControllerBase
             result.PageNumber,
             result.PageSize);
 
-        return Ok(response);
+        return Ok(ApiResponse.Success(response));
     }
 
     /// <summary>
@@ -57,7 +57,7 @@ public class CategoriesController : ControllerBase
     public async Task<IActionResult> GetById(Guid categoryId, CancellationToken cancellationToken)
     {
         var category = await _sender.Send(new GetCategoryByIdQuery(categoryId), cancellationToken);
-        return Ok(ToResponse(category));
+        return Ok(ApiResponse.Success(ToResponse(category)));
     }
 
     /// <summary>
@@ -74,7 +74,7 @@ public class CategoriesController : ControllerBase
             request.Name,
             request.Description), cancellationToken);
 
-        return CreatedAtAction(nameof(GetById), new { categoryId = created.Id }, ToResponse(created));
+        return CreatedAtAction(nameof(GetById), new { categoryId = created.Id }, ApiResponse.Success(ToResponse(created)));
     }
 
     /// <summary>
@@ -93,7 +93,7 @@ public class CategoriesController : ControllerBase
             request.Name,
             request.Description), cancellationToken);
 
-        return Ok(ToResponse(updated));
+        return Ok(ApiResponse.Success(ToResponse(updated), "Category updated successfully."));
     }
 
     /// <summary>
@@ -108,7 +108,7 @@ public class CategoriesController : ControllerBase
             categoryId,
             request.IsActive), cancellationToken);
 
-        return Ok(ToResponse(updated));
+        return Ok(ApiResponse.Success(ToResponse(updated), "Category status updated successfully."));
     }
 
     /// <summary>

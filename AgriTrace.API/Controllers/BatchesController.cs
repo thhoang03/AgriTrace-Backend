@@ -81,7 +81,7 @@ public sealed class BatchesController : ControllerBase
             new GetBatchByIdQuery(batchId),
             cancellationToken);
 
-        return Ok(result.ToResponse());
+        return Ok(ApiResponse.Success(result.ToResponse()));
 
     }
 
@@ -139,7 +139,7 @@ public sealed class BatchesController : ControllerBase
             request.ToCommand(batchId),
             cancellationToken);
 
-        return Ok(batch.ToResponse());
+        return Ok(ApiResponse.Success(batch.ToResponse(), "Batch updated successfully."));
 
     }
 
