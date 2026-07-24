@@ -4,6 +4,7 @@ using AgriTrace.Infrastructure.Sqlserver.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgriTrace.Infrastructure.Sqlserver.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260724081545_MigrateObsoleteRoles")]
+    partial class MigrateObsoleteRoles
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -488,20 +491,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             Code = "RECALL",
                             CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
                             Name = "Recall"
-                        },
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-00000000000a"),
-                            Code = "SPLIT",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Split"
-                        },
-                        new
-                        {
-                            Id = new Guid("20000000-0000-0000-0000-00000000000b"),
-                            Code = "MERGE",
-                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            Name = "Merge"
                         });
                 });
 
@@ -694,24 +683,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Name = "Agri Quality Inspection",
                             OrganizationTypeId = new Guid("10000000-0000-0000-0000-000000000005"),
-                            Status = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("50000000-0000-0000-0000-000000000005"),
-                            Address = "District 1, Ho Chi Minh City",
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "Fresh Market Retailer",
-                            OrganizationTypeId = new Guid("10000000-0000-0000-0000-000000000004"),
-                            Status = 1
-                        },
-                        new
-                        {
-                            Id = new Guid("50000000-0000-0000-0000-000000000006"),
-                            Address = "Hanoi City",
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Name = "System Operator",
-                            OrganizationTypeId = new Guid("10000000-0000-0000-0000-000000000006"),
                             Status = 1
                         });
                 });
@@ -1330,17 +1301,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         },
                         new
                         {
-                            Id = new Guid("70000000-0000-0000-0000-000000000009"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "manager.a@greenfarm.com",
-                            FullName = "Tran Van A",
-                            IsActive = true,
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"),
-                            PasswordHash = "100000.a1msUgi5QIhbZpEXRt1RLw==.pBgsOLFf8fuOYD0kIrZE1QjF3Zw5mNqwItZaWY0Nu+A=",
-                            Role = "Manager"
-                        },
-                        new
-                        {
                             Id = new Guid("70000000-0000-0000-0000-000000000003"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "manager.b@goldenbean.com",
@@ -1352,17 +1312,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         },
                         new
                         {
-                            Id = new Guid("70000000-0000-0000-0000-00000000000a"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "staff.b@goldenbean.com",
-                            FullName = "Le Van B",
-                            IsActive = true,
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
-                            PasswordHash = "100000.jaBwHVU9d0AVr3qmA2kLWw==.IdJpm8+lGT/Z25/5KZl5eoOK9SQ+keuCylWiWKYMgKY=",
-                            Role = "Staff"
-                        },
-                        new
-                        {
                             Id = new Guid("70000000-0000-0000-0000-000000000004"),
                             CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Email = "staff.c@agriquality.com",
@@ -1370,83 +1319,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             IsActive = true,
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000004"),
                             PasswordHash = "100000.8wke5U2qoW8dhTwYKYXlzQ==.iEDJyugFAUFuNzc5U+3bwcVXt1iNNU/FTZQAzrMwN8I=",
-                            Role = "Staff"
-                        },
-                        new
-                        {
-                            Id = new Guid("70000000-0000-0000-0000-00000000000c"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "manager.c@agriquality.com",
-                            FullName = "Pham Thi D",
-                            IsActive = true,
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000004"),
-                            PasswordHash = "100000.p1jNharWhbkY18w7UEmMNQ==.h5cbCKyGjyeFUhtrKcOOXPT0nNpAcAtrSZJY3GtOV3Y=",
-                            Role = "Manager"
-                        },
-                        new
-                        {
-                            Id = new Guid("70000000-0000-0000-0000-000000000005"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "staff.d@freshlink.com",
-                            FullName = "Pham Van D",
-                            IsActive = true,
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000003"),
-                            PasswordHash = "100000.kvsoLjDUX9yZUnO8qQ25bA==.WfdZNGvGSz5VLRa6KbjtFdMlu+Ac0wFDRY4OLYjZsxw=",
-                            Role = "Staff"
-                        },
-                        new
-                        {
-                            Id = new Guid("70000000-0000-0000-0000-00000000000b"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "manager.d@freshlink.com",
-                            FullName = "Hoang Van E",
-                            IsActive = true,
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000003"),
-                            PasswordHash = "100000.44b24E3eLoX/Tn/6Ss3n/w==.7rXza6oxS2cigQoMHeKjYexG9a3ZT5FWdzQY1gApa/Q=",
-                            Role = "Manager"
-                        },
-                        new
-                        {
-                            Id = new Guid("70000000-0000-0000-0000-000000000006"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "manager.e@freshmarket.com",
-                            FullName = "Nguyen Thi E",
-                            IsActive = true,
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000005"),
-                            PasswordHash = "100000.GU+TnccSHk98rWkw0cQXEw==.ebiU7auk5qcdnKJlpraFuOV/h+ev7/Q9rUF9SjkQolk=",
-                            Role = "Manager"
-                        },
-                        new
-                        {
-                            Id = new Guid("70000000-0000-0000-0000-00000000000d"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "staff.e@freshmarket.com",
-                            FullName = "Tran Thi F",
-                            IsActive = true,
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000005"),
-                            PasswordHash = "100000.po4yuFgTHgXEsj6fk4vYBQ==.0eVPEQ+X+wtF52FX7Y6T6LSlMzE7+eV46LYl6Yglff0=",
-                            Role = "Staff"
-                        },
-                        new
-                        {
-                            Id = new Guid("70000000-0000-0000-0000-000000000007"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "manager.f@systemop.com",
-                            FullName = "System Operator",
-                            IsActive = true,
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000006"),
-                            PasswordHash = "100000.ZCEfWZ2DeDBafl7sSoMR+w==.vS5N2A5Y2xxC3dQylLJes39s1xHrhN/mNbLz5D1/KVo=",
-                            Role = "Manager"
-                        },
-                        new
-                        {
-                            Id = new Guid("70000000-0000-0000-0000-00000000000e"),
-                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            Email = "staff.f@systemop.com",
-                            FullName = "System Staff",
-                            IsActive = true,
-                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000006"),
-                            PasswordHash = "100000.jlzfdeBqq5BkzvHyVkVUkw==.R3KvBcnhxzGqNbNFgJG3HPc1ozb7L+8OUUHjIUQAgOw=",
                             Role = "Staff"
                         });
                 });

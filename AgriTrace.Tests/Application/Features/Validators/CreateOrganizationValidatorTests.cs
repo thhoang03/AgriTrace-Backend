@@ -40,12 +40,20 @@ public class CreateOrganizationValidatorTests
     [InlineData("PROCESSOR")]
     [InlineData("DISTRIBUTOR")]
     [InlineData("RETAILER")]
-    [InlineData("INSPECTOR_ORG")]
+    [InlineData("INSPECTION")]
     public async Task Validate_ValidTypes_NoErrors(string type)
     {
         var cmd = ValidCommand() with { Type = type };
         var result = await _validator.TestValidateAsync(cmd);
         result.ShouldNotHaveValidationErrorFor(x => x.Type);
+    }
+
+    [Fact]
+    public async Task Validate_SystemType_HasValidationError()
+    {
+        var cmd = ValidCommand() with { Type = "SYSTEM" };
+        var result = await _validator.TestValidateAsync(cmd);
+        result.ShouldHaveValidationErrorFor(x => x.Type);
     }
 
     [Fact]

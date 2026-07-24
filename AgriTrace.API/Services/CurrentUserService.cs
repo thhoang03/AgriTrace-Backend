@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using AgriTrace.Domain.Interfaces.Inbound;
 
 namespace AgriTrace.API.Services;
 
@@ -23,7 +24,6 @@ public sealed class CurrentUserService : ICurrentUserService
     {
         get
         {
-            // Depending on JWT claim mapping the id lands under NameIdentifier or the raw "sub" claim.
             var value = User?.FindFirstValue(ClaimTypes.NameIdentifier)
                 ?? User?.FindFirstValue("sub");
 
@@ -47,4 +47,7 @@ public sealed class CurrentUserService : ICurrentUserService
             return Guid.TryParse(value, out var id) ? id : null;
         }
     }
+
+    public string? OrganizationType =>
+        User?.FindFirstValue("organizationType");
 }

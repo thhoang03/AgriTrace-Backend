@@ -28,11 +28,27 @@ namespace AgriTrace.API.Common
 
         public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
         {
+            if (exception is AgriTrace.Application.Common.Exceptions.RbacForbiddenException rbfe)
+            {
+                httpContext.Response.StatusCode = StatusCodes.Status403Forbidden;
+                var rbacResponse = new
+                {
+                    status = StatusCodes.Status403Forbidden,
+                    message = rbfe.Message,
+                    error = new
+                    {
+                        code = rbfe.Code,
+                        details = rbfe.Details ?? string.Empty
+                    }
+                };
+                await httpContext.Response.WriteAsJsonAsync(rbacResponse, cancellationToken);
+                return true;
+            }
+
             var (statusCode, message, errors) = MapException(exception);
 
             if (statusCode == HttpStatusCode.InternalServerError)
             {
-                // Chỉ log chi tiết cho lỗi ngoài dự kiến; không rò rỉ thông tin ra client.
                 _logger.LogError(exception, "Unhandled exception while processing {Path}", httpContext.Request.Path);
             }
 
@@ -63,6 +79,9 @@ namespace AgriTrace.API.Common
 
                 case ConflictException:
                     return (HttpStatusCode.Conflict, exception.Message, SingleError(exception.Message));
+
+                case ForbiddenException:
+                    return (HttpStatusCode.Forbidden, exception.Message, SingleError(exception.Message));
 
                 case UnauthorizedAccessException:
                     return (HttpStatusCode.Unauthorized, exception.Message, SingleError(exception.Message));
