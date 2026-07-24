@@ -45,6 +45,20 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+// Tự động tạo database & seed data nếu chưa tồn tại
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        dbContext.Database.EnsureCreated();
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[DB Auto Init Warning]: {ex.Message}");
+    }
+}
+
 // Bắt mọi exception chưa xử lý và trả về envelope ApiResponse (qua GlobalExceptionHandler).
 app.UseExceptionHandler();
 
