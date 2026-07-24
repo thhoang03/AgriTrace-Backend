@@ -1,10 +1,11 @@
-using System.Text;
 using AgriTrace.API;
 using AgriTrace.Application;
 using AgriTrace.Infrastructure.Sqlserver;
 using AgriTrace.Infrastructure.Sqlserver.Persistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -13,7 +14,7 @@ builder.Services.AddPresentation();
 builder.Services.AddApplication();
 builder.Services.AddInfrastructureSqlServer(builder.Configuration);
 
-// JWT Bearer authentication (Phase 10).
+// JWT Bearer authenticatio.
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -50,7 +51,26 @@ app.UseExceptionHandler();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
+    app.UseSwagger(c =>
+    {
+        c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
+        {
+            try
+            {
+                using var stringWriter = new StringWriter();
+                var yamlWriter = new OpenApiYamlWriter(stringWriter);
+
+                swaggerDoc.SerializeAsV3(yamlWriter);
+
+                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "swagger.yaml");
+                File.WriteAllText(filePath, stringWriter.ToString());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[Swagger Export Error]: {ex.Message}");
+            }
+        });
+    });
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "AgriTrace API v1");

@@ -79,19 +79,23 @@ public class CategoryService : ICategoryService
         int pageSize,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(null, pageNumber, pageSize, cancellationToken);
+        return await GetPagedAsync(null, pageNumber, pageSize, null, null, cancellationToken);
     }
 
     public async Task<PagedResult<Category>> GetPagedAsync(
         string? search,
         int pageNumber,
         int pageSize,
+        string? sortBy,
+        string? sortDir,
         CancellationToken cancellationToken = default)
     {
         return await _repository.GetPagedAsync(
             search,
             pageNumber,
             pageSize,
+            sortBy,
+            sortDir,
             cancellationToken);
     }
 

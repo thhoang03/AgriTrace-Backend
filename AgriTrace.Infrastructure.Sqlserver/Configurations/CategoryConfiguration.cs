@@ -22,5 +22,8 @@ public class CategoryConfiguration
 
         builder.Property(x => x.IsActive)
             .HasDefaultValue(true);
+
+        builder.HasIndex(x => x.Name)
+            .IsUnique();
     }
 }

@@ -4,6 +4,7 @@ using AgriTrace.Infrastructure.Sqlserver.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgriTrace.Infrastructure.Sqlserver.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260723045746_AddUniqueIndexToCategoryName")]
+    partial class AddUniqueIndexToCategoryName
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -512,83 +515,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Notifications", (string)null);
-
-                    b.HasData(
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000001"),
-                            CreatedAt = new DateTime(2026, 1, 15, 8, 30, 0, 0, DateTimeKind.Utc),
-                            IsRead = false,
-                            Message = "Lô Dragon Fruit (DRAGONFRUIT-20260108-001) đã bị thu hồi do phát hiện dư lượng thuốc bảo vệ thực vật vượt ngưỡng cho phép.",
-                            Title = "Cảnh báo thu hồi lô hàng",
-                            UserId = new Guid("70000000-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000002"),
-                            CreatedAt = new DateTime(2026, 1, 1, 9, 0, 0, 0, DateTimeKind.Utc),
-                            IsRead = true,
-                            Message = "Hệ thống AgriTrace đã được khởi tạo thành công với dữ liệu mẫu ban đầu.",
-                            Title = "Khởi tạo hệ thống",
-                            UpdatedAt = new DateTime(2026, 1, 1, 9, 15, 0, 0, DateTimeKind.Utc),
-                            UserId = new Guid("70000000-0000-0000-0000-000000000001")
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000003"),
-                            CreatedAt = new DateTime(2026, 1, 5, 14, 0, 0, 0, DateTimeKind.Utc),
-                            IsRead = false,
-                            Message = "Lô Organic Tomato (TOMATO-20260105-001) đã chuyển sang trạng thái Harvested.",
-                            Title = "Cập nhật trạng thái lô hàng",
-                            UserId = new Guid("70000000-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000004"),
-                            CreatedAt = new DateTime(2026, 1, 15, 9, 0, 0, 0, DateTimeKind.Utc),
-                            IsRead = true,
-                            Message = "Lô Dragon Fruit (DRAGONFRUIT-20260108-001) do bạn cung cấp đã bị thu hồi. Vui lòng kiểm tra chi tiết.",
-                            Title = "Lô hàng của bạn bị thu hồi",
-                            UpdatedAt = new DateTime(2026, 1, 16, 10, 0, 0, 0, DateTimeKind.Utc),
-                            UserId = new Guid("70000000-0000-0000-0000-000000000002")
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000005"),
-                            CreatedAt = new DateTime(2026, 1, 16, 11, 0, 0, 0, DateTimeKind.Utc),
-                            IsRead = false,
-                            Message = "Lô Jasmine Rice (RICE-20260112-001) nhận được phản ánh dị vật lẫn trong bao bì đóng gói từ khách hàng.",
-                            Title = "Phản ánh chất lượng sản phẩm",
-                            UserId = new Guid("70000000-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000006"),
-                            CreatedAt = new DateTime(2026, 1, 10, 16, 0, 0, 0, DateTimeKind.Utc),
-                            IsRead = false,
-                            Message = "Lô Arabica Coffee (COFFEE-20260110-001) hiện đang trong trạng thái Transporting, còn lại 150kg.",
-                            Title = "Lô hàng đang vận chuyển",
-                            UserId = new Guid("70000000-0000-0000-0000-000000000003")
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000007"),
-                            CreatedAt = new DateTime(2026, 1, 18, 8, 0, 0, 0, DateTimeKind.Utc),
-                            IsRead = true,
-                            Message = "Lô Dragon Fruit (DRAGONFRUIT-20260108-001) cần kiểm tra bổ sung sau lần thu hồi trước liên quan đến lỗi nhãn mác.",
-                            Title = "Yêu cầu kiểm tra bổ sung",
-                            UpdatedAt = new DateTime(2026, 1, 18, 8, 20, 0, 0, DateTimeKind.Utc),
-                            UserId = new Guid("70000000-0000-0000-0000-000000000004")
-                        },
-                        new
-                        {
-                            Id = new Guid("a0000000-0000-0000-0000-000000000008"),
-                            CreatedAt = new DateTime(2026, 1, 20, 7, 30, 0, 0, DateTimeKind.Utc),
-                            IsRead = false,
-                            Message = "Có 2 lô hàng đang chờ kiểm định chất lượng trong tuần này.",
-                            Title = "Lịch kiểm định mới",
-                            UserId = new Guid("70000000-0000-0000-0000-000000000004")
-                        });
                 });
 
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.OrganizationDataModel", b =>
