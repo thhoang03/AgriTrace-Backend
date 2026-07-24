@@ -37,9 +37,10 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll", policy =>
     {
-        policy.AllowAnyOrigin()
+        policy.SetIsOriginAllowed(_ => true)
               .AllowAnyHeader()
-              .AllowAnyMethod();
+              .AllowAnyMethod()
+              .AllowCredentials();
     });
 });
 
@@ -92,6 +93,9 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "AgriTrace API v1");
         c.ConfigObject.PersistAuthorization = true;
     });
+
+    // Mở trang chủ http://localhost:5103/ tự động chuyển hướng sang Swagger UI
+    app.MapGet("/", () => Results.Redirect("/swagger/index.html"));
 }
 else
 {
