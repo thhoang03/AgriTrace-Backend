@@ -208,7 +208,8 @@ public class User : BaseEntity
         string? refreshToken,
         DateTime? refreshTokenExpiry,
         string? resetPasswordToken,
-        DateTime? resetPasswordTokenExpiry)
+        DateTime? resetPasswordTokenExpiry,
+        Organization? organization = null)
     {
         var user = new User(
             organizationId,
@@ -225,7 +226,8 @@ public class User : BaseEntity
             RefreshToken = refreshToken,
             RefreshTokenExpiry = refreshTokenExpiry,
             ResetPasswordToken = resetPasswordToken,
-            ResetPasswordTokenExpiry = resetPasswordTokenExpiry
+            ResetPasswordTokenExpiry = resetPasswordTokenExpiry,
+            Organization = organization
         };
 
         return user;

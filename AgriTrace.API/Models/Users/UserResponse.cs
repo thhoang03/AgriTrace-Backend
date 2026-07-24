@@ -15,6 +15,9 @@ public class UserDetail
     [JsonPropertyName("userId")]
     public Guid UserId { get; set; }
 
+    [JsonPropertyName("id")]
+    public Guid Id => UserId;
+
     [JsonPropertyName("fullName")]
     public string FullName { get; set; } = string.Empty;
 
@@ -26,6 +29,9 @@ public class UserDetail
 
     [JsonPropertyName("organizationId")]
     public Guid? OrganizationId { get; set; }
+
+    [JsonPropertyName("organizationName")]
+    public string? OrganizationName { get; set; }
 
     [JsonPropertyName("phone")]
     public string? Phone { get; set; }
@@ -41,6 +47,9 @@ public class UserListItem
 {
     [JsonPropertyName("userId")]
     public Guid UserId { get; set; }
+
+    [JsonPropertyName("id")]
+    public Guid Id => UserId;
 
     [JsonPropertyName("fullName")]
     public string FullName { get; set; } = string.Empty;

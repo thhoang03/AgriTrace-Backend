@@ -24,11 +24,23 @@ public class ProductDetailResponse
     [JsonPropertyName("category")]
     public ProductCategoryRef? Category { get; set; }
 
+    [JsonPropertyName("categoryId")]
+    public Guid? CategoryId => Category?.Id;
+
+    [JsonPropertyName("categoryName")]
+    public string? CategoryName => Category?.Name;
+
     [JsonPropertyName("unit")]
     public string? Unit { get; set; }
 
     [JsonPropertyName("unitId")]
     public Guid? UnitId { get; set; }
+
+    [JsonPropertyName("unitCode")]
+    public string? UnitCode => Unit;
+
+    [JsonPropertyName("unitName")]
+    public string? UnitName => Unit;
 
     [JsonPropertyName("organizationId")]
     public Guid OrganizationId { get; set; }
@@ -81,6 +93,12 @@ public class ProductListItemResponse
 
     [JsonPropertyName("unitId")]
     public Guid? UnitId { get; set; }
+
+    [JsonPropertyName("unitCode")]
+    public string? UnitCode => Unit;
+
+    [JsonPropertyName("unitName")]
+    public string? UnitName => Unit;
 
     [JsonPropertyName("organizationId")]
     public Guid OrganizationId { get; set; }

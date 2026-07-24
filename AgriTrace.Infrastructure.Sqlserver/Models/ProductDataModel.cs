@@ -1,4 +1,6 @@
-﻿namespace AgriTrace.Infrastructure.Sqlserver.Models;
+using AgriTrace.Domain.Entities.Products;
+
+namespace AgriTrace.Infrastructure.Sqlserver.Models;
 
 
 public class ProductDataModel : BaseDataModel
@@ -15,6 +17,8 @@ public class ProductDataModel : BaseDataModel
 
 
     public string Name { get; set; } = string.Empty;
+
+    public ProductStatus Status { get; set; } = ProductStatus.Active;
 
 
 

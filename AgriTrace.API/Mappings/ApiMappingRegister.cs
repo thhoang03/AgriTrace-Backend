@@ -61,7 +61,8 @@ internal static class ApiMappings
             id,
             request.CategoryId,
             unitId,
-            request.Name);
+            request.Name,
+            request.OrganizationId);
     }
 
 

@@ -10,11 +10,11 @@ public class Product : BaseEntity
 
     public Guid? UnitId { get; private set; }
 
-    public string Name { get; private set; }
+    public string Name { get; private set; } = null!;
 
     // Navigation
 
-    public Organization Organization { get; private set; }
+    public Organization Organization { get; private set; } = null!;
 
     public Category? Category { get; private set; }
 
@@ -44,6 +44,7 @@ public class Product : BaseEntity
         CategoryId = categoryId;
         UnitId = unitId;
         Name = name.Trim();
+        Status = ProductStatus.Created;
     }
 
     public Product(
@@ -56,7 +57,8 @@ public class Product : BaseEntity
         DateTime? updatedAt,
         Category? category,
         Unit? unit,
-        Organization? organization = null)
+        Organization? organization = null,
+        ProductStatus status = ProductStatus.Active)
         : base(id, createdAt, updatedAt)
     {
         OrganizationId = organizationId;
@@ -66,18 +68,25 @@ public class Product : BaseEntity
         Category = category;
         Unit = unit;
         Organization = organization;
+        Status = status;
     }
 
     public void UpdateInformation(
         Guid? categoryId,
         Guid? unitId,
-        string name)
+        string name,
+        Guid? organizationId = null)
     {
+        var targetOrgId = (organizationId.HasValue && organizationId.Value != Guid.Empty)
+            ? organizationId.Value
+            : OrganizationId;
+
         Validate(
-            OrganizationId,
+            targetOrgId,
             name
         );
 
+        OrganizationId = targetOrgId;
         CategoryId = categoryId;
         UnitId = unitId;
         Name = name.Trim();
@@ -85,9 +94,6 @@ public class Product : BaseEntity
         MarkUpdated();
     }
 
-    // NOTE: The Product domain entity does not yet persist a Status flag (no DB column / migration
-    // in this phase). ChangeStatus toggles the in-memory field; persistence follows in a later phase
-    // (Phase 11 follow-up) once the column and mapping are added.
     public ProductStatus Status { get; private set; } = ProductStatus.Created;
 
     public void ChangeStatus(ProductStatus status)

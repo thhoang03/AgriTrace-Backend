@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using MediatR;
 using AgriTrace.Domain.Entities.Products;
 using AgriTrace.Domain.Interfaces.Inbound;
@@ -9,7 +9,8 @@ public sealed record UpdateProductCommand(
     Guid Id,
     Guid? CategoryId,
     Guid? UnitId,
-    string Name) : IRequest;
+    string Name,
+    Guid? OrganizationId = null) : IRequest;
 
 public sealed class UpdateProductCommandHandler
     : IRequestHandler<UpdateProductCommand>

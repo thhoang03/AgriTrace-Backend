@@ -63,7 +63,8 @@ public sealed class ProductWriteService : IProductWriteService
         product.UpdateInformation(
             request.CategoryId,
             request.UnitId,
-            request.Name);
+            request.Name,
+            request.OrganizationId);
 
         await _repository.UpdateAsync(
             product,

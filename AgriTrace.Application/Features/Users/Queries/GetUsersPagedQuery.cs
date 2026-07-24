@@ -61,7 +61,7 @@ public class GetUsersPagedQueryHandler : IRequestHandler<GetUsersPagedQuery, Pag
         var totalCount = query.Count();
 
         var items = query
-            .OrderBy(x => x.Email)
+            .OrderByDescending(x => x.CreatedAt)
             .Skip((request.Page - 1) * request.PageSize)
             .Take(request.PageSize)
             .Select(CreateUserCommandHandler.ToDto)

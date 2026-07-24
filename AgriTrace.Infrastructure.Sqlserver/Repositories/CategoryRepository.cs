@@ -83,7 +83,8 @@ public class CategoryRepository
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            query = query.Where(x => x.Name.Contains(search));
+            var keyword = search.Trim().ToLower();
+            query = query.Where(x => x.Name.ToLower().Contains(keyword));
         }
 
         var effectiveSortBy = string.Equals(sortBy, "name", StringComparison.OrdinalIgnoreCase) ? "name" : "createdAt";
@@ -194,9 +195,10 @@ public class CategoryRepository
         string name,
         CancellationToken cancellationToken = default)
     {
+        var trimmedName = name.Trim().ToLower();
         var model = await _context.Categories
             .FirstOrDefaultAsync(
-                x => x.Name == name,
+                x => x.Name.ToLower() == trimmedName,
                 cancellationToken);
 
         return model == null

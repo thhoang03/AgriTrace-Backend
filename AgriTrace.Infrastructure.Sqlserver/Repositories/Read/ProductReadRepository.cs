@@ -53,7 +53,7 @@ public sealed class ProductReadRepository : IProductReadRepository
             .Include(x => x.Organization)
             .Include(x => x.Category)
             .Include(x => x.Unit)
-            .OrderBy(x => x.Name)
+            .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(cancellationToken);
 
         return models.Select(ToEntity).ToList();
@@ -69,7 +69,7 @@ public sealed class ProductReadRepository : IProductReadRepository
             .Include(x => x.Category)
             .Include(x => x.Unit)
             .Where(x => x.OrganizationId == organizationId)
-            .OrderBy(x => x.Name)
+            .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(cancellationToken);
 
         return models.Select(ToEntity).ToList();
@@ -85,7 +85,7 @@ public sealed class ProductReadRepository : IProductReadRepository
             .Include(x => x.Category)
             .Include(x => x.Unit)
             .Where(x => x.CategoryId == categoryId)
-            .OrderBy(x => x.Name)
+            .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(cancellationToken);
 
         return models.Select(ToEntity).ToList();
@@ -97,7 +97,7 @@ public sealed class ProductReadRepository : IProductReadRepository
         CancellationToken cancellationToken = default)
     {
         var query = _context.Products
-       .AsNoTracking()
+            .AsNoTracking()
             .Include(x => x.Organization)
             .Include(x => x.Category)
             .Include(x => x.Unit);
@@ -105,7 +105,7 @@ public sealed class ProductReadRepository : IProductReadRepository
         var totalCount = await query.CountAsync(cancellationToken);
 
         var models = await query
-            .OrderBy(x => x.Name)
+            .OrderByDescending(x => x.CreatedAt)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
@@ -143,15 +143,15 @@ public sealed class ProductReadRepository : IProductReadRepository
 
         if (!string.IsNullOrWhiteSpace(search))
         {
-            var keyword = search.Trim();
+            var keyword = search.Trim().ToLower();
 
-            query = query.Where(x => x.Name.Contains(keyword));
+            query = query.Where(x => x.Name.ToLower().Contains(keyword));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);
 
         var models = await query
-            .OrderBy(x => x.Name)
+            .OrderByDescending(x => x.CreatedAt)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
@@ -196,6 +196,7 @@ public sealed class ProductReadRepository : IProductReadRepository
                 model.Unit.Name,
                 model.Unit.CreatedAt,
                 model.Unit.UpdatedAt),
-            organization);
+            organization,
+            model.Status);
     }
 }

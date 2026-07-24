@@ -75,7 +75,7 @@ public sealed class UsersController : ControllerBase
         return CreatedAtAction(
             nameof(GetById),
             new { userId = result.Id },
-            ApiResponse.Success(new { userId = result.Id }, "Tạo người dùng thành công"));
+            ApiResponse.Success(new { userId = result.Id }, "User created successfully."));
     }
 
     /// <summary>
@@ -113,7 +113,7 @@ public sealed class UsersController : ControllerBase
 
         return Ok(ApiResponse.Success(
             ToDetail(result),
-            "Cập nhật hồ sơ thành công"));
+            "Profile updated successfully."));
     }
 
     /// <summary>
@@ -156,7 +156,7 @@ public sealed class UsersController : ControllerBase
 
         return Ok(ApiResponse.Success(
             ToDetail(result),
-            "Cập nhật người dùng thành công"));
+            "User updated successfully."));
     }
 
     /// <summary>
@@ -177,7 +177,7 @@ public sealed class UsersController : ControllerBase
 
         return Ok(ApiResponse.Success(
             ToDetail(result),
-            "Cập nhật trạng thái người dùng thành công"));
+            "User status updated successfully."));
     }
 
     private static UserListItem ToListItem(UserDto dto) => new()
@@ -199,6 +199,7 @@ public sealed class UsersController : ControllerBase
         Email = dto.Email,
         Role = dto.Role,
         OrganizationId = dto.OrganizationId,
+        OrganizationName = dto.OrganizationName,
         Phone = dto.Phone,
         IsActive = dto.IsActive
     };

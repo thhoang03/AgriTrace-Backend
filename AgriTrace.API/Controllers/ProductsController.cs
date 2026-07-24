@@ -147,17 +147,31 @@ public sealed class ProductsController : ControllerBase
     /// Thay đổi trạng thái Product
     /// </summary>
     [HttpPatch("{productId:guid}/status")]
+    [HttpPut("{productId:guid}/status")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse>> UpdateStatus(
         Guid productId,
-        [FromBody] ProductStatusRequest request,
+        [FromBody] ProductStatusRequest? request,
         CancellationToken cancellationToken)
     {
+        ProductStatus targetStatus = ProductStatus.Active;
+        if (request != null)
+        {
+            if (request.IsActive.HasValue)
+            {
+                targetStatus = request.IsActive.Value ? ProductStatus.Active : ProductStatus.Inactive;
+            }
+            else if (request.Status.HasValue)
+            {
+                targetStatus = request.Status.Value;
+            }
+        }
+
         await _sender.Send(
-            new UpdateProductStatusCommand(productId, request.Status),
+            new UpdateProductStatusCommand(productId, targetStatus),
             cancellationToken);
 
-        return Ok(ApiResponse.Success("Product status updated."));
+        return Ok(ApiResponse.Success("Product status updated successfully."));
     }
 
     /// <summary>
