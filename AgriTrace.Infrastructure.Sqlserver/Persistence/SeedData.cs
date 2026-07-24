@@ -260,6 +260,7 @@ public static class SeedData
                 CategoryId = new Guid("30000000-0000-0000-0000-000000000001"),
                 UnitId = new Guid("40000000-0000-0000-0000-000000000001"),
                 Name = "Organic Tomato",
+                Status = ProductStatus.Active,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new ProductDataModel
@@ -269,6 +270,7 @@ public static class SeedData
                 CategoryId = new Guid("30000000-0000-0000-0000-000000000004"),
                 UnitId = new Guid("40000000-0000-0000-0000-000000000001"),
                 Name = "Dragon Fruit",
+                Status = ProductStatus.Active,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new ProductDataModel
@@ -278,6 +280,7 @@ public static class SeedData
                 CategoryId = new Guid("30000000-0000-0000-0000-000000000002"),
                 UnitId = new Guid("40000000-0000-0000-0000-000000000005"),
                 Name = "Arabica Coffee",
+                Status = ProductStatus.Active,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             },
             new ProductDataModel
@@ -287,6 +290,7 @@ public static class SeedData
                 CategoryId = new Guid("30000000-0000-0000-0000-000000000003"),
                 UnitId = new Guid("40000000-0000-0000-0000-000000000009"),
                 Name = "Jasmine Rice",
+                Status = ProductStatus.Active,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             }
         );

@@ -131,12 +131,12 @@ public sealed class ProductReadRepository : IProductReadRepository
             .Include(x => x.Category)
             .Include(x => x.Unit);
 
-        if (organizationId.HasValue)
+        if (organizationId.HasValue && organizationId.Value != Guid.Empty)
         {
             query = query.Where(x => x.OrganizationId == organizationId.Value);
         }
 
-        if (categoryId.HasValue)
+        if (categoryId.HasValue && categoryId.Value != Guid.Empty)
         {
             query = query.Where(x => x.CategoryId == categoryId.Value);
         }

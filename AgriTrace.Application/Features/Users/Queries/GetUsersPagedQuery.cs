@@ -39,7 +39,7 @@ public class GetUsersPagedQueryHandler : IRequestHandler<GetUsersPagedQuery, Pag
 
         var query = all.AsEnumerable();
 
-        if (request.OrganizationId.HasValue)
+        if (request.OrganizationId.HasValue && request.OrganizationId.Value != Guid.Empty)
         {
             query = query.Where(x => x.OrganizationId == request.OrganizationId.Value);
         }

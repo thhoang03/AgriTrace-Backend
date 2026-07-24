@@ -171,12 +171,12 @@ public sealed class BatchReadRepository
     {
         IQueryable<BatchDataModel> query = QueryWithIncludes();
 
-        if (productId.HasValue)
+        if (productId.HasValue && productId.Value != Guid.Empty)
         {
             query = query.Where(x => x.ProductId == productId.Value);
         }
 
-        if (organizationId.HasValue)
+        if (organizationId.HasValue && organizationId.Value != Guid.Empty)
         {
             query = query.Where(x => x.CurrentOrganizationId == organizationId.Value);
         }
