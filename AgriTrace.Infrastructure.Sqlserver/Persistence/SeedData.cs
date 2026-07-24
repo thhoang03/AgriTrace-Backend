@@ -1,14 +1,22 @@
-using AgriTrace.Domain.Common.Enums;
+using AgriTrace.Domain.Entities.Batches;
+using AgriTrace.Domain.Entities.Categories;
+using AgriTrace.Domain.Entities.Certificates;
+using AgriTrace.Domain.Entities.Events;
+using AgriTrace.Domain.Entities.Notifications;
+using AgriTrace.Domain.Entities.Organizations;
+using AgriTrace.Domain.Entities.Products;
+using AgriTrace.Domain.Entities.QualityInspections;
+using AgriTrace.Domain.Entities.Recalls;
+using AgriTrace.Domain.Entities.Units;
+using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Infrastructure.Sqlserver.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace AgriTrace.Infrastructure.Sqlserver.Persistence;
 
-
 public static class SeedData
 {
-
     public static void Seed(ModelBuilder builder)
     {
         SeedOrganizationTypes(builder);
@@ -20,9 +28,11 @@ public static class SeedData
         SeedUsers(builder);
         SeedBatches(builder);
         SeedRecalls(builder);
+        SeedSupplyChainEvents(builder);
+        SeedQualityInspections(builder);
+        SeedCertificates(builder);
         SeedNotifications(builder);
     }
-
 
     private static void SeedOrganizationTypes(ModelBuilder builder)
     {
@@ -67,8 +77,6 @@ public static class SeedData
         );
     }
 
-
-
     private static void SeedEventTypes(ModelBuilder builder)
     {
         builder.Entity<EventTypeDataModel>().HasData(
@@ -83,6 +91,7 @@ public static class SeedData
             new EventTypeDataModel { Id = new Guid("20000000-0000-0000-0000-000000000009"), Code = "RECALL", Name = "Recall" }
         );
     }
+
     private static void SeedCategories(ModelBuilder builder)
     {
         builder.Entity<CategoryDataModel>().HasData(
@@ -199,7 +208,6 @@ public static class SeedData
         );
     }
 
-
     private static void SeedOrganizations(ModelBuilder builder)
     {
         builder.Entity<OrganizationDataModel>().HasData(
@@ -241,7 +249,6 @@ public static class SeedData
             }
         );
     }
-
 
     private static void SeedProducts(ModelBuilder builder)
     {
@@ -285,13 +292,8 @@ public static class SeedData
         );
     }
 
-
     private static void SeedUsers(ModelBuilder builder)
     {
-        // Tất cả seeded users dùng password: Admin@123
-        // Hash được tạo bằng User.HashPassword() — PBKDF2/SHA256, 100 000 iterations.
-        // Format: {iterations}.{saltBase64}.{keyBase64}
-        // Để tạo hash mới: dotnet run --project tools/HashGen -- "YourPassword"
         builder.Entity<UserDataModel>().HasData(
             new UserDataModel
             {
@@ -339,6 +341,7 @@ public static class SeedData
             }
         );
     }
+
     private static void SeedBatches(ModelBuilder builder)
     {
         builder.Entity<BatchDataModel>().HasData(
@@ -417,7 +420,7 @@ public static class SeedData
                 Id = new Guid("90000000-0000-0000-0000-000000000001"),
                 BatchId = new Guid("80000000-0000-0000-0000-000000000002"),        // Dragon Fruit batch
                 CreatedBy = new Guid("70000000-0000-0000-0000-000000000001"),      // Admin
-                Reason = "Phát hiện dư lượng thuốc bảo vệ thực vật vượt ngưỡng cho phép.",
+                Reason = "Pesticide residue detected exceeding the permitted threshold.",
                 Severity = (int)RecallSeverity.High,
                 Status = (int)RecallStatus.Processing,
                 CreatedAt = new DateTime(2026, 1, 15, 0, 0, 0, DateTimeKind.Utc)
@@ -427,7 +430,7 @@ public static class SeedData
                 Id = new Guid("90000000-0000-0000-0000-000000000002"),
                 BatchId = new Guid("80000000-0000-0000-0000-000000000004"),        // Jasmine Rice batch
                 CreatedBy = new Guid("70000000-0000-0000-0000-000000000003"),      // Manager (Golden Bean)
-                Reason = "Khách hàng phản ánh dị vật lẫn trong bao bì đóng gói.",
+                Reason = "Customer reported foreign objects found inside the packaging.",
                 Severity = (int)RecallSeverity.Critical,
                 Status = (int)RecallStatus.Processing,
                 CreatedAt = new DateTime(2026, 1, 16, 0, 0, 0, DateTimeKind.Utc)
@@ -435,9 +438,9 @@ public static class SeedData
             new RecallDataModel
             {
                 Id = new Guid("90000000-0000-0000-0000-000000000003"),
-                BatchId = new Guid("80000000-0000-0000-0000-000000000002"),        // Dragon Fruit batch (recall lần 2)
+                BatchId = new Guid("80000000-0000-0000-0000-000000000002"),        // Dragon Fruit batch (2nd recall)
                 CreatedBy = new Guid("70000000-0000-0000-0000-000000000001"),      // Admin
-                Reason = "Kiểm tra bổ sung sau lần thu hồi trước, lỗi nhẹ về nhãn mác.",
+                Reason = "Follow-up inspection after previous recall; minor labeling defect detected.",
                 Severity = (int)RecallSeverity.Low,
                 Status = (int)RecallStatus.Completed,
                 CreatedAt = new DateTime(2026, 1, 18, 0, 0, 0, DateTimeKind.Utc)
@@ -447,90 +450,160 @@ public static class SeedData
     private static void SeedNotifications(ModelBuilder builder)
     {
         builder.Entity<NotificationDataModel>().HasData(
-            // Admin — cảnh báo thu hồi mới tạo (chưa đọc)
+            // Admin - new recall warning (unread)
             new NotificationDataModel
             {
                 Id = new Guid("A0000000-0000-0000-0000-000000000001"),
                 UserId = new Guid("70000000-0000-0000-0000-000000000001"), // Admin
-                Title = "Cảnh báo thu hồi lô hàng",
-                Message = "Lô Dragon Fruit (DRAGONFRUIT-20260108-001) đã bị thu hồi do phát hiện dư lượng thuốc bảo vệ thực vật vượt ngưỡng cho phép.",
+                Title = "Batch Recall Alert",
+                Message = "Batch Dragon Fruit (DRAGONFRUIT-20260108-001) has been recalled due to pesticide residue exceeding the permitted threshold.",
                 IsRead = false,
                 CreatedAt = new DateTime(2026, 1, 15, 8, 30, 0, DateTimeKind.Utc)
             },
-            // Admin — đã đọc thông báo hệ thống trước đó
+            // Admin - system initialization notification (read)
             new NotificationDataModel
             {
                 Id = new Guid("A0000000-0000-0000-0000-000000000002"),
                 UserId = new Guid("70000000-0000-0000-0000-000000000001"), // Admin
-                Title = "Khởi tạo hệ thống",
-                Message = "Hệ thống AgriTrace đã được khởi tạo thành công với dữ liệu mẫu ban đầu.",
+                Title = "System Initialized",
+                Message = "The AgriTrace system has been successfully initialized with initial seed data.",
                 IsRead = true,
                 CreatedAt = new DateTime(2026, 1, 1, 9, 0, 0, DateTimeKind.Utc),
                 UpdatedAt = new DateTime(2026, 1, 1, 9, 15, 0, DateTimeKind.Utc)
             },
-            // Farmer (Nguyen Van A) — nhắc trạng thái lô hàng, chưa đọc
+            // Farmer (Nguyen Van A) - batch status reminder (unread)
             new NotificationDataModel
             {
                 Id = new Guid("A0000000-0000-0000-0000-000000000003"),
                 UserId = new Guid("70000000-0000-0000-0000-000000000002"), // Farmer
-                Title = "Cập nhật trạng thái lô hàng",
-                Message = "Lô Organic Tomato (TOMATO-20260105-001) đã chuyển sang trạng thái Harvested.",
+                Title = "Batch Status Updated",
+                Message = "Batch Organic Tomato (TOMATO-20260105-001) has transitioned to Harvested status.",
                 IsRead = false,
                 CreatedAt = new DateTime(2026, 1, 5, 14, 0, 0, DateTimeKind.Utc)
             },
-            // Farmer — cảnh báo thu hồi liên quan tới lô của mình, đã đọc
+            // Farmer - recall alert for their batch (read)
             new NotificationDataModel
             {
                 Id = new Guid("A0000000-0000-0000-0000-000000000004"),
                 UserId = new Guid("70000000-0000-0000-0000-000000000002"), // Farmer
-                Title = "Lô hàng của bạn bị thu hồi",
-                Message = "Lô Dragon Fruit (DRAGONFRUIT-20260108-001) do bạn cung cấp đã bị thu hồi. Vui lòng kiểm tra chi tiết.",
+                Title = "Your Batch Has Been Recalled",
+                Message = "Batch Dragon Fruit (DRAGONFRUIT-20260108-001) supplied by you has been recalled. Please check the details.",
                 IsRead = true,
                 CreatedAt = new DateTime(2026, 1, 15, 9, 0, 0, DateTimeKind.Utc),
                 UpdatedAt = new DateTime(2026, 1, 16, 10, 0, 0, DateTimeKind.Utc)
             },
-            // Manager (Tran Thi B) — phản ánh khách hàng, chưa đọc
+            // Manager (Tran Thi B) - customer complaint (unread)
             new NotificationDataModel
             {
                 Id = new Guid("A0000000-0000-0000-0000-000000000005"),
                 UserId = new Guid("70000000-0000-0000-0000-000000000003"), // Manager
-                Title = "Phản ánh chất lượng sản phẩm",
-                Message = "Lô Jasmine Rice (RICE-20260112-001) nhận được phản ánh dị vật lẫn trong bao bì đóng gói từ khách hàng.",
+                Title = "Product Quality Complaint",
+                Message = "Batch Jasmine Rice (RICE-20260112-001) received a complaint about foreign objects found inside the packaging from a customer.",
                 IsRead = false,
                 CreatedAt = new DateTime(2026, 1, 16, 11, 0, 0, DateTimeKind.Utc)
             },
-            // Manager — nhắc duyệt batch, chưa đọc
+            // Manager - batch in transit reminder (unread)
             new NotificationDataModel
             {
                 Id = new Guid("A0000000-0000-0000-0000-000000000006"),
                 UserId = new Guid("70000000-0000-0000-0000-000000000003"), // Manager
-                Title = "Lô hàng đang vận chuyển",
-                Message = "Lô Arabica Coffee (COFFEE-20260110-001) hiện đang trong trạng thái Transporting, còn lại 150kg.",
+                Title = "Batch In Transit",
+                Message = "Batch Arabica Coffee (COFFEE-20260110-001) is currently in Transporting status with 150 kg remaining.",
                 IsRead = false,
                 CreatedAt = new DateTime(2026, 1, 10, 16, 0, 0, DateTimeKind.Utc)
             },
-            // Inspector (Le Van C) — nhắc lịch kiểm định, đã đọc
+            // Inspector (Le Van C) - additional inspection reminder (read)
             new NotificationDataModel
             {
                 Id = new Guid("A0000000-0000-0000-0000-000000000007"),
                 UserId = new Guid("70000000-0000-0000-0000-000000000004"), // Inspector
-                Title = "Yêu cầu kiểm tra bổ sung",
-                Message = "Lô Dragon Fruit (DRAGONFRUIT-20260108-001) cần kiểm tra bổ sung sau lần thu hồi trước liên quan đến lỗi nhãn mác.",
+                Title = "Additional Inspection Required",
+                Message = "Batch Dragon Fruit (DRAGONFRUIT-20260108-001) requires additional inspection following the previous recall related to a labeling defect.",
                 IsRead = true,
                 CreatedAt = new DateTime(2026, 1, 18, 8, 0, 0, DateTimeKind.Utc),
                 UpdatedAt = new DateTime(2026, 1, 18, 8, 20, 0, DateTimeKind.Utc)
             },
-            // Inspector — chưa đọc
+            // Inspector - new inspection schedule (unread)
             new NotificationDataModel
             {
                 Id = new Guid("A0000000-0000-0000-0000-000000000008"),
                 UserId = new Guid("70000000-0000-0000-0000-000000000004"), // Inspector
-                Title = "Lịch kiểm định mới",
-                Message = "Có 2 lô hàng đang chờ kiểm định chất lượng trong tuần này.",
+                Title = "New Inspection Schedule",
+                Message = "There are 2 batches awaiting quality inspection this week.",
                 IsRead = false,
                 CreatedAt = new DateTime(2026, 1, 20, 7, 30, 0, DateTimeKind.Utc)
+            },
+            new NotificationDataModel
+            {
+                Id = new Guid("D0000000-0000-0000-0000-000000000001"),
+                UserId = new Guid("70000000-0000-0000-0000-000000000002"), // Farmer
+                Title = "Harvest Event Recorded",
+                Message = "Your harvest event for batch BATCH-TOMATO-001 has been successfully recorded.",
+                IsRead = false,
+                CreatedAt = new DateTime(2026, 6, 1, 8, 5, 0, DateTimeKind.Utc)
             }
         );
     }
 
+    private static void SeedSupplyChainEvents(ModelBuilder builder)
+    {
+        builder.Entity<SupplyChainEventDataModel>().HasData(
+            new SupplyChainEventDataModel
+            {
+                Id = new Guid("90000000-0000-0000-0000-000000000001"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000001"),
+                EventTypeId = new Guid("20000000-0000-0000-0000-000000000001"), // HARVEST
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000001"), // Farm
+                PerformedByUserId = new Guid("70000000-0000-0000-0000-000000000002"), // Farmer
+                EventData = "Harvested 1000kg of tomatoes",
+                Location = "Green Farm Field 1",
+                EventTime = new DateTime(2026, 6, 1, 8, 0, 0, DateTimeKind.Utc),
+                CreatedAt = new DateTime(2026, 6, 1, 8, 0, 0, DateTimeKind.Utc)
+            },
+            new SupplyChainEventDataModel
+            {
+                Id = new Guid("90000000-0000-0000-0000-000000000002"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000002"),
+                EventTypeId = new Guid("20000000-0000-0000-0000-000000000003"), // PROCESSING
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"), // Processor
+                PerformedByUserId = new Guid("70000000-0000-0000-0000-000000000003"), // Manager
+                EventData = "Processed and roasted coffee beans",
+                Location = "Golden Bean Factory",
+                EventTime = new DateTime(2026, 5, 2, 10, 0, 0, DateTimeKind.Utc),
+                CreatedAt = new DateTime(2026, 5, 2, 10, 0, 0, DateTimeKind.Utc)
+            }
+        );
+    }
+
+    private static void SeedQualityInspections(ModelBuilder builder)
+    {
+        builder.Entity<QualityInspectionDataModel>().HasData(
+            new QualityInspectionDataModel
+            {
+                Id = new Guid("A0000000-0000-0000-0000-000000000001"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000001"),
+                InspectorId = new Guid("70000000-0000-0000-0000-000000000004"), // Inspector
+                Status = InspectionStatus.Passed,
+                Result = "All standards met. No pesticide residue found.",
+                Notes = "Excellent quality.",
+                CreatedAt = new DateTime(2026, 6, 2, 9, 0, 0, DateTimeKind.Utc)
+            }
+        );
+    }
+
+    private static void SeedCertificates(ModelBuilder builder)
+    {
+        builder.Entity<CertificateDataModel>().HasData(
+            new CertificateDataModel
+            {
+                Id = new Guid("B0000000-0000-0000-0000-000000000001"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000001"),
+                InspectionId = new Guid("A0000000-0000-0000-0000-000000000001"),
+                CertificateType = "Organic Certification",
+                FileUrl = "https://agritrace.com/certs/cert-001.pdf",
+                IssuedDate = new DateTime(2026, 6, 2, 10, 0, 0, DateTimeKind.Utc),
+                CreatedAt = new DateTime(2026, 6, 2, 10, 0, 0, DateTimeKind.Utc)
+            }
+        );
+    }
 }

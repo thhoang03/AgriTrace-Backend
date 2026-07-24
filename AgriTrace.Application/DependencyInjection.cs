@@ -39,12 +39,13 @@ namespace AgriTrace.Application
             services.AddScoped<IOrganizationService, OrganizationService>();
             services.AddScoped<IQualityInspectionService, QualityInspectionService>();
             services.AddScoped<ICertificateService, CertificateService>();
+            services.AddScoped<IEventService, EventService>();
+            services.AddScoped<ISupplyChainEventWriteService, SupplyChainEventWriteService>();
+            services.AddScoped<IHashChainService, HashChainService>();
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<ITokenService, TokenService>();
 
             // Phase 8: events, split/merge, recalls, notifications
-            services.AddScoped<IHashChainService, HashChainService>();
-            services.AddScoped<IEventService, EventService>();
             services.AddScoped<IEventTypeService, EventTypeService>();
             services.AddScoped<IBatchSplitService, BatchSplitService>();
             services.AddScoped<IBatchMergeService, BatchMergeService>();

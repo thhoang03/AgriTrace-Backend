@@ -56,8 +56,11 @@ public static class DependencyInjection
 
         // Phase 8: events, split/merge, recalls, notifications
         services.AddScoped<IEventTypeRepository, EventTypeRepository>();
-        services.AddScoped<ISupplyChainEventRepository, SupplyChainEventRepository>();
-        services.AddScoped<IEventRepository, SupplyChainEventRepository>();
+        services.AddScoped<SupplyChainEventRepository>();
+        services.AddScoped<ISupplyChainEventRepository>(sp => sp.GetRequiredService<SupplyChainEventRepository>());
+        services.AddScoped<IEventRepository>(sp => sp.GetRequiredService<SupplyChainEventRepository>());
+        services.AddScoped<ISupplyChainEventReadRepository, SupplyChainEventReadRepository>();
+        services.AddScoped<ISupplyChainEventWriteRepository, SupplyChainEventWriteRepository>();
         services.AddScoped<IBatchSplitRepository, BatchSplitRepository>();
         services.AddScoped<IBatchMergeRepository, BatchMergeRepository>();
         services.AddScoped<IRecallRepository, RecallRepository>();

@@ -53,7 +53,7 @@ public sealed class UpdateBatchCommandHandler
 
         if (batch == null)
         {
-            throw new NotFoundException("Batch not found.");
+            throw new AgriTrace.Application.Common.Exceptions.NotFoundException("Batch not found.");
         }
 
 

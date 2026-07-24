@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -30,6 +30,9 @@ public class BatchListItemResponse
 {
     [JsonPropertyName("batchId")]
     public Guid BatchId { get; set; }
+
+    [JsonPropertyName("id")]
+    public Guid Id => BatchId;
 
     [JsonPropertyName("productId")]
     public Guid ProductId { get; set; }
@@ -72,6 +75,9 @@ public class BatchDetailResponse
 {
     [JsonPropertyName("batchId")]
     public Guid BatchId { get; set; }
+
+    [JsonPropertyName("id")]
+    public Guid Id => BatchId;
 
     [JsonPropertyName("productId")]
     public Guid ProductId { get; set; }

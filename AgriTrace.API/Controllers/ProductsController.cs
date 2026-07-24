@@ -1,4 +1,4 @@
-﻿using MediatR;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
@@ -130,7 +130,7 @@ public sealed class ProductsController : ControllerBase
     /// Xóa Product
     /// </summary>
     [HttpDelete("{productId:guid}")]
-    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse>> Delete(
         Guid productId,
@@ -140,7 +140,7 @@ public sealed class ProductsController : ControllerBase
             new DeleteProductCommand(productId),
             cancellationToken);
 
-        return NoContent();
+        return Ok(ApiResponse.Success("Product deleted successfully."));
     }
 
     /// <summary>
@@ -150,11 +150,11 @@ public sealed class ProductsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse>> UpdateStatus(
         Guid productId,
-        [FromBody] ActiveStatusRequest request,
+        [FromBody] ProductStatusRequest request,
         CancellationToken cancellationToken)
     {
         await _sender.Send(
-            new UpdateProductStatusCommand(productId, request.IsActive),
+            new UpdateProductStatusCommand(productId, request.Status),
             cancellationToken);
 
         return Ok(ApiResponse.Success("Product status updated."));

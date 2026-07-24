@@ -1116,15 +1116,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-  '/api/v1/batches/{batchId}/events':
+  /api/v1/inspections:
     get:
       tags:
-        - Events
-      summary: Danh sách Event của Batch
+        - Inspections
+      summary: "Danh sách tất cả kiểm định (hỗ trợ lọc theo batchId và phân trang)\r\nGET /api/v1/inspections"
       parameters:
         - name: batchId
-          in: path
-          required: true
+          in: query
           schema:
             type: string
             format: uuid
@@ -1144,148 +1143,9 @@ paths:
         '200':
           description: OK
           content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
             application/json:
               schema:
                 $ref: '#/components/schemas/ApiResponse'
-            text/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-    post:
-      tags:
-        - Events
-      summary: Ghi nhận Supply Chain Event
-      parameters:
-        - name: batchId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/CreateEventRequest'
-          text/json:
-            schema:
-              $ref: '#/components/schemas/CreateEventRequest'
-          application/*+json:
-            schema:
-              $ref: '#/components/schemas/CreateEventRequest'
-      responses:
-        '201':
-          description: Created
-          content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-            text/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '400':
-          description: Bad Request
-          content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            text/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Not Found
-          content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            text/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  '/api/v1/batches/{batchId}/events/verify':
-    get:
-      tags:
-        - Events
-      summary: Kiểm tra Hash Chain của Batch
-      parameters:
-        - name: batchId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-            text/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '404':
-          description: Not Found
-          content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            text/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-  '/api/v1/events/{eventId}':
-    get:
-      tags:
-        - Events
-      summary: Chi tiết Event
-      parameters:
-        - name: eventId
-          in: path
-          required: true
-          schema:
-            type: string
-            format: uuid
-      responses:
-        '200':
-          description: OK
-          content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-            text/json:
-              schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '404':
-          description: Not Found
-          content:
-            text/plain:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-            text/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
   '/api/v1/batches/{batchId}/inspections':
     post:
       tags:
@@ -2103,8 +1963,18 @@ paths:
             type: string
             format: uuid
       responses:
-        '204':
-          description: No Content
+        '200':
+          description: OK
+          content:
+            text/plain:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+            text/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
         '404':
           description: Not Found
           content:
@@ -2133,13 +2003,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ActiveStatusRequest'
+              $ref: '#/components/schemas/ProductStatusRequest'
           text/json:
             schema:
-              $ref: '#/components/schemas/ActiveStatusRequest'
+              $ref: '#/components/schemas/ProductStatusRequest'
           application/*+json:
             schema:
-              $ref: '#/components/schemas/ActiveStatusRequest'
+              $ref: '#/components/schemas/ProductStatusRequest'
       responses:
         '200':
           description: OK
@@ -2475,6 +2345,111 @@ paths:
             text/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+  '/api/v1/batches/{batchId}/events':
+    post:
+      tags:
+        - SupplyChainEvents
+      summary: "Record a new supply chain event for a batch.\r\nThe hash chain (previousHash / currentHash) is computed automatically.\r\nAuthorization: MANAGER | STAFF"
+      parameters:
+        - name: batchId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSupplyChainEventRequest'
+          text/json:
+            schema:
+              $ref: '#/components/schemas/CreateSupplyChainEventRequest'
+          application/*+json:
+            schema:
+              $ref: '#/components/schemas/CreateSupplyChainEventRequest'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplyChainEventResponse'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+    get:
+      tags:
+        - SupplyChainEvents
+      summary: "Get the full supply chain event timeline for a batch, ordered by EventTime ascending.\r\nAuthorization: ADMIN | MANAGER | INSPECTOR | PUBLIC"
+      parameters:
+        - name: batchId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SupplyChainEventResponse'
+  '/api/v1/events/{eventId}':
+    get:
+      tags:
+        - SupplyChainEvents
+      summary: "Get the details of a specific supply chain event.\r\nAuthorization: ADMIN | MANAGER | INSPECTOR"
+      parameters:
+        - name: eventId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SupplyChainEventResponse'
+        '404':
+          description: Not Found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+  '/api/v1/batches/{batchId}/events/verify':
+    get:
+      tags:
+        - SupplyChainEvents
+      summary: "Verify the integrity of the hash chain for a batch.\r\nReturns { \"isValid\": true } if the chain has not been tampered with.\r\nAuthorization: ADMIN | INSPECTOR"
+      parameters:
+        - name: batchId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { }
   /api/v1/users:
     get:
       tags:
@@ -2843,22 +2818,6 @@ components:
           nullable: true
       additionalProperties: false
       description: "Request body for creating a new batch. Matches swagger `CreateBatchRequest`.\r\nThe server generates the batch code; the client does not provide it."
-    CreateEventRequest:
-      required:
-        - eventTypeId
-      type: object
-      properties:
-        eventTypeId:
-          type: string
-          format: uuid
-        eventData:
-          type: string
-          nullable: true
-        location:
-          type: string
-          nullable: true
-      additionalProperties: false
-      description: Request body for creating a supply-chain event. Matches swagger `CreateEventRequest`.
     CreateInspectionRequest:
       required:
         - result
@@ -2895,6 +2854,39 @@ components:
           format: int32
       additionalProperties: false
       description: "Request body for creating a recall. Matches swagger `CreateRecallRequest`.\r\nseverity: 1=LOW, 2=MEDIUM, 3=HIGH."
+    CreateSupplyChainEventRequest:
+      required:
+        - eventTypeId
+        - organizationId
+        - performedByUserId
+      type: object
+      properties:
+        eventTypeId:
+          type: string
+          description: 'The Id of the EventType (e.g. Harvest, Transport, Storage).'
+          format: uuid
+        organizationId:
+          type: string
+          description: The Id of the Organization performing this event.
+          format: uuid
+        performedByUserId:
+          type: string
+          description: The Id of the User who performed this event.
+          format: uuid
+        eventData:
+          maxLength: 4000
+          minLength: 0
+          type: string
+          description: JSON or plain-text payload describing the event details.
+          nullable: true
+        location:
+          maxLength: 500
+          minLength: 0
+          type: string
+          description: GPS coordinates or location name where the event took place.
+          nullable: true
+      additionalProperties: false
+      description: Request body for recording a new supply chain event on a batch.
     CreateUserRequest:
       type: object
       properties:
@@ -3041,10 +3033,7 @@ components:
       description: Request body for creating/updating an organization. Matches swagger `OrganizationRequest`.
     ProductRequest:
       required:
-        - categoryId
         - name
-        - organizationId
-        - unit
       type: object
       properties:
         name:
@@ -3054,16 +3043,39 @@ components:
         categoryId:
           type: string
           format: uuid
+          nullable: true
         unit:
           maxLength: 50
           minLength: 0
           type: string
-          description: 'Unit code/name (e.g. "kg"). Swagger models unit as a plain string, not a UUID reference.'
+          description: Unit code/name (e.g. "kg").
+          nullable: true
+        unitId:
+          type: string
+          description: Direct Unit ID (Guid).
+          format: uuid
+          nullable: true
         organizationId:
           type: string
           format: uuid
+          nullable: true
       additionalProperties: false
-      description: Request body for creating/updating a product. Matches swagger `ProductRequest`.
+      description: "Request body for creating/updating a product.\r\nSupports both string Unit and UUID UnitId for frontend flexibility."
+    ProductStatus:
+      enum:
+        - Created
+        - Active
+        - Inactive
+      type: string
+    ProductStatusRequest:
+      required:
+        - status
+      type: object
+      properties:
+        status:
+          $ref: '#/components/schemas/ProductStatus'
+      additionalProperties: false
+      description: Request body for setting a product's status.
     RefreshTokenRequest:
       type: object
       properties:
@@ -3121,6 +3133,50 @@ components:
           type: string
       additionalProperties: false
       description: Request body for setting an organization's status. Matches swagger `StatusRequest`.
+    SupplyChainEventResponse:
+      type: object
+      properties:
+        eventId:
+          type: string
+          format: uuid
+        batchId:
+          type: string
+          format: uuid
+        eventTypeId:
+          type: string
+          format: uuid
+        organizationId:
+          type: string
+          format: uuid
+        performedByUserId:
+          type: string
+          format: uuid
+        eventData:
+          type: string
+          nullable: true
+        location:
+          type: string
+          nullable: true
+        previousHash:
+          type: string
+          description: Hash of the previous event in the chain ("GENESIS" for the first event).
+          nullable: true
+        currentHash:
+          type: string
+          description: SHA-256 hash computed from PreviousHash + EventData.
+          nullable: true
+        eventTime:
+          type: string
+          format: date-time
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+          nullable: true
+      additionalProperties: false
+      description: Response payload for a supply chain event.
     UpdateBatchRequest:
       type: object
       properties:
@@ -3188,7 +3244,6 @@ tags:
   - name: BatchSplitMerge
   - name: Categories
   - name: Certificates
-  - name: Events
   - name: Inspections
   - name: Lookup
   - name: Notifications
@@ -3196,4 +3251,5 @@ tags:
   - name: Products
   - name: Public
   - name: Recalls
+  - name: SupplyChainEvents
   - name: Users

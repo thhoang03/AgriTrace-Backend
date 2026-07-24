@@ -9,7 +9,7 @@ namespace AgriTrace.Application.Features.Products.Commands;
 
 public sealed record UpdateProductStatusCommand(
     Guid ProductId,
-    bool IsActive) : IRequest<ProductDto>;
+    ProductStatus Status) : IRequest<ProductDto>;
 
 public sealed class UpdateProductStatusCommandHandler
     : IRequestHandler<UpdateProductStatusCommand, ProductDto>
@@ -26,10 +26,10 @@ public sealed class UpdateProductStatusCommandHandler
         var product = await _productWriteService.GetByIdAsync(command.ProductId, cancellationToken)
             ?? throw new NotFoundException($"Product {command.ProductId} not found.");
 
-        // Toggle the in-memory status. NOTE: Product.IsActive is not yet persisted (no DB column /
+        // Toggle the in-memory status. NOTE: Product.Status is not yet persisted (no DB column /
         // migration in this phase); the write path below preserves the existing product fields so the
         // entity's UpdatedAt is bumped. Real status persistence is a Phase 11 follow-up.
-        product.ChangeStatus(command.IsActive);
+        product.ChangeStatus(command.Status);
 
         await _productWriteService.UpdateAsync(
             command.ProductId,

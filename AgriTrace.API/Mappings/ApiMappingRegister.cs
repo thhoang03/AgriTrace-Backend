@@ -4,7 +4,17 @@ using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Features.Organizations.Commands;
 using AgriTrace.Application.Features.Products.Commands;
 using AgriTrace.Application.Features.Batches.Commands;
-using AgriTrace.Domain.Common.Enums;
+using AgriTrace.Domain.Entities.Batches;
+using AgriTrace.Domain.Entities.Categories;
+using AgriTrace.Domain.Entities.Certificates;
+using AgriTrace.Domain.Entities.Events;
+using AgriTrace.Domain.Entities.Notifications;
+using AgriTrace.Domain.Entities.Organizations;
+using AgriTrace.Domain.Entities.Products;
+using AgriTrace.Domain.Entities.QualityInspections;
+using AgriTrace.Domain.Entities.Recalls;
+using AgriTrace.Domain.Entities.Units;
+using AgriTrace.Domain.Entities.Users;
 
 namespace AgriTrace.API.Mapping;
 
@@ -24,25 +34,33 @@ internal static class ApiMappings
     public static CreateProductCommand ToCommand(
         this ProductRequest request)
     {
-        // TODO Phase 8+: resolve UnitId (Guid) from request.Unit (string) via a unit lookup service.
+        Guid? unitId = request.UnitId;
+        if (!unitId.HasValue && !string.IsNullOrWhiteSpace(request.Unit) && Guid.TryParse(request.Unit, out var parsedGuid))
+        {
+            unitId = parsedGuid;
+        }
+
         return new CreateProductCommand(
-            request.OrganizationId,
+            request.OrganizationId ?? Guid.Empty,
             request.CategoryId,
-            null,
+            unitId,
             request.Name);
     }
-
-
 
     public static UpdateProductCommand ToCommand(
         this ProductRequest request,
         Guid id)
     {
-        // TODO Phase 8+: resolve UnitId (Guid) from request.Unit (string) via a unit lookup service.
+        Guid? unitId = request.UnitId;
+        if (!unitId.HasValue && !string.IsNullOrWhiteSpace(request.Unit) && Guid.TryParse(request.Unit, out var parsedGuid))
+        {
+            unitId = parsedGuid;
+        }
+
         return new UpdateProductCommand(
             id,
             request.CategoryId,
-            null,
+            unitId,
             request.Name);
     }
 
@@ -137,8 +155,10 @@ internal static class ApiMappings
                 }
                 : null,
             Unit = dto.UnitName,
+            UnitId = dto.UnitId,
             OrganizationId = dto.OrganizationId,
-            IsActive = dto.IsActive
+            OrganizationName = dto.OrganizationName,
+            Status = dto.Status
         };
     }
 
@@ -152,8 +172,10 @@ internal static class ApiMappings
             CategoryId = dto.CategoryId,
             CategoryName = dto.CategoryName,
             Unit = dto.UnitName,
+            UnitId = dto.UnitId,
             OrganizationId = dto.OrganizationId,
-            IsActive = dto.IsActive
+            OrganizationName = dto.OrganizationName,
+            Status = dto.Status
         };
     }
 

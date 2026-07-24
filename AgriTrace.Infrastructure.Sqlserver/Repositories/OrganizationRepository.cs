@@ -1,5 +1,15 @@
-﻿using AgriTrace.Domain.Common;
-using AgriTrace.Domain.Entities;
+using AgriTrace.Domain.Common;
+using AgriTrace.Domain.Entities.Batches;
+using AgriTrace.Domain.Entities.Categories;
+using AgriTrace.Domain.Entities.Certificates;
+using AgriTrace.Domain.Entities.Events;
+using AgriTrace.Domain.Entities.Notifications;
+using AgriTrace.Domain.Entities.Organizations;
+using AgriTrace.Domain.Entities.Products;
+using AgriTrace.Domain.Entities.QualityInspections;
+using AgriTrace.Domain.Entities.Recalls;
+using AgriTrace.Domain.Entities.Units;
+using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Outbound;
 using AgriTrace.Infrastructure.Sqlserver.Models;
 using AgriTrace.Infrastructure.Sqlserver.Persistence;
@@ -147,8 +157,8 @@ public class OrganizationRepository
 
 
 
-        // Trả lại entity được rehydrate từ model vừa lưu để đảm bảo
-        // Id/CreatedAt trả về khớp chính xác với dữ liệu đã persist.
+        // Tr? l?i entity du?c rehydrate t? model v?a luu d? d?m b?o
+        // Id/CreatedAt tr? v? kh?p ch�nh x�c v?i d? li?u d� persist.
         return ToEntity(model);
 
     }
@@ -307,9 +317,9 @@ public class OrganizationRepository
         OrganizationDataModel model)
     {
 
-        // Dùng constructor rehydrate để giữ đúng Id/Status/CreatedAt/UpdatedAt
-        // từ database, thay vì constructor "tạo mới" (sẽ sinh Id ngẫu nhiên
-        // và luôn set Status = Active).
+        // D�ng constructor rehydrate d? gi? d�ng Id/Status/CreatedAt/UpdatedAt
+        // t? database, thay v� constructor "t?o m?i" (s? sinh Id ng?u nhi�n
+        // v� lu�n set Status = Active).
         return new Organization(
             model.Id,
             model.OrganizationTypeId,
