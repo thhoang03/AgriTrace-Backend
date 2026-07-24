@@ -6,6 +6,8 @@ public sealed class ProductDto
 
     public Guid OrganizationId { get; init; }
 
+    public string? OrganizationName { get; init; }
+
     public Guid? CategoryId { get; init; }
 
     public Guid? UnitId { get; init; }

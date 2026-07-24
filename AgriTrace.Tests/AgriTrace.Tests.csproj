@@ -30,4 +30,8 @@
     <ProjectReference Include="..\AgriTrace.Application\AgriTrace.Application.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Domain\adasdsd\" />
+  </ItemGroup>
+
 </Project>

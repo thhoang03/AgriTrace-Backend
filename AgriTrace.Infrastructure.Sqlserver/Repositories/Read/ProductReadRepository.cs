@@ -33,6 +33,7 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         var model = await _context.Products
             .AsNoTracking()
+            .Include(x => x.Organization)
             .Include(x => x.Category)
             .Include(x => x.Unit)
             .FirstOrDefaultAsync(
@@ -49,6 +50,7 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         var models = await _context.Products
             .AsNoTracking()
+            .Include(x => x.Organization)
             .Include(x => x.Category)
             .Include(x => x.Unit)
             .OrderBy(x => x.Name)
@@ -63,6 +65,7 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         var models = await _context.Products
             .AsNoTracking()
+            .Include(x => x.Organization)
             .Include(x => x.Category)
             .Include(x => x.Unit)
             .Where(x => x.OrganizationId == organizationId)
@@ -78,6 +81,7 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         var models = await _context.Products
             .AsNoTracking()
+            .Include(x => x.Organization)
             .Include(x => x.Category)
             .Include(x => x.Unit)
             .Where(x => x.CategoryId == categoryId)
@@ -94,6 +98,7 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         var query = _context.Products
        .AsNoTracking()
+            .Include(x => x.Organization)
             .Include(x => x.Category)
             .Include(x => x.Unit);
 
@@ -122,6 +127,7 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         IQueryable<ProductDataModel> query = _context.Products
             .AsNoTracking()
+            .Include(x => x.Organization)
             .Include(x => x.Category)
             .Include(x => x.Unit);
 
@@ -159,6 +165,16 @@ public sealed class ProductReadRepository : IProductReadRepository
 
     private static Product ToEntity(ProductDataModel model)
     {
+        var organization = model.Organization == null ? null : new Organization(
+            model.Organization.Id,
+            model.Organization.OrganizationTypeId,
+            model.Organization.Name,
+            model.Organization.Address,
+            model.Organization.Status,
+            model.Organization.CreatedAt,
+            model.Organization.UpdatedAt,
+            null);
+
         return new Product(
             model.Id,
             model.OrganizationId,
@@ -179,6 +195,7 @@ public sealed class ProductReadRepository : IProductReadRepository
                 model.Unit.Code,
                 model.Unit.Name,
                 model.Unit.CreatedAt,
-                model.Unit.UpdatedAt));
+                model.Unit.UpdatedAt),
+            organization);
     }
 }

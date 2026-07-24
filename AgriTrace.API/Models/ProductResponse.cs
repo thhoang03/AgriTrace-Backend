@@ -33,8 +33,14 @@ public class ProductDetailResponse
     [JsonPropertyName("organizationId")]
     public Guid OrganizationId { get; set; }
 
+    [JsonPropertyName("organizationName")]
+    public string? OrganizationName { get; set; }
+
     [JsonPropertyName("status")]
     public ProductStatus Status { get; set; }
+
+    [JsonPropertyName("isActive")]
+    public bool IsActive => Status != ProductStatus.Inactive;
 }
 
 /// <summary>
@@ -79,8 +85,14 @@ public class ProductListItemResponse
     [JsonPropertyName("organizationId")]
     public Guid OrganizationId { get; set; }
 
+    [JsonPropertyName("organizationName")]
+    public string? OrganizationName { get; set; }
+
     [JsonPropertyName("status")]
     public ProductStatus Status { get; set; }
+
+    [JsonPropertyName("isActive")]
+    public bool IsActive => Status != ProductStatus.Inactive;
 }
 
 /// <summary>

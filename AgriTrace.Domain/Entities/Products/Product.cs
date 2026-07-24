@@ -55,7 +55,8 @@ public class Product : BaseEntity
         DateTime createdAt,
         DateTime? updatedAt,
         Category? category,
-        Unit? unit)
+        Unit? unit,
+        Organization? organization = null)
         : base(id, createdAt, updatedAt)
     {
         OrganizationId = organizationId;
@@ -64,6 +65,7 @@ public class Product : BaseEntity
         Name = name;
         Category = category;
         Unit = unit;
+        Organization = organization;
     }
 
     public void UpdateInformation(

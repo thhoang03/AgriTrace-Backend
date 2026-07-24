@@ -157,6 +157,7 @@ internal static class ApiMappings
             Unit = dto.UnitName,
             UnitId = dto.UnitId,
             OrganizationId = dto.OrganizationId,
+            OrganizationName = dto.OrganizationName,
             Status = dto.Status
         };
     }
@@ -173,6 +174,7 @@ internal static class ApiMappings
             Unit = dto.UnitName,
             UnitId = dto.UnitId,
             OrganizationId = dto.OrganizationId,
+            OrganizationName = dto.OrganizationName,
             Status = dto.Status
         };
     }

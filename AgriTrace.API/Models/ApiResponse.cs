@@ -24,7 +24,7 @@ namespace AgriTrace.API.Models
 
         // ---- Factory helpers cho gọn ở controller ----
 
-        public static ApiResponse Success(object? data, string message = "Thực hiện thành công") => new()
+        public static ApiResponse Success(object? data, string message = "Success") => new()
         {
             IsSuccess = true,
             Data = data,
@@ -32,7 +32,7 @@ namespace AgriTrace.API.Models
             Timestamp = DateTime.UtcNow
         };
 
-        public static ApiResponse Fail(HttpStatusCode statusCode, string message = "Thất bại") => new()
+        public static ApiResponse Fail(HttpStatusCode statusCode, string message = "Failed") => new()
         {
             IsSuccess = false,
             Data = null,

@@ -94,10 +94,10 @@ public class Batch : BaseEntity
     public Product Product { get; private set; } = null!;
 
 
-
     public Unit Unit { get; private set; } = null!;
 
 
+    public Organization? CurrentOrganization { get; private set; }
 
 
     public Batch? ParentBatch { get; private set; }
@@ -180,7 +180,10 @@ public class Batch : BaseEntity
         Guid? rootBatchId,
         Guid? splitId,
         DateTime createdAt,
-        DateTime? updatedAt)
+        DateTime? updatedAt,
+        Product? product = null,
+        Unit? unit = null,
+        Organization? currentOrganization = null)
     {
         var batch = new Batch();
 
@@ -201,6 +204,10 @@ public class Batch : BaseEntity
         batch.SplitId = splitId;
         batch.CreatedAt = createdAt;
         batch.UpdatedAt = updatedAt;
+
+        if (product != null) batch.Product = product;
+        if (unit != null) batch.Unit = unit;
+        if (currentOrganization != null) batch.CurrentOrganization = currentOrganization;
 
         return batch;
     }
