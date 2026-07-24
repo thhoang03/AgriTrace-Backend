@@ -10,9 +10,9 @@ public class BatchMergeSource
 
     public decimal Quantity { get; private set; }
 
-    public BatchMerge BatchMerge { get; private set; }
+    public BatchMerge BatchMerge { get; private set; } = null!;
 
-    public Batch SourceBatch { get; private set; }
+    public Batch SourceBatch { get; private set; } = null!;
 
     private BatchMergeSource()
     {

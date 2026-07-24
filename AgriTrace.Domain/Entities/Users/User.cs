@@ -18,11 +18,11 @@ public class User : BaseEntity
 {
     public Guid? OrganizationId { get; private set; }
 
-    public string FullName { get; private set; }
+    public string FullName { get; private set; } = null!;
 
-    public string Email { get; private set; }
+    public string Email { get; private set; } = null!;
 
-    public string PasswordHash { get; private set; }
+    public string PasswordHash { get; private set; } = null!;
 
     public string? Phone { get; private set; }
 

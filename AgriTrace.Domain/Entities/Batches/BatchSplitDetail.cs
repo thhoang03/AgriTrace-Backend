@@ -10,9 +10,9 @@ public class BatchSplitDetail : BaseEntity
 
     public decimal Quantity { get; private set; }
 
-    public BatchSplit Split { get; private set; }
+    public BatchSplit Split { get; private set; } = null!;
 
-    public Batch TargetBatch { get; private set; }
+    public Batch TargetBatch { get; private set; } = null!;
 
     private BatchSplitDetail()
     {

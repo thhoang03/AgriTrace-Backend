@@ -6,7 +6,7 @@ public class BatchSplit : BaseEntity
 {
     public Guid SourceBatchId { get; private set; }
 
-    public Batch SourceBatch { get; private set; }
+    public Batch SourceBatch { get; private set; } = null!;
 
     private readonly List<BatchSplitDetail> _details = new();
 
