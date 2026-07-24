@@ -3,4 +3,5 @@
   <Project Path="AgriTrace.Application/AgriTrace.Application.csproj" />
   <Project Path="AgriTrace.Domain/AgriTrace.Domain.csproj" />
   <Project Path="AgriTrace.Infrastructure.Sqlserver/AgriTrace.Infrastructure.Sqlserver.csproj" />
+  <Project Path="AgriTrace.Tests/AgriTrace.Tests.csproj" />
 </Solution>

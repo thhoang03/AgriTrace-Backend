@@ -3,7 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using AgriTrace.Application.Common.Exceptions;
 using AgriTrace.Application.Contracts;
-using AgriTrace.Domain.Entities;
+using AgriTrace.Domain.Common;
+using AgriTrace.Domain.Entities.Categories;
 using AgriTrace.Domain.Interfaces.Inbound;
 using Mapster;
 using MediatR;
@@ -31,8 +32,16 @@ public class CreateCategoryCommandHandler : IRequestHandler<CreateCategoryComman
         }
 
         var category = new Category(request.Name, request.Description);
-        var created = await _categoryService.CreateAsync(category, cancellationToken);
 
-        return created.Adapt<CategoryDto>();
+        try
+        {
+            var created = await _categoryService.CreateAsync(category, cancellationToken);
+            return created.Adapt<CategoryDto>();
+        }
+        catch (DuplicateEntityException)
+        {
+            throw new ConflictException("Category name already exists.");
+        }
     }
 }
+

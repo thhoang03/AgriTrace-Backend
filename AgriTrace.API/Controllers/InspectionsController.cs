@@ -25,6 +25,38 @@ public sealed class InspectionsController : ControllerBase
         _currentUser = currentUser;
     }
 
+    /// <summary>
+    /// Danh sách tất cả kiểm định (hỗ trợ lọc theo batchId và phân trang)
+    /// GET /api/v1/inspections
+    /// </summary>
+    [HttpGet("api/v1/inspections")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    public async Task<IActionResult> GetAllInspections(
+        [FromQuery] Guid? batchId,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        CancellationToken cancellationToken = default)
+    {
+        if (batchId.HasValue)
+        {
+            return await GetInspectionsByBatch(batchId.Value, page, pageSize, cancellationToken);
+        }
+
+        var result = await _mediator.Send(
+            new GetQualityInspectionsPagedQuery(page, pageSize),
+            cancellationToken);
+
+        var items = result.Items.Select(ToResponse).ToList();
+
+        var response = new InspectionPagedResponse(
+            items,
+            result.TotalCount,
+            result.PageNumber,
+            result.PageSize);
+
+        return Ok(ApiResponse.Success(response));
+    }
+
     // ─────────────────────────────────────────────────────────────
     // Nested under batches: POST /api/v1/batches/{batchId}/inspections
     // ─────────────────────────────────────────────────────────────
@@ -55,7 +87,7 @@ public sealed class InspectionsController : ControllerBase
         return CreatedAtAction(
             nameof(GetInspectionById),
             new { inspectionId = dto.Id },
-            new { inspectionId = dto.Id });
+            ApiResponse.Success(new { inspectionId = dto.Id }));
     }
 
     /// <summary>
@@ -81,7 +113,7 @@ public sealed class InspectionsController : ControllerBase
             result.PageNumber,
             result.PageSize);
 
-        return Ok(response);
+        return Ok(ApiResponse.Success(response));
     }
 
     // ─────────────────────────────────────────────────────────────
@@ -110,7 +142,7 @@ public sealed class InspectionsController : ControllerBase
                     $"Inspection '{inspectionId}' was not found."));
         }
 
-        return Ok(ToResponse(dto));
+        return Ok(ApiResponse.Success(ToResponse(dto)));
     }
 
     /// <summary>
@@ -135,15 +167,6 @@ public sealed class InspectionsController : ControllerBase
 
         return Ok(ApiResponse.Success("Cập nhật kiểm định thành công"));
     }
-
-    // ─────────────────────────────────────────────────────────────
-    // Lookup: GET /api/v1/inspection-results
-    // Migrated to LookupController in Phase 9.
-    // ─────────────────────────────────────────────────────────────
-
-    // ─────────────────────────────────────────────────────────────
-    // Mapping helper
-    // ─────────────────────────────────────────────────────────────
 
     private static InspectionResponse ToResponse(
         AgriTrace.Application.Contracts.QualityInspectionDto dto)

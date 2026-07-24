@@ -1,5 +1,15 @@
-﻿using AgriTrace.Domain.Common;
-using AgriTrace.Domain.Entities;
+using AgriTrace.Domain.Common;
+using AgriTrace.Domain.Entities.Batches;
+using AgriTrace.Domain.Entities.Categories;
+using AgriTrace.Domain.Entities.Certificates;
+using AgriTrace.Domain.Entities.Events;
+using AgriTrace.Domain.Entities.Notifications;
+using AgriTrace.Domain.Entities.Organizations;
+using AgriTrace.Domain.Entities.Products;
+using AgriTrace.Domain.Entities.QualityInspections;
+using AgriTrace.Domain.Entities.Recalls;
+using AgriTrace.Domain.Entities.Units;
+using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Outbound;
 using AgriTrace.Infrastructure.Sqlserver.Models;
 using AgriTrace.Infrastructure.Sqlserver.Persistence;
@@ -23,6 +33,7 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         var model = await _context.Products
             .AsNoTracking()
+            .Include(x => x.Organization)
             .Include(x => x.Category)
             .Include(x => x.Unit)
             .FirstOrDefaultAsync(
@@ -39,6 +50,7 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         var models = await _context.Products
             .AsNoTracking()
+            .Include(x => x.Organization)
             .Include(x => x.Category)
             .Include(x => x.Unit)
             .OrderBy(x => x.Name)
@@ -53,6 +65,7 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         var models = await _context.Products
             .AsNoTracking()
+            .Include(x => x.Organization)
             .Include(x => x.Category)
             .Include(x => x.Unit)
             .Where(x => x.OrganizationId == organizationId)
@@ -68,6 +81,7 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         var models = await _context.Products
             .AsNoTracking()
+            .Include(x => x.Organization)
             .Include(x => x.Category)
             .Include(x => x.Unit)
             .Where(x => x.CategoryId == categoryId)
@@ -84,6 +98,7 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         var query = _context.Products
        .AsNoTracking()
+            .Include(x => x.Organization)
             .Include(x => x.Category)
             .Include(x => x.Unit);
 
@@ -112,6 +127,7 @@ public sealed class ProductReadRepository : IProductReadRepository
     {
         IQueryable<ProductDataModel> query = _context.Products
             .AsNoTracking()
+            .Include(x => x.Organization)
             .Include(x => x.Category)
             .Include(x => x.Unit);
 
@@ -149,6 +165,16 @@ public sealed class ProductReadRepository : IProductReadRepository
 
     private static Product ToEntity(ProductDataModel model)
     {
+        var organization = model.Organization == null ? null : new Organization(
+            model.Organization.Id,
+            model.Organization.OrganizationTypeId,
+            model.Organization.Name,
+            model.Organization.Address,
+            model.Organization.Status,
+            model.Organization.CreatedAt,
+            model.Organization.UpdatedAt,
+            null);
+
         return new Product(
             model.Id,
             model.OrganizationId,
@@ -169,6 +195,7 @@ public sealed class ProductReadRepository : IProductReadRepository
                 model.Unit.Code,
                 model.Unit.Name,
                 model.Unit.CreatedAt,
-                model.Unit.UpdatedAt));
+                model.Unit.UpdatedAt),
+            organization);
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace AgriTrace.Domain.Entities.Products;
+namespace AgriTrace.Domain.Entities.Products;
 
 public sealed record UpdateProduct(
     Guid? CategoryId,

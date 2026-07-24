@@ -13,11 +13,26 @@ public class RecallDetail
     [JsonPropertyName("recallId")]
     public Guid RecallId { get; set; }
 
+    [JsonPropertyName("id")]
+    public Guid Id => RecallId;
+
     [JsonPropertyName("batchId")]
     public Guid BatchId { get; set; }
 
     [JsonPropertyName("batchCode")]
     public string? BatchCode { get; set; }
+
+    [JsonPropertyName("productId")]
+    public Guid? ProductId { get; set; }
+
+    [JsonPropertyName("productName")]
+    public string? ProductName { get; set; }
+
+    [JsonPropertyName("organizationId")]
+    public Guid? OrganizationId { get; set; }
+
+    [JsonPropertyName("organizationName")]
+    public string? OrganizationName { get; set; }
 
     [JsonPropertyName("createdBy")]
     public Guid CreatedBy { get; set; }

@@ -1,4 +1,5 @@
 using System;
+using System.Net;
 using System.Text.Json.Serialization;
 
 namespace AgriTrace.API.Models
@@ -23,10 +24,18 @@ namespace AgriTrace.API.Models
 
         // ---- Factory helpers cho gọn ở controller ----
 
-        public static ApiResponse Success(object? data, string message = "Thực hiện thành công") => new()
+        public static ApiResponse Success(object? data, string message = "Success") => new()
         {
             IsSuccess = true,
             Data = data,
+            Message = message,
+            Timestamp = DateTime.UtcNow
+        };
+
+        public static ApiResponse Fail(HttpStatusCode statusCode, string message = "Failed") => new()
+        {
+            IsSuccess = false,
+            Data = null,
             Message = message,
             Timestamp = DateTime.UtcNow
         };

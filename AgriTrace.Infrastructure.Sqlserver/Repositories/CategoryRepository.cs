@@ -1,5 +1,15 @@
-﻿using AgriTrace.Domain.Common;
-using AgriTrace.Domain.Entities;
+using AgriTrace.Domain.Common;
+using AgriTrace.Domain.Entities.Batches;
+using AgriTrace.Domain.Entities.Categories;
+using AgriTrace.Domain.Entities.Certificates;
+using AgriTrace.Domain.Entities.Events;
+using AgriTrace.Domain.Entities.Notifications;
+using AgriTrace.Domain.Entities.Organizations;
+using AgriTrace.Domain.Entities.Products;
+using AgriTrace.Domain.Entities.QualityInspections;
+using AgriTrace.Domain.Entities.Recalls;
+using AgriTrace.Domain.Entities.Units;
+using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Outbound;
 using AgriTrace.Infrastructure.Sqlserver.Models;
 using AgriTrace.Infrastructure.Sqlserver.Persistence;
@@ -36,7 +46,7 @@ public class CategoryRepository
         CancellationToken cancellationToken = default)
     {
         var models = await _context.Categories
-            .OrderBy(x => x.Name)
+            .OrderByDescending(x => x.CreatedAt)
             .ToListAsync(cancellationToken);
 
         return models
@@ -49,13 +59,24 @@ public class CategoryRepository
         int pageSize,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(null, pageNumber, pageSize, cancellationToken);
+        return await GetPagedAsync(null, pageNumber, pageSize, null, null, cancellationToken);
     }
 
     public async Task<PagedResult<Category>> GetPagedAsync(
         string? search,
         int pageNumber,
         int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        return await GetPagedAsync(search, pageNumber, pageSize, null, null, cancellationToken);
+    }
+
+    public async Task<PagedResult<Category>> GetPagedAsync(
+        string? search,
+        int pageNumber,
+        int pageSize,
+        string? sortBy,
+        string? sortDir,
         CancellationToken cancellationToken = default)
     {
         var query = _context.Categories.AsQueryable();
@@ -65,10 +86,21 @@ public class CategoryRepository
             query = query.Where(x => x.Name.Contains(search));
         }
 
+        var effectiveSortBy = string.Equals(sortBy, "name", StringComparison.OrdinalIgnoreCase) ? "name" : "createdAt";
+        var effectiveSortDir = string.Equals(sortDir, "asc", StringComparison.OrdinalIgnoreCase) ? "asc" : "desc";
+
+        query = (effectiveSortBy, effectiveSortDir) switch
+        {
+            ("name", "asc") => query.OrderBy(x => x.Name),
+            ("name", "desc") => query.OrderByDescending(x => x.Name),
+            ("createdAt", "asc") => query.OrderBy(x => x.CreatedAt),
+            ("createdAt", "desc") => query.OrderByDescending(x => x.CreatedAt),
+            _ => query.OrderByDescending(x => x.CreatedAt)
+        };
+
         var totalCount = await query.CountAsync(cancellationToken);
 
         var models = await query
-            .OrderBy(x => x.Name)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
@@ -88,15 +120,35 @@ public class CategoryRepository
     {
         var model = ToModel(entity);
 
-        await _context.Categories
-            .AddAsync(
-                model,
+        try
+        {
+            await _context.Categories
+                .AddAsync(
+                    model,
+                    cancellationToken);
+
+            await _context.SaveChangesAsync(
                 cancellationToken);
 
-        await _context.SaveChangesAsync(
-            cancellationToken);
+            return entity;
+        }
+        catch (DbUpdateException ex)
+        {
+            if (IsUniqueConstraintViolation(ex))
+            {
+                throw new DuplicateEntityException("Category name already exists.");
+            }
 
-        return entity;
+            throw;
+        }
+    }
+
+    private static bool IsUniqueConstraintViolation(DbUpdateException ex)
+    {
+        return ex.InnerException != null &&
+            (ex.InnerException.Message.Contains("IX_Categories_Name", StringComparison.OrdinalIgnoreCase) ||
+             ex.InnerException.Message.Contains("2627", StringComparison.OrdinalIgnoreCase) ||
+             ex.InnerException.Message.Contains("2601", StringComparison.OrdinalIgnoreCase));
     }
 
     public async Task UpdateAsync(
@@ -188,3 +240,4 @@ public class CategoryRepository
         };
     }
 }
+
