@@ -11,6 +11,7 @@ using AgriTrace.Domain.Entities.Recalls;
 using AgriTrace.Domain.Entities.Units;
 using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using MediatR;
 
 namespace AgriTrace.Application.Features.Recalls.Commands;
@@ -40,7 +41,8 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
         IRecallService recallService,
         IBatchReadService batchReadService,
         IBatchWriteService batchWriteService,
-        IUserService userService)
+        IUserService userService
+        )
     {
         _recallService = recallService;
         _batchReadService = batchReadService;
@@ -50,6 +52,7 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
 
     public async Task<RecallCreatedResult> Handle(CreateRecallCommand request, CancellationToken cancellationToken)
     {
+
         if (request.Severity is < 1 or > 3)
         {
             throw new ArgumentException("Severity must be between 1 and 3.");
@@ -57,6 +60,10 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
 
         var batch = await _batchReadService.GetByIdAsync(request.BatchId, cancellationToken)
             ?? throw new NotFoundException($"Batch {request.BatchId} not found.");
+
+        if (!batch.CanBeRecalled()) {
+            throw new ConflictException($"Batch {request.BatchId} is already under an active recall.");
+        }
 
         // CreatedBy comes from the auth context in Phase 10; fall back to any user until then.
         var createdBy = request.CreatedByUserId;
@@ -79,7 +86,7 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
         // Setting the batch status to Recalled.
         batch.Recall();
         await _batchWriteService.UpdateAsync(batch, cancellationToken);
-
+        
         return new RecallCreatedResult
         {
             RecallId = created.Id
