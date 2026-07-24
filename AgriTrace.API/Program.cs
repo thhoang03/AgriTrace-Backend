@@ -48,6 +48,8 @@ var app = builder.Build();
 // Bắt mọi exception chưa xử lý và trả về envelope ApiResponse (qua GlobalExceptionHandler).
 app.UseExceptionHandler();
 
+app.UseCors("AllowAll");
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -77,11 +79,10 @@ if (app.Environment.IsDevelopment())
         c.ConfigObject.PersistAuthorization = true;
     });
 }
-
-
-app.UseCors("AllowAll");
-
-app.UseHttpsRedirection();
+else
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthentication();
 
