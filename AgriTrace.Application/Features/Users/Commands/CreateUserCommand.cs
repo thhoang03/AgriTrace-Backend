@@ -99,6 +99,8 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserD
         Email = user.Email,
         Role = user.Role.ToString(),
         OrganizationId = user.OrganizationId ?? Guid.Empty,
+        OrganizationName = user.Organization?.Name ?? string.Empty,
+        OrganizationTypeName = user.Organization?.OrganizationType?.Name ?? string.Empty,
         Phone = user.Phone ?? string.Empty,
         IsActive = user.IsActive,
         CreatedAt = user.CreatedAt

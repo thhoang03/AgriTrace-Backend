@@ -44,6 +44,7 @@ public class UserRepository
 
         var model = await _context.Users
             .Include(x => x.Organization)
+                .ThenInclude(o => o.OrganizationType)
             .FirstOrDefaultAsync(
                 x => x.Id == id,
                 cancellationToken);
@@ -65,6 +66,8 @@ public class UserRepository
     {
 
         var models = await _context.Users
+            .Include(x => x.Organization)
+                .ThenInclude(o => o.OrganizationType)
             .OrderBy(x => x.Email)
             .ToListAsync(cancellationToken);
 
@@ -87,6 +90,8 @@ public class UserRepository
     {
 
         var query = _context.Users
+            .Include(x => x.Organization)
+                .ThenInclude(o => o.OrganizationType)
             .AsQueryable();
 
 
@@ -239,6 +244,7 @@ public class UserRepository
 
         var model = await _context.Users
             .Include(x => x.Organization)
+                .ThenInclude(o => o.OrganizationType)
             .FirstOrDefaultAsync(
                 x => x.Email == email,
                 cancellationToken);

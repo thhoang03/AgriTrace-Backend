@@ -6,6 +6,7 @@ using AgriTrace.API.Mapping;
 using AgriTrace.API.Models;
 using AgriTrace.Application.Features.Organizations.Commands;
 using AgriTrace.Application.Features.Organizations.Queries;
+using AgriTrace.Domain.Interfaces.Inbound;
 
 namespace AgriTrace.API.Controllers;
 
@@ -18,14 +19,20 @@ namespace AgriTrace.API.Controllers;
 public sealed class OrganizationsController : ControllerBase
 {
     private readonly ISender _sender;
+    private readonly ICurrentUserService _currentUser;
 
-    public OrganizationsController(ISender sender)
+    public OrganizationsController(ISender sender, ICurrentUserService currentUser)
     {
         _sender = sender;
+        _currentUser = currentUser;
     }
 
+    private bool IsAdmin =>
+        string.Equals(_currentUser.Role, "Admin", StringComparison.OrdinalIgnoreCase)
+     || string.Equals(_currentUser.OrganizationType, "System", StringComparison.OrdinalIgnoreCase);
+
     /// <summary>
-    /// Lấy danh sách tổ chức
+    /// Lấy danh sách tổ chức (Admin/System only)
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
@@ -35,6 +42,9 @@ public sealed class OrganizationsController : ControllerBase
         int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
+        if (!IsAdmin)
+            return Forbid();
+
         if (organizationTypeId.HasValue)
         {
             var byType = await _sender.Send(
@@ -81,6 +91,9 @@ public sealed class OrganizationsController : ControllerBase
         Guid id,
         CancellationToken cancellationToken)
     {
+        if (!IsAdmin && id != _currentUser.OrganizationId)
+            return Forbid();
+
         var result = await _sender.Send(
             new GetOrganizationByIdQuery(id),
             cancellationToken);
@@ -114,7 +127,7 @@ public sealed class OrganizationsController : ControllerBase
     /// Cập nhật tổ chức
     /// </summary>
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -136,7 +149,7 @@ public sealed class OrganizationsController : ControllerBase
     /// Thay đổi trạng thái tổ chức
     /// </summary>
     [HttpPatch("{id:guid}/status")]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse>> UpdateStatus(
@@ -164,6 +177,9 @@ public sealed class OrganizationsController : ControllerBase
         int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
+        if (!IsAdmin && id != _currentUser.OrganizationId)
+            return Forbid();
+
         var result = await _sender.Send(
             new GetOrganizationUsersQuery(id, page, pageSize),
             cancellationToken);
@@ -182,6 +198,9 @@ public sealed class OrganizationsController : ControllerBase
         int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
+        if (!IsAdmin && id != _currentUser.OrganizationId)
+            return Forbid();
+
         var result = await _sender.Send(
             new GetOrganizationProductsQuery(id, page, pageSize),
             cancellationToken);
@@ -197,7 +216,7 @@ public sealed class OrganizationsController : ControllerBase
 
     // Not in swagger.yaml — internal-only endpoint, suppressed from OpenAPI docs (Phase 12 decision: keep suppressed).
     [ApiExplorerSettings(IgnoreApi = true)]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin")]
     [HttpDelete("{id:guid}")]
     public async Task<ActionResult<ApiResponse>> Delete(
         Guid id,

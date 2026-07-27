@@ -4,6 +4,7 @@ using AgriTrace.API.Models.Users;
 using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Features.Users.Commands;
 using AgriTrace.Application.Features.Users.Queries;
+using AgriTrace.Domain.Interfaces.Inbound;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,10 +20,12 @@ namespace AgriTrace.API.Controllers;
 public sealed class UsersController : ControllerBase
 {
     private readonly ISender _sender;
+    private readonly ICurrentUserService _currentUser;
 
-    public UsersController(ISender sender)
+    public UsersController(ISender sender, ICurrentUserService currentUser)
     {
         _sender = sender;
+        _currentUser = currentUser;
     }
 
     /// <summary>
@@ -32,15 +35,29 @@ public sealed class UsersController : ControllerBase
     [Authorize(Roles = "Admin,Manager")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse>> GetAll(
-        Guid? organizationId,
         string? role,
         string? search,
         int page = 1,
         int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
+        Guid? orgId = _currentUser.OrganizationId;
+
+        if (!IsAdmin)
+        {
+            if (!orgId.HasValue)
+            {
+                var empty = new UserPagedResponse([], 0, page, pageSize);
+                return Ok(ApiResponse.Success(empty));
+            }
+        }
+        else
+        {
+            orgId = null;
+        }
+
         var result = await _sender.Send(
-            new GetUsersPagedQuery(organizationId, role, search, page, pageSize),
+            new GetUsersPagedQuery(orgId, role, search, page, pageSize),
             cancellationToken);
 
         var paged = new UserPagedResponse(
@@ -51,6 +68,10 @@ public sealed class UsersController : ControllerBase
 
         return Ok(ApiResponse.Success(paged));
     }
+
+    private bool IsAdmin =>
+        string.Equals(_currentUser.Role, "Admin", StringComparison.OrdinalIgnoreCase)
+     || string.Equals(_currentUser.OrganizationType, "System", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Tạo User mới
@@ -188,6 +209,7 @@ public sealed class UsersController : ControllerBase
         Role = dto.Role,
         OrganizationId = dto.OrganizationId,
         OrganizationName = dto.OrganizationName,
+        OrganizationTypeName = dto.OrganizationTypeName,
         IsActive = dto.IsActive,
         CreatedAt = dto.CreatedAt
     };
