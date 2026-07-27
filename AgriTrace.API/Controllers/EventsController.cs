@@ -1,9 +1,9 @@
 using AgriTrace.API.Models;
 using AgriTrace.API.Models.Events;
-using AgriTrace.API.Services;
 using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Features.Events.Commands;
 using AgriTrace.Application.Features.Events.Queries;
+using AgriTrace.Domain.Interfaces.Inbound;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -15,7 +15,6 @@ namespace AgriTrace.API.Controllers;
 /// </summary>
 [ApiController]
 [Authorize]
-[ApiExplorerSettings(IgnoreApi = true)]
 public sealed class EventsController : ControllerBase
 {
     private readonly ISender _sender;

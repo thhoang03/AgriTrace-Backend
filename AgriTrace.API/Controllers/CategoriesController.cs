@@ -64,7 +64,7 @@ public class CategoriesController : ControllerBase
     /// Tạo Category mới
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
@@ -81,7 +81,7 @@ public class CategoriesController : ControllerBase
     /// Cập nhật Category
     /// </summary>
     [HttpPut("{categoryId:guid}")]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -100,6 +100,7 @@ public class CategoriesController : ControllerBase
     /// Thay đổi trạng thái Category
     /// </summary>
     [HttpPatch("{categoryId:guid}/status")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> UpdateStatus(Guid categoryId, [FromBody] ActiveStatusRequest request, CancellationToken cancellationToken)
@@ -115,7 +116,7 @@ public class CategoriesController : ControllerBase
     /// Xóa Category
     /// </summary>
     [HttpDelete("{categoryId:guid}")]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]

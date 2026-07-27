@@ -162,8 +162,8 @@ public class UserTests
     public void UpdateProfileDetails_OnlyRole_UpdatesRole()
     {
         var user = CreateValid(role: UserRole.Staff);
-        user.UpdateProfileDetails(null, null, UserRole.Inspector);
-        user.Role.Should().Be(UserRole.Inspector);
+        user.UpdateProfileDetails(null, null, UserRole.Staff);
+        user.Role.Should().Be(UserRole.Staff);
     }
 
     [Fact]

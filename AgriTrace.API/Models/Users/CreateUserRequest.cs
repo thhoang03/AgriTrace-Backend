@@ -4,13 +4,11 @@ namespace AgriTrace.API.Models.Users;
 
 /// <summary>
 /// Request body for creating a user. Matches swagger <c>CreateUserRequest</c>.
-/// organizationId is nullable; role is a required string enum (ADMIN, MANAGER, STAFF, FARMER, INSPECTOR, CONSUMER).
+/// organizationId is not accepted; it is auto-assigned from the authenticated MANAGER's token.
+/// role is a required string enum (STAFF only).
 /// </summary>
 public class CreateUserRequest
 {
-    [JsonPropertyName("organizationId")]
-    public Guid? OrganizationId { get; set; }
-
     [JsonPropertyName("fullName")]
     public string FullName { get; set; } = string.Empty;
 

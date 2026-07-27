@@ -4,6 +4,7 @@ using System.Text.Json;
 using AgriTrace.API.Common;
 using AgriTrace.API.Services;
 using AgriTrace.API.Swagger;
+using AgriTrace.Domain.Interfaces.Inbound;
 using Mapster;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi;
