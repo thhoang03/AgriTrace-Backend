@@ -43,6 +43,8 @@ public sealed class CreateOrganizationCommandValidator
 {
     public CreateOrganizationCommandValidator()
     {
+        RuleFor(x => x.OrganizationTypeId)
+            .NotEmpty();
         RuleFor(x => x.Name)
             .NotEmpty()
             .MaximumLength(200);
