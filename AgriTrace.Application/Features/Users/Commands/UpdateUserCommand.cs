@@ -26,10 +26,14 @@ public record UpdateUserCommand(
 public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserDto>
 {
     private readonly IUserService _userService;
+    private readonly ICurrentUserService _currentUser;
 
-    public UpdateUserCommandHandler(IUserService userService)
+    public UpdateUserCommandHandler(
+        IUserService userService,
+        ICurrentUserService currentUser)
     {
         _userService = userService;
+        _currentUser = currentUser;
     }
 
     public async Task<UserDto> Handle(UpdateUserCommand request, CancellationToken cancellationToken)
@@ -44,6 +48,15 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserD
                 || !Enum.IsDefined(typeof(UserRole), parsed))
             {
                 throw new ArgumentException($"Role '{request.Role}' is invalid.");
+            }
+
+            if (parsed == UserRole.Manager
+                && user.Role != UserRole.Manager
+                && !string.Equals(_currentUser.Role, "Admin", StringComparison.OrdinalIgnoreCase))
+            {
+                throw new RbacForbiddenException(
+                    "RBAC_ROLE_UPGRADE",
+                    "Chỉ Admin mới có thể thăng cấp người dùng lên Manager.");
             }
 
             role = parsed;

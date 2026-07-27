@@ -2,7 +2,6 @@ using System.IO;
 using System.Reflection;
 using System.Text.Json;
 using AgriTrace.API.Common;
-using AgriTrace.API.Services;
 using AgriTrace.API.Swagger;
 using AgriTrace.Domain.Interfaces.Inbound;
 using Mapster;
@@ -30,9 +29,7 @@ namespace AgriTrace.API
             services.AddExceptionHandler<GlobalExceptionHandler>();
             services.AddProblemDetails();
 
-            // Current-user accessor for extracting identity from JWT claims (Phase 10).
             services.AddHttpContextAccessor();
-            services.AddScoped<ICurrentUserService, CurrentUserService>();
 
             // Set up Mapster configurations for API
             var config = TypeAdapterConfig.GlobalSettings;

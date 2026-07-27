@@ -318,7 +318,7 @@ public static class SeedData
             new UserDataModel
             {
                 Id = new Guid("70000000-0000-0000-0000-000000000001"),
-                OrganizationId = null,
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000006"),
                 FullName = "System Administrator",
                 Email = "admin@agritrace.com",
                 PasswordHash = "100000.WO50AmM77hFBSqiT1aSFiw==.e1i6MrL9ZZlQF4h2CiK5+qvkR7zilfDmRnLCHfUsNx8=",

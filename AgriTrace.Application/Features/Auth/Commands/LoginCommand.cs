@@ -64,7 +64,8 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResult>
                 Id = user.Id,
                 Name = user.FullName,
                 Email = user.Email,
-                Role = user.Role.ToString()
+                Role = user.Role.ToString(),
+                OrganizationType = user.Organization?.OrganizationType?.Code
             }
         };
     }
