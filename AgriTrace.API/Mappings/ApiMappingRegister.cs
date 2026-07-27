@@ -75,7 +75,7 @@ internal static class ApiMappings
         this OrganizationRequest request)
     {
         return new CreateOrganizationCommand(
-            request.Type,
+            request.OrganizationTypeId,
             request.Name,
             request.Address);
     }
@@ -88,7 +88,7 @@ internal static class ApiMappings
     {
         return new UpdateOrganizationCommand(
             id,
-            request.Type,
+            request.OrganizationTypeId,
             request.Name,
             request.Address);
     }

@@ -3013,17 +3013,17 @@ components:
     OrganizationRequest:
       required:
         - name
-        - type
+        - organizationTypeId
       type: object
       properties:
         name:
           maxLength: 200
           minLength: 1
           type: string
-        type:
-          minLength: 1
+        organizationTypeId:
           type: string
           description: 'Organization type. One of: FARM, PROCESSOR, DISTRIBUTOR, RETAILER, INSPECTOR_ORG.'
+          format: uuid
         address:
           maxLength: 500
           minLength: 0
