@@ -29,7 +29,7 @@ public sealed class UsersController : ControllerBase
     /// Lấy danh sách người dùng
     /// </summary>
     [HttpGet]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse>> GetAll(
         Guid? organizationId,
@@ -56,7 +56,7 @@ public sealed class UsersController : ControllerBase
     /// Tạo User mới
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ApiResponse>> Create(
@@ -137,7 +137,7 @@ public sealed class UsersController : ControllerBase
     /// Cập nhật User
     /// </summary>
     [HttpPut("{userId:guid}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -163,7 +163,7 @@ public sealed class UsersController : ControllerBase
     /// Kích hoạt / Vô hiệu hóa tài khoản
     /// </summary>
     [HttpPatch("{userId:guid}/status")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse>> UpdateStatus(

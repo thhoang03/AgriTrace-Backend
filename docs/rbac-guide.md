@@ -108,14 +108,14 @@ Khi tạo event:
 | --- | --- |
 | `AnalyticsController` | `Admin,Manager` |
 | `CategoriesController` (Create/Update/Delete) | `Admin,Manager` |
-| `CertificatesController::IssueCertificate` | `Admin` |
-| `CertificatesController::RevokeCertificate` | `Admin` |
-| `InspectionsController::CreateInspection` | `Admin` |
-| `InspectionsController::UpdateInspection` | `Admin` |
-| `OrganizationsController` (mutations) | `Admin` |
+| `CertificatesController::IssueCertificate` | `Admin,Manager` |
+| `CertificatesController::RevokeCertificate` | `Admin,Manager` |
+| `InspectionsController::CreateInspection` | `Admin,Manager` |
+| `InspectionsController::UpdateInspection` | `Admin,Manager` |
+| `OrganizationsController` (mutations) | `Admin,Manager` |
 | `RecallsController::Create` | `Admin,Manager` |
 | `RecallsController::Resolve` | `Admin,Manager` |
-| `UsersController` (mutations) | `Admin` |
+| `UsersController` (mutations) | `Admin,Manager` |
 
 ## 9. Migration dữ liệu
 
