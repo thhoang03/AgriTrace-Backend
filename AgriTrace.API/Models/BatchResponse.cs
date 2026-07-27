@@ -46,6 +46,9 @@ public class BatchListItemResponse
     [JsonPropertyName("quantity")]
     public decimal Quantity { get; set; }
 
+    [JsonPropertyName("remainingQuantity")]
+    public decimal RemainingQuantity { get; set; }
+
     [JsonPropertyName("unitId")]
     public Guid UnitId { get; set; }
 
@@ -96,6 +99,9 @@ public class BatchDetailResponse
 
     [JsonPropertyName("quantity")]
     public decimal Quantity { get; set; }
+
+    [JsonPropertyName("remainingQuantity")]
+    public decimal RemainingQuantity { get; set; }
 
     [JsonPropertyName("unitId")]
     public Guid UnitId { get; set; }
