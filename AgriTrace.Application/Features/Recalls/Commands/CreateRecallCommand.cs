@@ -11,6 +11,7 @@ using AgriTrace.Domain.Entities.Recalls;
 using AgriTrace.Domain.Entities.Units;
 using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using MediatR;
 
 namespace AgriTrace.Application.Features.Recalls.Commands;
@@ -71,6 +72,10 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
         var batch = await _batchReadService.GetByIdAsync(request.BatchId, cancellationToken)
             ?? throw new NotFoundException($"Batch {request.BatchId} not found.");
 
+        if (!batch.CanBeRecalled()) {
+            throw new ConflictException($"Batch {request.BatchId} is already under an active recall.");
+        }
+
         // CreatedBy comes from the auth context in Phase 10; fall back to any user until then.
         var createdBy = request.CreatedByUserId;
         if (createdBy == Guid.Empty)
@@ -92,7 +97,7 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
         // Setting the batch status to Recalled.
         batch.Recall();
         await _batchWriteService.UpdateAsync(batch, cancellationToken);
-
+        
         return new RecallCreatedResult
         {
             RecallId = created.Id

@@ -85,6 +85,13 @@ public class MergeBatchCommandHandler : IRequestHandler<MergeBatchCommand, Merge
         foreach (var source in sources)
         {
             merge.AddSource(source.Id, source.RemainingQuantity);
+
+            // Drain the remaining quantity of each source batch to 0
+            if (source.RemainingQuantity > 0)
+            {
+                source.ReduceRemainingQuantity(source.RemainingQuantity);
+                await _batchWriteService.UpdateAsync(source, cancellationToken);
+            }
         }
 
         await _mergeRepository.AddAsync(merge, cancellationToken);
