@@ -435,28 +435,6 @@ public static class SeedData
                 Role = UserRole.Staff,
                 IsActive = true,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-            },
-            new UserDataModel
-            {
-                Id = new Guid("70000000-0000-0000-0000-000000000007"),
-                OrganizationId = new Guid("50000000-0000-0000-0000-000000000006"),
-                FullName = "System Operator",
-                Email = "manager.f@systemop.com",
-                PasswordHash = "100000.ZCEfWZ2DeDBafl7sSoMR+w==.vS5N2A5Y2xxC3dQylLJes39s1xHrhN/mNbLz5D1/KVo=",
-                Role = UserRole.Manager,
-                IsActive = true,
-                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
-            },
-            new UserDataModel
-            {
-                Id = new Guid("70000000-0000-0000-0000-00000000000e"),
-                OrganizationId = new Guid("50000000-0000-0000-0000-000000000006"),
-                FullName = "System Staff",
-                Email = "staff.f@systemop.com",
-                PasswordHash = "100000.jlzfdeBqq5BkzvHyVkVUkw==.R3KvBcnhxzGqNbNFgJG3HPc1ozb7L+8OUUHjIUQAgOw=",
-                Role = UserRole.Staff,
-                IsActive = true,
-                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             }
         );
     }
