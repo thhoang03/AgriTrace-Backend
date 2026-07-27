@@ -56,7 +56,7 @@ public sealed class UsersController : ControllerBase
     /// Tạo User mới
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Manager")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ApiResponse>> Create(
@@ -65,7 +65,7 @@ public sealed class UsersController : ControllerBase
     {
         var result = await _sender.Send(
             new CreateUserCommand(
-                request.OrganizationId,
+                null,
                 request.FullName,
                 request.Email,
                 request.Password,

@@ -31,21 +31,38 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
         RuleFor(x => x.FullName).NotEmpty().MaximumLength(200);
         RuleFor(x => x.Email).NotEmpty().EmailAddress();
         RuleFor(x => x.Password).NotEmpty().MinimumLength(6);
-        RuleFor(x => x.Role).NotEmpty();
+        RuleFor(x => x.Role)
+            .NotEmpty()
+            .Equal("STAFF", StringComparer.OrdinalIgnoreCase)
+            .WithMessage("MANAGER can only invite STAFF via this endpoint.");
     }
 }
 
 public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserDto>
 {
     private readonly IUserService _userService;
+    private readonly ICurrentUserService _currentUser;
 
-    public CreateUserCommandHandler(IUserService userService)
+    public CreateUserCommandHandler(
+        IUserService userService,
+        ICurrentUserService currentUser)
     {
         _userService = userService;
+        _currentUser = currentUser;
     }
 
     public async Task<UserDto> Handle(CreateUserCommand request, CancellationToken cancellationToken)
     {
+        if (!_currentUser.IsAuthenticated)
+        {
+            throw new UnauthorizedAccessException("Authentication required to create users.");
+        }
+
+        if (_currentUser.Role != "Manager")
+        {
+            throw new RbacForbiddenException("RBAC_INVALID_ROLE", "Only MANAGER can invite staff.");
+        }
+
         if (!Enum.TryParse<UserRole>(request.Role, ignoreCase: true, out var role)
             || !Enum.IsDefined(typeof(UserRole), role))
         {
@@ -60,12 +77,15 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserD
             throw new ConflictException($"Email '{email}' already exists.");
         }
 
+        var organizationId = _currentUser.OrganizationId
+            ?? throw new RbacForbiddenException("RBAC_INVALID_ROLE", "Current user does not belong to an organization.");
+
         var user = new User(
-            request.OrganizationId,
+            organizationId,
             request.FullName,
             email,
             User.HashPassword(request.Password),
-            role);
+            UserRole.Staff);
 
         var created = await _userService.CreateAsync(user, cancellationToken);
 

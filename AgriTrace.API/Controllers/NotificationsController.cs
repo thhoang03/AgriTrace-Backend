@@ -1,9 +1,9 @@
 using AgriTrace.API.Models;
 using AgriTrace.API.Models.Notifications;
-using AgriTrace.API.Services;
 using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Features.Notifications.Commands;
 using AgriTrace.Application.Features.Notifications.Queries;
+using AgriTrace.Domain.Interfaces.Inbound;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

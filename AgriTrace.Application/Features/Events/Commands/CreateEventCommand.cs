@@ -38,19 +38,22 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
     private readonly IUserService _userService;
     private readonly IOrganizationService _organizationService;
     private readonly IEventTypeService _eventTypeService;
+    private readonly ICurrentUserService _currentUser;
 
     public CreateEventCommandHandler(
         IEventService eventService,
         IBatchReadService batchReadService,
         IUserService userService,
         IOrganizationService organizationService,
-        IEventTypeService eventTypeService)
+        IEventTypeService eventTypeService,
+        ICurrentUserService currentUser)
     {
         _eventService = eventService;
         _batchReadService = batchReadService;
         _userService = userService;
         _organizationService = organizationService;
         _eventTypeService = eventTypeService;
+        _currentUser = currentUser;
     }
 
     public async Task<EventCreatedResult> Handle(CreateEventCommand request, CancellationToken cancellationToken)
@@ -69,21 +72,18 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
             performedByUserId = fallback.Id;
         }
 
+        if (_currentUser.IsAuthenticated && performedByUserId != Guid.Empty && performedByUserId != _currentUser.UserId)
+        {
+            throw new RbacForbiddenException("RBAC_IDOR_ATTEMPT", "PerformedByUserId does not match authenticated user.");
+        }
+
         var user = await _userService.GetByIdAsync(performedByUserId, cancellationToken)
             ?? throw new NotFoundException($"User {performedByUserId} not found.");
 
         var eventType = await _eventTypeService.GetByIdAsync(request.EventTypeId, cancellationToken)
             ?? throw new NotFoundException($"EventType {request.EventTypeId} not found.");
 
-        string? orgTypeCode = null;
-        if (user.OrganizationId.HasValue)
-        {
-            var organization = await _organizationService.GetByIdAsync(user.OrganizationId.Value, cancellationToken);
-            if (organization != null)
-            {
-                orgTypeCode = organization.OrganizationType?.Code;
-            }
-        }
+        var orgTypeCode = _currentUser.OrganizationType;
 
         bool isAdmin = user.Role == UserRole.Admin;
         bool isInspectionCrossOrg = orgTypeCode == "INSPECTION" && eventType.Code == "INSPECTION";

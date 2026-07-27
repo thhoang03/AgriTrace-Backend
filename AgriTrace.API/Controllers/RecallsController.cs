@@ -1,9 +1,9 @@
 using AgriTrace.API.Models;
 using AgriTrace.API.Models.Recalls;
-using AgriTrace.API.Services;
 using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Features.Recalls.Commands;
 using AgriTrace.Application.Features.Recalls.Queries;
+using AgriTrace.Domain.Interfaces.Inbound;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -54,7 +54,7 @@ public sealed class RecallsController : ControllerBase
     /// Tạo Recall (thu hồi Batch)
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
