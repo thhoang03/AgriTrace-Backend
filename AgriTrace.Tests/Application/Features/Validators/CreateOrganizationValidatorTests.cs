@@ -8,7 +8,7 @@ public class CreateOrganizationValidatorTests
     private readonly CreateOrganizationCommandValidator _validator = new();
 
     private CreateOrganizationCommand ValidCommand()
-        => new("FARM", "Farm Co", "123 Address");
+        => new(Guid.NewGuid(), "Farm Co", "123 Address");
 
     [Fact]
     public async Task Validate_ValidCommand_NoErrors()
@@ -18,34 +18,11 @@ public class CreateOrganizationValidatorTests
     }
 
     [Fact]
-    public async Task Validate_EmptyType_HasValidationError()
+    public async Task Validate_EmptyOrganizationTypeId_HasValidationError()
     {
-        var cmd = ValidCommand() with { Type = "" };
+        var cmd = ValidCommand() with { OrganizationTypeId = Guid.Empty };
         var result = await _validator.TestValidateAsync(cmd);
-        result.ShouldHaveValidationErrorFor(x => x.Type);
-    }
-
-    [Theory]
-    [InlineData("INVALID_TYPE")]
-    [InlineData("farm")] // case-sensitive in the current implementation
-    public async Task Validate_InvalidType_HasValidationError(string type)
-    {
-        var cmd = ValidCommand() with { Type = type };
-        var result = await _validator.TestValidateAsync(cmd);
-        result.ShouldHaveValidationErrorFor(x => x.Type);
-    }
-
-    [Theory]
-    [InlineData("FARM")]
-    [InlineData("PROCESSOR")]
-    [InlineData("DISTRIBUTOR")]
-    [InlineData("RETAILER")]
-    [InlineData("INSPECTOR_ORG")]
-    public async Task Validate_ValidTypes_NoErrors(string type)
-    {
-        var cmd = ValidCommand() with { Type = type };
-        var result = await _validator.TestValidateAsync(cmd);
-        result.ShouldNotHaveValidationErrorFor(x => x.Type);
+        result.ShouldHaveValidationErrorFor(x => x.OrganizationTypeId);
     }
 
     [Fact]

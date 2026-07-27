@@ -1,16 +1,6 @@
 using AgriTrace.Application.Common.Exceptions;
 using AgriTrace.Application.Features.Organizations.Commands;
-using AgriTrace.Domain.Entities.Batches;
-using AgriTrace.Domain.Entities.Categories;
-using AgriTrace.Domain.Entities.Certificates;
-using AgriTrace.Domain.Entities.Events;
-using AgriTrace.Domain.Entities.Notifications;
 using AgriTrace.Domain.Entities.Organizations;
-using AgriTrace.Domain.Entities.Products;
-using AgriTrace.Domain.Entities.QualityInspections;
-using AgriTrace.Domain.Entities.Recalls;
-using AgriTrace.Domain.Entities.Units;
-using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Inbound;
 using FluentAssertions;
 using Moq;
@@ -19,7 +9,6 @@ namespace AgriTrace.Tests.Application.Features.Organizations;
 
 /// <summary>
 /// Tests for CreateOrganizationCommandHandler.
-/// Note: Mapster is used at the end, so we catch FileLoadException.
 /// </summary>
 public class CreateOrganizationCommandTests
 {
@@ -32,12 +21,14 @@ public class CreateOrganizationCommandTests
     public async Task Handle_DuplicateName_ThrowsConflictException()
     {
         var existing = BuildOrganization("Dup Name");
-        var mock = new Mock<IOrganizationService>();
-        mock.Setup(s => s.GetByNameAsync("Dup Name", default))
+        var mockOrgService = new Mock<IOrganizationService>();
+        var mockOrgTypeService = new Mock<IOrganizationTypeService>();
+
+        mockOrgService.Setup(s => s.GetByNameAsync("Dup Name", default))
             .ReturnsAsync(existing);
 
-        var sut = new CreateOrganizationCommandHandler(mock.Object);
-        var cmd = new CreateOrganizationCommand("FARM", "Dup Name", "Address");
+        var sut = new CreateOrganizationCommandHandler(mockOrgService.Object, mockOrgTypeService.Object);
+        var cmd = new CreateOrganizationCommand(Guid.NewGuid(), "Dup Name", "Address");
 
         var act = () => sut.Handle(cmd, default);
 
@@ -47,19 +38,28 @@ public class CreateOrganizationCommandTests
     [Fact]
     public async Task Handle_ValidCommand_CallsCreateAsync()
     {
-        var mock = new Mock<IOrganizationService>();
-        mock.Setup(s => s.GetByNameAsync(It.IsAny<string>(), default))
+        var orgTypeId = Guid.NewGuid();
+        var mockOrgService = new Mock<IOrganizationService>();
+        var mockOrgTypeService = new Mock<IOrganizationTypeService>();
+
+        var dummyOrgType = new OrganizationType(orgTypeId, "FARM", "Nông trại", "Mô tả", DateTime.UtcNow, null);
+
+        mockOrgService.Setup(s => s.GetByNameAsync(It.IsAny<string>(), default))
             .ReturnsAsync((Organization?)null);
-        mock.Setup(s => s.CreateAsync(It.IsAny<Organization>(), default))
+
+        mockOrgTypeService.Setup(s => s.GetByIdAsync(orgTypeId, default))
+            .ReturnsAsync(dummyOrgType);
+
+        mockOrgService.Setup(s => s.CreateAsync(It.IsAny<Organization>(), default))
             .ReturnsAsync((Organization o, CancellationToken _) => o);
 
-        var sut = new CreateOrganizationCommandHandler(mock.Object);
-        var cmd = new CreateOrganizationCommand("FARM", "New Org", "Addr");
+        var sut = new CreateOrganizationCommandHandler(mockOrgService.Object, mockOrgTypeService.Object);
+        var cmd = new CreateOrganizationCommand(orgTypeId, "New Org", "Addr");
 
-        try { await sut.Handle(cmd, default); }
-        catch (System.IO.FileLoadException) { }
+        var result = await sut.Handle(cmd, default);
 
-        mock.Verify(s => s.CreateAsync(It.IsAny<Organization>(), default), Times.Once);
+        result.Should().NotBeNull();
+        result.Name.Should().Be("New Org");
+        mockOrgService.Verify(s => s.CreateAsync(It.IsAny<Organization>(), default), Times.Once);
     }
 }
-
