@@ -44,7 +44,7 @@ public class CreateOrganizationCommandHandler : IRequestHandler<CreateOrganizati
         }
             
 
-        if (organizationType.Name == "SYSTEM")
+        if (organizationType.Code == "SYSTEM")
         {
             throw new RbacForbiddenException("RBAC_ORG_PROHIBITED", "Creating SYSTEM organizations is forbidden via public API.");
         }
