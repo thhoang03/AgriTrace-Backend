@@ -16,7 +16,6 @@ Hệ thống quản lý toàn bộ vòng đời của lô nông sản (Batch) t�
 | Admin | Quản trị hệ thống, tổ chức, người dùng |
 | Manager | Quản lý tổ chức, sản phẩm, batch, báo cáo |
 | Staff | Nhân viên vận hành (tạo event, split/merge batch) |
-| Inspector | Kiểm định chất lượng, cấp chứng nhận |
 | Consumer | Tra cứu công khai qua QR (không cần đăng nhập) |
 
 ---

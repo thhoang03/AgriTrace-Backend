@@ -1,4 +1,4 @@
-namespace AgriTrace.Domain.Interfaces.Inbound;
+namespace AgriTrace.Domain.Interfaces.Outbound;
 
 public interface ICurrentUserService
 {

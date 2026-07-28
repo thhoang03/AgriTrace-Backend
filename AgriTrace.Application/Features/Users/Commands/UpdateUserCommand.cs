@@ -13,6 +13,7 @@ using AgriTrace.Domain.Entities.Recalls;
 using AgriTrace.Domain.Entities.Units;
 using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using MediatR;
 
 namespace AgriTrace.Application.Features.Users.Commands;

@@ -12,6 +12,7 @@ using AgriTrace.Domain.Entities.Recalls;
 using AgriTrace.Domain.Entities.Units;
 using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using FluentAssertions;
 using Moq;
 
@@ -32,6 +33,7 @@ public class CreateUserCommandTests
     private static Mock<ICurrentUserService> BuildCurrentUser(string role = "Manager", Guid? orgId = null)
     {
         var mock = new Mock<ICurrentUserService>();
+        mock.Setup(c => c.UserId).Returns(Guid.NewGuid());
         mock.Setup(c => c.Role).Returns(role);
         mock.Setup(c => c.IsAuthenticated).Returns(true);
         mock.Setup(c => c.OrganizationId).Returns(orgId ?? Guid.NewGuid());
@@ -39,11 +41,21 @@ public class CreateUserCommandTests
         return mock;
     }
 
+    private static IEmailService BuildEmailService()
+    {
+        return new Mock<IEmailService>().Object;
+    }
+
+    private static INotificationService BuildNotificationService()
+    {
+        return new Mock<INotificationService>().Object;
+    }
+
     [Fact]
     public async Task Handle_InvalidRole_ThrowsArgumentException()
     {
         var mock = new Mock<IUserService>();
-        var sut = new CreateUserCommandHandler(mock.Object, BuildCurrentUser().Object);
+        var sut = new CreateUserCommandHandler(mock.Object, BuildCurrentUser().Object, BuildEmailService(), BuildNotificationService());
         var cmd = new CreateUserCommand(null, "Name", "a@b.com", "password123", "INVALID_ROLE");
 
         var act = () => sut.Handle(cmd, default);
@@ -53,16 +65,16 @@ public class CreateUserCommandTests
     }
 
     [Fact]
-    public async Task Handle_NonManagerRole_ThrowsRbacForbiddenException()
+    public async Task Handle_NonAdminOrManagerRole_ThrowsRbacForbiddenException()
     {
         var mock = new Mock<IUserService>();
-        var sut = new CreateUserCommandHandler(mock.Object, BuildCurrentUser(role: "Admin").Object);
+        var sut = new CreateUserCommandHandler(mock.Object, BuildCurrentUser(role: "Staff").Object, BuildEmailService(), BuildNotificationService());
         var cmd = new CreateUserCommand(null, "Name", "a@b.com", "password123", "Staff");
 
         var act = () => sut.Handle(cmd, default);
 
         await act.Should().ThrowAsync<RbacForbiddenException>()
-            .WithMessage("*MANAGER*");
+            .WithMessage("*ADMIN or MANAGER*");
     }
 
     [Fact]
@@ -73,7 +85,7 @@ public class CreateUserCommandTests
         mock.Setup(s => s.GetByEmailAsync("dup@example.com", default))
             .ReturnsAsync(existing);
 
-        var sut = new CreateUserCommandHandler(mock.Object, BuildCurrentUser().Object);
+        var sut = new CreateUserCommandHandler(mock.Object, BuildCurrentUser().Object, BuildEmailService(), BuildNotificationService());
         var cmd = new CreateUserCommand(null, "Name", "DUP@example.com", "password123", "Staff");
 
         var act = () => sut.Handle(cmd, default);
@@ -90,7 +102,7 @@ public class CreateUserCommandTests
         mock.Setup(s => s.CreateAsync(It.IsAny<User>(), default))
             .ReturnsAsync((User u, CancellationToken _) => u);
 
-        var sut = new CreateUserCommandHandler(mock.Object, BuildCurrentUser().Object);
+        var sut = new CreateUserCommandHandler(mock.Object, BuildCurrentUser().Object, BuildEmailService(), BuildNotificationService());
         await sut.Handle(new CreateUserCommand(null, "Nguyen Van A", "a@b.com", "secret123", "Staff"), default);
 
         mock.Verify(s => s.CreateAsync(It.IsAny<User>(), default), Times.Once);
@@ -107,7 +119,7 @@ public class CreateUserCommandTests
             .Callback<User, CancellationToken>((u, _) => captured = u)
             .ReturnsAsync((User u, CancellationToken _) => u);
 
-        var sut = new CreateUserCommandHandler(mock.Object, BuildCurrentUser().Object);
+        var sut = new CreateUserCommandHandler(mock.Object, BuildCurrentUser().Object, BuildEmailService(), BuildNotificationService());
         await sut.Handle(new CreateUserCommand(null, "Name", "User@Example.COM", "secret123", "Staff"), default);
 
         captured!.Email.Should().Be("user@example.com");
@@ -122,7 +134,7 @@ public class CreateUserCommandTests
         mock.Setup(s => s.CreateAsync(It.IsAny<User>(), default))
             .ReturnsAsync((User u, CancellationToken _) => u);
 
-        var sut = new CreateUserCommandHandler(mock.Object, BuildCurrentUser().Object);
+        var sut = new CreateUserCommandHandler(mock.Object, BuildCurrentUser().Object, BuildEmailService(), BuildNotificationService());
         var result = await sut.Handle(
             new CreateUserCommand(null, "Nguyen Van A", "a@b.com", "secret123", "Staff"), default);
 
@@ -139,14 +151,14 @@ public class CreateUserCommandTests
         mock.Setup(s => s.CreateAsync(It.IsAny<User>(), default))
             .ReturnsAsync((User u, CancellationToken _) => u);
 
-        var sut = new CreateUserCommandHandler(mock.Object, BuildCurrentUser().Object);
+        var sut = new CreateUserCommandHandler(mock.Object, BuildCurrentUser().Object, BuildEmailService(), BuildNotificationService());
         await sut.Handle(new CreateUserCommand(null, "Name", "check@b.com", "pass123", "Staff"), default);
 
         mock.Verify(s => s.GetByEmailAsync("check@b.com", default), Times.Once);
     }
 
     [Fact]
-    public async Task Handle_ValidCommand_ForcesStaffRoleAndOrgIdFromToken()
+    public async Task Handle_ManagerCreatesStaff_UsesOrgFromToken()
     {
         var orgId = Guid.NewGuid();
         User? captured = null;
@@ -158,10 +170,26 @@ public class CreateUserCommandTests
             .ReturnsAsync((User u, CancellationToken _) => u);
 
         var currentUserMock = BuildCurrentUser(orgId: orgId);
-        var sut = new CreateUserCommandHandler(mock.Object, currentUserMock.Object);
-        await sut.Handle(new CreateUserCommand(null, "Name", "check@b.com", "pass123", "Manager"), default);
+        var sut = new CreateUserCommandHandler(mock.Object, currentUserMock.Object, BuildEmailService(), BuildNotificationService());
+        await sut.Handle(new CreateUserCommand(null, "Name", "check@b.com", "pass123", "Staff"), default);
 
         captured!.Role.Should().Be(UserRole.Staff);
         captured.OrganizationId.Should().Be(orgId);
+    }
+
+    [Fact]
+    public async Task Handle_ManagerTriesToCreateManager_ThrowsRbacForbiddenException()
+    {
+        var mock = new Mock<IUserService>();
+        mock.Setup(s => s.GetByEmailAsync(It.IsAny<string>(), default))
+            .ReturnsAsync((User?)null);
+
+        var sut = new CreateUserCommandHandler(mock.Object, BuildCurrentUser().Object, BuildEmailService(), BuildNotificationService());
+        var cmd = new CreateUserCommand(null, "Name", "check@b.com", "pass123", "Manager");
+
+        var act = () => sut.Handle(cmd, default);
+
+        await act.Should().ThrowAsync<RbacForbiddenException>()
+            .WithMessage("*MANAGER can only invite STAFF*");
     }
 }

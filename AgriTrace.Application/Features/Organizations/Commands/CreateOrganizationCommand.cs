@@ -1,6 +1,7 @@
 using AgriTrace.Application.Common.Exceptions;
 using AgriTrace.Application.Contracts;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using AgriTrace.Domain.Services;
 using FluentValidation;
 using Mapster;

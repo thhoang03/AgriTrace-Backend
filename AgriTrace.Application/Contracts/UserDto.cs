@@ -1,12 +1,7 @@
-using System;
+using AgriTrace.Domain.Enums;
 
 namespace AgriTrace.Application.Contracts;
 
-/// <summary>
-/// Stub DTO for a user list item. Matches swagger <c>UserListItem</c>.
-/// NOTE: Only the fields needed for the Phase 6 controller stub are populated; the Users
-/// feature (Phase 7) will flesh out the handler and fill these properties.
-/// </summary>
 public class UserDto
 {
     public Guid Id { get; set; }
@@ -26,6 +21,10 @@ public class UserDto
     public string Phone { get; set; } = string.Empty;
 
     public bool IsActive { get; set; }
+
+    public UserStatus Status { get; set; }
+
+    public bool MustChangePassword { get; set; }
 
     public DateTime CreatedAt { get; set; }
 }

@@ -1,17 +1,10 @@
 using AgriTrace.Application.Common.Exceptions;
 using AgriTrace.Application.Contracts;
-using AgriTrace.Domain.Entities.Batches;
-using AgriTrace.Domain.Entities.Categories;
-using AgriTrace.Domain.Entities.Certificates;
-using AgriTrace.Domain.Entities.Events;
 using AgriTrace.Domain.Entities.Notifications;
-using AgriTrace.Domain.Entities.Organizations;
-using AgriTrace.Domain.Entities.Products;
-using AgriTrace.Domain.Entities.QualityInspections;
-using AgriTrace.Domain.Entities.Recalls;
-using AgriTrace.Domain.Entities.Units;
 using AgriTrace.Domain.Entities.Users;
+using AgriTrace.Application.Emails;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using FluentValidation;
 using MediatR;
 
@@ -33,8 +26,9 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
         RuleFor(x => x.Password).NotEmpty().MinimumLength(6);
         RuleFor(x => x.Role)
             .NotEmpty()
-            .Equal("STAFF", StringComparer.OrdinalIgnoreCase)
-            .WithMessage("MANAGER can only invite STAFF via this endpoint.");
+            .Must(r => r.Equals("MANAGER", StringComparison.OrdinalIgnoreCase)
+                    || r.Equals("STAFF", StringComparison.OrdinalIgnoreCase))
+            .WithMessage("Role must be MANAGER or STAFF.");
     }
 }
 
@@ -42,13 +36,19 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserD
 {
     private readonly IUserService _userService;
     private readonly ICurrentUserService _currentUser;
+    private readonly IEmailService _emailService;
+    private readonly INotificationService _notificationService;
 
     public CreateUserCommandHandler(
         IUserService userService,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        IEmailService emailService,
+        INotificationService notificationService)
     {
         _userService = userService;
         _currentUser = currentUser;
+        _emailService = emailService;
+        _notificationService = notificationService;
     }
 
     public async Task<UserDto> Handle(CreateUserCommand request, CancellationToken cancellationToken)
@@ -58,15 +58,23 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserD
             throw new UnauthorizedAccessException("Authentication required to create users.");
         }
 
-        if (_currentUser.Role != "Manager")
+        var isAdmin = string.Equals(_currentUser.Role, "Admin", StringComparison.OrdinalIgnoreCase);
+
+        if (!isAdmin && !string.Equals(_currentUser.Role, "Manager", StringComparison.OrdinalIgnoreCase))
         {
-            throw new RbacForbiddenException("RBAC_INVALID_ROLE", "Only MANAGER can invite staff.");
+            throw new RbacForbiddenException("RBAC_INVALID_ROLE", "Only ADMIN or MANAGER can create users.");
         }
 
         if (!Enum.TryParse<UserRole>(request.Role, ignoreCase: true, out var role)
             || !Enum.IsDefined(typeof(UserRole), role))
         {
             throw new ArgumentException($"Role '{request.Role}' is invalid.");
+        }
+
+        // MANAGER can only create STAFF users
+        if (!isAdmin && role != UserRole.Staff)
+        {
+            throw new RbacForbiddenException("RBAC_INVALID_ROLE", "MANAGER can only invite STAFF.");
         }
 
         var email = request.Email.Trim().ToLowerInvariant();
@@ -77,17 +85,38 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserD
             throw new ConflictException($"Email '{email}' already exists.");
         }
 
-        var organizationId = _currentUser.OrganizationId
-            ?? throw new RbacForbiddenException("RBAC_INVALID_ROLE", "Current user does not belong to an organization.");
+        Guid organizationId;
+        if (isAdmin)
+        {
+            // ADMIN must provide an organizationId
+            organizationId = request.OrganizationId
+                ?? throw new ArgumentException("OrganizationId is required for ADMIN.");
+        }
+        else
+        {
+            // MANAGER uses their own organization
+            organizationId = _currentUser.OrganizationId
+                ?? throw new RbacForbiddenException("RBAC_INVALID_ORG", "Current user does not belong to an organization.");
+        }
 
         var user = new User(
             organizationId,
             request.FullName,
             email,
             User.HashPassword(request.Password),
-            UserRole.Staff);
+            role);
 
         var created = await _userService.CreateAsync(user, cancellationToken);
+
+        var (subject, body) = WelcomeEmailTemplate.Build(
+            request.FullName, email, request.Password);
+        await _emailService.SendAsync(email, subject, body, cancellationToken);
+
+        var notification = new Notification(
+            _currentUser.UserId,
+            "User Created",
+            $"User '{request.FullName}' ({email}) has been created with role {request.Role}.");
+        await _notificationService.CreateAsync(notification, cancellationToken);
 
         return ToDto(created);
     }
@@ -103,6 +132,8 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserD
         OrganizationTypeName = user.Organization?.OrganizationType?.Name ?? string.Empty,
         Phone = user.Phone ?? string.Empty,
         IsActive = user.IsActive,
+        Status = user.Status,
+        MustChangePassword = user.MustChangePassword,
         CreatedAt = user.CreatedAt
     };
 }

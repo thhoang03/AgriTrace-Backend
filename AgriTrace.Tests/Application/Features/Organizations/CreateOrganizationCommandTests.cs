@@ -2,6 +2,7 @@ using AgriTrace.Application.Common.Exceptions;
 using AgriTrace.Application.Features.Organizations.Commands;
 using AgriTrace.Domain.Entities.Organizations;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using FluentAssertions;
 using Moq;
 

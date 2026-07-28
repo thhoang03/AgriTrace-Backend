@@ -44,13 +44,15 @@ public sealed class AuthController : ControllerBase
         {
             AccessToken = result.AccessToken,
             RefreshToken = result.RefreshToken,
+            MustChangePassword = result.MustChangePassword,
             User = new UserBasic
             {
                 Id = result.User.Id,
                 Name = result.User.Name,
                 Email = result.User.Email,
                 Role = result.User.Role,
-                OrganizationType = result.User.OrganizationType
+                OrganizationType = result.User.OrganizationType,
+                MustChangePassword = result.User.MustChangePassword
             }
         };
 

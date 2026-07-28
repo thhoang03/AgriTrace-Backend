@@ -67,6 +67,14 @@ public class UserConfiguration
         builder.Property(x => x.IsActive)
             .HasDefaultValue(true);
 
+        builder.Property(x => x.Status)
+            .HasMaxLength(50)
+            .HasConversion<string>()
+            .HasDefaultValue(AgriTrace.Domain.Enums.UserStatus.Pending);
+
+        builder.Property(x => x.MustChangePassword)
+            .HasDefaultValue(true);
+
 
 
         builder.Property(x => x.CreatedAt)

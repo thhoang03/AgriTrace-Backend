@@ -45,7 +45,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResult>
             throw new ArgumentException("Email hoặc mật khẩu không đúng.");
         }
 
-        if (!user.IsActive)
+        if (user.Status == Domain.Enums.UserStatus.Inactive || !user.IsActive)
         {
             throw new ArgumentException("Tài khoản đã bị vô hiệu hóa.");
         }
@@ -59,13 +59,15 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResult>
         {
             AccessToken = _tokenService.GenerateAccessToken(user),
             RefreshToken = refreshToken,
+            MustChangePassword = user.MustChangePassword,
             User = new UserBasicInfo
             {
                 Id = user.Id,
                 Name = user.FullName,
                 Email = user.Email,
                 Role = user.Role.ToString(),
-                OrganizationType = user.Organization?.OrganizationType?.Code
+                OrganizationType = user.Organization?.OrganizationType?.Code,
+                MustChangePassword = user.MustChangePassword
             }
         };
     }

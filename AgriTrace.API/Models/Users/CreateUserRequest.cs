@@ -3,12 +3,15 @@ using System.Text.Json.Serialization;
 namespace AgriTrace.API.Models.Users;
 
 /// <summary>
-/// Request body for creating a user. Matches swagger <c>CreateUserRequest</c>.
-/// organizationId is not accepted; it is auto-assigned from the authenticated MANAGER's token.
-/// role is a required string enum (STAFF only).
+/// Request body for creating a user.
+/// organizationId: required for ADMIN (select org), ignored for MANAGER (auto-assigned from token).
+/// role: ADMIN can set MANAGER/STAFF; MANAGER is forced to STAFF.
 /// </summary>
 public class CreateUserRequest
 {
+    [JsonPropertyName("organizationId")]
+    public Guid? OrganizationId { get; set; }
+
     [JsonPropertyName("fullName")]
     public string FullName { get; set; } = string.Empty;
 
