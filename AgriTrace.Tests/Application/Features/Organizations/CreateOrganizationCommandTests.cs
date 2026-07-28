@@ -30,7 +30,7 @@ public class CreateOrganizationCommandTests
     public async Task Handle_DuplicateName_ThrowsConflictException()
     {
         var orgTypeId = Guid.NewGuid();
-        var dummyOrgType = new OrganizationType(orgTypeId, "SYSTEM", "Nông trại", "Mô tả", DateTime.UtcNow, null);
+        var dummyOrgType = new OrganizationType(orgTypeId, "FARM", "Nông trại", "Mô tả", DateTime.UtcNow, null);
         var existing = BuildOrganization("Dup Name");
         var mockOrgService = new Mock<IOrganizationService>();
         var mockOrgTypeService = new Mock<IOrganizationTypeService>();
@@ -83,7 +83,7 @@ public class CreateOrganizationCommandTests
         var mockOrgService = new Mock<IOrganizationService>();
         var mockOrgTypeService=new Mock<IOrganizationTypeService>();
 
-        var dummyOrgType = new OrganizationType(orgTypeId, "FARM", "Nông trại", "Mô tả", DateTime.UtcNow, null);
+        var dummyOrgType = new OrganizationType(orgTypeId, "SYSTEM", "Hệ thống", "Mô tả", DateTime.UtcNow, null);
 
         mockOrgService.Setup(s => s.GetByNameAsync(It.IsAny<string>(), default))
             .ReturnsAsync((Organization?)null);
