@@ -6,6 +6,7 @@ using AgriTrace.API.Mapping;
 using AgriTrace.API.Models;
 using AgriTrace.Application.Features.Products.Commands;
 using AgriTrace.Application.Features.Products.Queries;
+using AgriTrace.Domain.Interfaces.Inbound;
 
 namespace AgriTrace.API.Controllers;
 
@@ -18,11 +19,17 @@ namespace AgriTrace.API.Controllers;
 public sealed class ProductsController : ControllerBase
 {
     private readonly ISender _sender;
+    private readonly ICurrentUserService _currentUser;
 
-    public ProductsController(ISender sender)
+    public ProductsController(ISender sender, ICurrentUserService currentUser)
     {
         _sender = sender;
+        _currentUser = currentUser;
     }
+
+    private bool IsAdmin =>
+        string.Equals(_currentUser.Role, "Admin", StringComparison.OrdinalIgnoreCase)
+     || string.Equals(_currentUser.OrganizationType, "System", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Danh sách Product
@@ -30,16 +37,30 @@ public sealed class ProductsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse>> GetAll(
-        Guid? organizationId,
         Guid? categoryId,
         string? search,
         int page = 1,
         int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
+        Guid? orgId = _currentUser.OrganizationId;
+
+        if (!IsAdmin)
+        {
+            if (!orgId.HasValue)
+            {
+                var empty = new ProductPagedResponse([], 0, page, pageSize);
+                return Ok(ApiResponse.Success(empty));
+            }
+        }
+        else
+        {
+            orgId = null;
+        }
+
         var result = await _sender.Send(
             new GetProductsQuery(
-                organizationId,
+                orgId,
                 categoryId,
                 search,
                 page,

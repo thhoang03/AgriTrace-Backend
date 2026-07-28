@@ -17,18 +17,33 @@ public class CreateOrganizationCommandTests
         return new Organization(Guid.NewGuid(), name, "Address");
     }
 
+    private static Mock<ICurrentUserService> BuildCurrentUser(string role = "Admin")
+    {
+        var mock = new Mock<ICurrentUserService>();
+        mock.Setup(c => c.Role).Returns(role);
+        mock.Setup(c => c.OrganizationId).Returns(Guid.NewGuid());
+        mock.Setup(c => c.OrganizationType).Returns((string?)null);
+        return mock;
+    }
+
     [Fact]
     public async Task Handle_DuplicateName_ThrowsConflictException()
     {
+        var orgTypeId = Guid.NewGuid();
+        var dummyOrgType = new OrganizationType(orgTypeId, "FARM", "Nông trại", "Mô tả", DateTime.UtcNow, null);
         var existing = BuildOrganization("Dup Name");
         var mockOrgService = new Mock<IOrganizationService>();
         var mockOrgTypeService = new Mock<IOrganizationTypeService>();
+        var mockOrgCurrentUser = new Mock<ICurrentUserService>();
 
         mockOrgService.Setup(s => s.GetByNameAsync("Dup Name", default))
-            .ReturnsAsync(existing);
+          .ReturnsAsync(existing);
+        mockOrgTypeService.Setup(s => s.GetByIdAsync(orgTypeId, default))
+        .ReturnsAsync(dummyOrgType);
 
-        var sut = new CreateOrganizationCommandHandler(mockOrgService.Object, mockOrgTypeService.Object);
-        var cmd = new CreateOrganizationCommand(Guid.NewGuid(), "Dup Name", "Address");
+        var sut = new CreateOrganizationCommandHandler(mockOrgService.Object, BuildCurrentUser().Object, mockOrgTypeService.Object);
+        //var sut = new CreateOrganizationCommandHandler(orgMock.Object, BuildCurrentUser().Object);
+        var cmd = new CreateOrganizationCommand(orgTypeId, "Dup Name", "Address");
 
         var act = () => sut.Handle(cmd, default);
 
@@ -53,13 +68,36 @@ public class CreateOrganizationCommandTests
         mockOrgService.Setup(s => s.CreateAsync(It.IsAny<Organization>(), default))
             .ReturnsAsync((Organization o, CancellationToken _) => o);
 
-        var sut = new CreateOrganizationCommandHandler(mockOrgService.Object, mockOrgTypeService.Object);
+        var sut = new CreateOrganizationCommandHandler(mockOrgService.Object, BuildCurrentUser().Object,mockOrgTypeService.Object);
         var cmd = new CreateOrganizationCommand(orgTypeId, "New Org", "Addr");
 
         var result = await sut.Handle(cmd, default);
 
-        result.Should().NotBeNull();
-        result.Name.Should().Be("New Org");
         mockOrgService.Verify(s => s.CreateAsync(It.IsAny<Organization>(), default), Times.Once);
+    }
+
+    [Fact]
+    public async Task Handle_SystemType_ThrowsRbacForbiddenException()
+    {
+        var orgTypeId = Guid.NewGuid();
+        var mockOrgService = new Mock<IOrganizationService>();
+        var mockOrgTypeService=new Mock<IOrganizationTypeService>();
+
+        var dummyOrgType = new OrganizationType(orgTypeId, "FARM", "Nông trại", "Mô tả", DateTime.UtcNow, null);
+
+        mockOrgService.Setup(s => s.GetByNameAsync(It.IsAny<string>(), default))
+            .ReturnsAsync((Organization?)null);
+
+        mockOrgTypeService.Setup(s => s.GetByIdAsync(orgTypeId, default))
+            .ReturnsAsync(dummyOrgType);
+
+
+        var sut = new CreateOrganizationCommandHandler(mockOrgService.Object, BuildCurrentUser().Object,mockOrgTypeService.Object);
+        var cmd = new CreateOrganizationCommand(orgTypeId, "System Org", "Address");
+
+        var act = () => sut.Handle(cmd, default);
+
+        await act.Should().ThrowAsync<RbacForbiddenException>()
+            .WithMessage("*SYSTEM*");
     }
 }

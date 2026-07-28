@@ -36,22 +36,33 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
     private readonly IBatchReadService _batchReadService;
     private readonly IBatchWriteService _batchWriteService;
     private readonly IUserService _userService;
+    private readonly ICurrentUserService _currentUser;
 
     public CreateRecallCommandHandler(
         IRecallService recallService,
         IBatchReadService batchReadService,
         IBatchWriteService batchWriteService,
-        IUserService userService
-        )
+        IUserService userService,
+        ICurrentUserService currentUser)
     {
         _recallService = recallService;
         _batchReadService = batchReadService;
         _batchWriteService = batchWriteService;
         _userService = userService;
+        _currentUser = currentUser;
     }
 
     public async Task<RecallCreatedResult> Handle(CreateRecallCommand request, CancellationToken cancellationToken)
     {
+        if (!_currentUser.IsAuthenticated)
+        {
+            throw new UnauthorizedAccessException("Authentication required to create recalls.");
+        }
+
+        if (_currentUser.Role != "Admin" || _currentUser.OrganizationType != "SYSTEM")
+        {
+            throw new RbacForbiddenException("RBAC_FORBIDDEN", "Only system administrator can create recall events.");
+        }
 
         if (request.Severity is < 1 or > 3)
         {

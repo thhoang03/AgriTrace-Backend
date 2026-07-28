@@ -43,6 +43,8 @@ public class UserRepository
     {
 
         var model = await _context.Users
+            .Include(x => x.Organization)
+                .ThenInclude(o => o.OrganizationType)
             .FirstOrDefaultAsync(
                 x => x.Id == id,
                 cancellationToken);
@@ -64,6 +66,8 @@ public class UserRepository
     {
 
         var models = await _context.Users
+            .Include(x => x.Organization)
+                .ThenInclude(o => o.OrganizationType)
             .OrderBy(x => x.Email)
             .ToListAsync(cancellationToken);
 
@@ -86,6 +90,8 @@ public class UserRepository
     {
 
         var query = _context.Users
+            .Include(x => x.Organization)
+                .ThenInclude(o => o.OrganizationType)
             .AsQueryable();
 
 
@@ -237,6 +243,8 @@ public class UserRepository
     {
 
         var model = await _context.Users
+            .Include(x => x.Organization)
+                .ThenInclude(o => o.OrganizationType)
             .FirstOrDefaultAsync(
                 x => x.Email == email,
                 cancellationToken);
@@ -349,7 +357,26 @@ public class UserRepository
             model.RefreshToken,
             model.RefreshTokenExpiry,
             model.ResetPasswordToken,
-            model.ResetPasswordTokenExpiry);
+            model.ResetPasswordTokenExpiry,
+            model.Organization == null
+                ? null
+                : new Organization(
+                    model.Organization.Id,
+                    model.Organization.OrganizationTypeId,
+                    model.Organization.Name,
+                    model.Organization.Address,
+                    model.Organization.Status,
+                    model.Organization.CreatedAt,
+                    model.Organization.UpdatedAt,
+                    model.Organization.OrganizationType == null
+                        ? null
+                        : new OrganizationType(
+                            model.Organization.OrganizationType.Id,
+                            model.Organization.OrganizationType.Code,
+                            model.Organization.OrganizationType.Name,
+                            model.Organization.OrganizationType.Description,
+                            model.Organization.OrganizationType.CreatedAt,
+                            model.Organization.OrganizationType.UpdatedAt)));
 
     }
 

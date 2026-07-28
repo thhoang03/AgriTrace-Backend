@@ -4,6 +4,7 @@ using AgriTrace.API.Models.Users;
 using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Features.Users.Commands;
 using AgriTrace.Application.Features.Users.Queries;
+using AgriTrace.Domain.Interfaces.Inbound;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,28 +20,44 @@ namespace AgriTrace.API.Controllers;
 public sealed class UsersController : ControllerBase
 {
     private readonly ISender _sender;
+    private readonly ICurrentUserService _currentUser;
 
-    public UsersController(ISender sender)
+    public UsersController(ISender sender, ICurrentUserService currentUser)
     {
         _sender = sender;
+        _currentUser = currentUser;
     }
 
     /// <summary>
     /// Lấy danh sách người dùng
     /// </summary>
     [HttpGet]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse>> GetAll(
-        Guid? organizationId,
         string? role,
         string? search,
         int page = 1,
         int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
+        Guid? orgId = _currentUser.OrganizationId;
+
+        if (!IsAdmin)
+        {
+            if (!orgId.HasValue)
+            {
+                var empty = new UserPagedResponse([], 0, page, pageSize);
+                return Ok(ApiResponse.Success(empty));
+            }
+        }
+        else
+        {
+            orgId = null;
+        }
+
         var result = await _sender.Send(
-            new GetUsersPagedQuery(organizationId, role, search, page, pageSize),
+            new GetUsersPagedQuery(orgId, role, search, page, pageSize),
             cancellationToken);
 
         var paged = new UserPagedResponse(
@@ -52,11 +69,15 @@ public sealed class UsersController : ControllerBase
         return Ok(ApiResponse.Success(paged));
     }
 
+    private bool IsAdmin =>
+        string.Equals(_currentUser.Role, "Admin", StringComparison.OrdinalIgnoreCase)
+     || string.Equals(_currentUser.OrganizationType, "System", StringComparison.OrdinalIgnoreCase);
+
     /// <summary>
     /// Tạo User mới
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Manager")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ApiResponse>> Create(
@@ -65,7 +86,7 @@ public sealed class UsersController : ControllerBase
     {
         var result = await _sender.Send(
             new CreateUserCommand(
-                request.OrganizationId,
+                null,
                 request.FullName,
                 request.Email,
                 request.Password,
@@ -137,7 +158,7 @@ public sealed class UsersController : ControllerBase
     /// Cập nhật User
     /// </summary>
     [HttpPut("{userId:guid}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -163,7 +184,7 @@ public sealed class UsersController : ControllerBase
     /// Kích hoạt / Vô hiệu hóa tài khoản
     /// </summary>
     [HttpPatch("{userId:guid}/status")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,Manager")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse>> UpdateStatus(
@@ -180,6 +201,25 @@ public sealed class UsersController : ControllerBase
             "Cập nhật trạng thái người dùng thành công"));
     }
 
+    /// <summary>
+    /// Admin/Manager đặt lại mật khẩu cho user
+    /// </summary>
+    [HttpPost("{userId:guid}/reset-password")]
+    [Authorize(Roles = "Admin,Manager")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse>> AdminResetPassword(
+        Guid userId,
+        [FromBody] AdminResetPasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _sender.Send(
+            new AdminResetPasswordCommand(userId, request.NewPassword),
+            cancellationToken);
+
+        return Ok(ApiResponse.Success(null, "Đặt lại mật khẩu thành công"));
+    }
+
     private static UserListItem ToListItem(UserDto dto) => new()
     {
         UserId = dto.Id,
@@ -188,6 +228,7 @@ public sealed class UsersController : ControllerBase
         Role = dto.Role,
         OrganizationId = dto.OrganizationId,
         OrganizationName = dto.OrganizationName,
+        OrganizationTypeName = dto.OrganizationTypeName,
         IsActive = dto.IsActive,
         CreatedAt = dto.CreatedAt
     };

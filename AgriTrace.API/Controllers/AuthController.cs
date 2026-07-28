@@ -49,7 +49,8 @@ public sealed class AuthController : ControllerBase
                 Id = result.User.Id,
                 Name = result.User.Name,
                 Email = result.User.Email,
-                Role = result.User.Role
+                Role = result.User.Role,
+                OrganizationType = result.User.OrganizationType
             }
         };
 
