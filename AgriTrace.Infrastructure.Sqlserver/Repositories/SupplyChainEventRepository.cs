@@ -394,6 +394,7 @@ public class SupplyChainEventRepository
 
         return new SupplyChainEvent(
 
+            model.Id,
             model.BatchId,
 
             model.EventTypeId,
@@ -408,7 +409,11 @@ public class SupplyChainEventRepository
 
             model.PreviousHash,
 
-            model.CurrentHash
+            model.CurrentHash,
+
+            model.EventTime,
+            model.CreatedAt,
+            model.UpdatedAt
 
         );
 

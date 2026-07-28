@@ -296,8 +296,11 @@ public class UnitRepository
     {
 
         return new Unit(
+            model.Id,
             model.Code,
-            model.Name);
+            model.Name,
+            model.CreatedAt,
+            model.UpdatedAt);
 
     }
 

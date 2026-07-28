@@ -227,8 +227,11 @@ public class EventTypeRepository
     {
 
         return new EventType(
+            model.Id,
             model.Code,
-            model.Name);
+            model.Name,
+            model.CreatedAt,
+            model.UpdatedAt);
 
     }
 
