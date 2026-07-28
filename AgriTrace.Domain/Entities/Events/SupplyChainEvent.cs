@@ -36,6 +36,32 @@ public class SupplyChainEvent : BaseEntity
     }
 
     public SupplyChainEvent(
+        Guid id,
+        Guid batchId,
+        Guid eventTypeId,
+        Guid organizationId,
+        Guid performedByUserId,
+        string? eventData,
+        string? location,
+        string? previousHash,
+        string? currentHash,
+        DateTime eventTime,
+        DateTime createdAt,
+        DateTime? updatedAt)
+        : base(id, createdAt, updatedAt)
+    {
+        BatchId = batchId;
+        EventTypeId = eventTypeId;
+        OrganizationId = organizationId;
+        PerformedByUserId = performedByUserId;
+        EventData = eventData;
+        Location = location;
+        PreviousHash = previousHash;
+        CurrentHash = currentHash;
+        EventTime = eventTime;
+    }
+
+    public SupplyChainEvent(
         Guid batchId,
         Guid eventTypeId,
         Guid organizationId,

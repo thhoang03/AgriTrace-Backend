@@ -110,13 +110,17 @@ public sealed class SupplyChainEventReadRepository : ISupplyChainEventReadReposi
     }
 
     private static SupplyChainEvent ToEntity(SupplyChainEventDataModel model) =>
-        new(model.BatchId,
+        new(model.Id,
+            model.BatchId,
             model.EventTypeId,
             model.OrganizationId,
             model.PerformedByUserId,
             model.EventData,
             model.Location,
             model.PreviousHash,
-            model.CurrentHash);
+            model.CurrentHash,
+            model.EventTime,
+            model.CreatedAt,
+            model.UpdatedAt);
 }
 

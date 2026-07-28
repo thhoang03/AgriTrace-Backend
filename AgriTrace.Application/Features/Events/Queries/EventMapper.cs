@@ -18,14 +18,16 @@ namespace AgriTrace.Application.Features.Events.Queries;
 /// </summary>
 public static class EventMapper
 {
-    public static EventDto ToDto(SupplyChainEvent e, string? eventTypeCode) => new()
+    public static EventDto ToDto(SupplyChainEvent e, string? eventTypeCode, string? organizationName = null, string? performedByName = null) => new()
     {
         EventId = e.Id,
         BatchId = e.BatchId,
         EventTypeId = e.EventTypeId,
         EventTypeCode = eventTypeCode,
         OrganizationId = e.OrganizationId,
+        OrganizationName = organizationName,
         PerformedByUserId = e.PerformedByUserId,
+        PerformedByName = performedByName,
         EventData = e.EventData,
         Location = e.Location,
         PreviousHash = e.PreviousHash,

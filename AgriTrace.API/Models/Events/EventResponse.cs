@@ -25,8 +25,14 @@ public class EventDetail
     [JsonPropertyName("organizationId")]
     public Guid OrganizationId { get; set; }
 
+    [JsonPropertyName("organizationName")]
+    public string? OrganizationName { get; set; }
+
     [JsonPropertyName("performedByUserId")]
     public Guid PerformedByUserId { get; set; }
+
+    [JsonPropertyName("performedByName")]
+    public string? PerformedByName { get; set; }
 
     [JsonPropertyName("eventData")]
     public string? EventData { get; set; }

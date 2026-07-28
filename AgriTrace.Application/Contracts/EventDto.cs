@@ -15,7 +15,11 @@ public class EventDto
 
     public Guid OrganizationId { get; set; }
 
+    public string? OrganizationName { get; set; }
+
     public Guid PerformedByUserId { get; set; }
+
+    public string? PerformedByName { get; set; }
 
     public string? EventData { get; set; }
 
