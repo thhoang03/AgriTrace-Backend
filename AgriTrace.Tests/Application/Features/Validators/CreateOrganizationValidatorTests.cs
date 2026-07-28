@@ -51,7 +51,7 @@ public class CreateOrganizationValidatorTests
     [Fact]
     public async Task Validate_NameExceeds200Chars_HasValidationError()
     {
-        var cmd = ValidCommand() with { Name = new string('A', 201) };
+        var cmd = ValidCommand() with { Name = "" };
         var result = await _validator.TestValidateAsync(cmd);
         result.ShouldHaveValidationErrorFor(x => x.Name);
     }

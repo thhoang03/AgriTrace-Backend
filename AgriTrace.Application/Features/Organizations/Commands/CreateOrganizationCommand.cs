@@ -81,7 +81,7 @@ public sealed class CreateOrganizationCommandValidator
     private async Task<bool> NotBeSystemType(Guid organizationTypeId, CancellationToken cancellationToken)
     {
         var organizationType = await _organizationTypeService.GetByIdAsync(organizationTypeId, cancellationToken);
-        return organizationType is null || !string.Equals(organizationType.Name, "SYSTEM", StringComparison.OrdinalIgnoreCase);
+        return organizationType is null || !string.Equals(organizationType.Code, "SYSTEM", StringComparison.OrdinalIgnoreCase);
     }
 
 }
