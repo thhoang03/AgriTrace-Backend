@@ -2,6 +2,7 @@ using System.ComponentModel.DataAnnotations;
 using AgriTrace.Application.Common.Exceptions;
 using AgriTrace.Application.Contracts;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using FluentValidation;
 using Mapster;
 using MediatR;

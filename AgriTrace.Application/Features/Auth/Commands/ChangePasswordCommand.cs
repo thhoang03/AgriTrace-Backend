@@ -40,6 +40,7 @@ public class ChangePasswordCommandHandler : IRequestHandler<ChangePasswordComman
         }
 
         user.SetPassword(request.NewPassword);
+        user.MarkPasswordChanged();
         await _userService.UpdateAsync(user, cancellationToken);
 
         return MediatR.Unit.Value;

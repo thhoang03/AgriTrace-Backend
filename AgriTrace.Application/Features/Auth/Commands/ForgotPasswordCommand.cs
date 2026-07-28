@@ -1,21 +1,25 @@
 using AgriTrace.Application.Common.Exceptions;
+using AgriTrace.Application.Emails;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using MediatR;
 
 namespace AgriTrace.Application.Features.Auth.Commands;
 
-// STUB: email sending is out of scope (Phase 7 Excluded). We generate and persist a reset token;
-// actual email delivery is a TODO.
 public record ForgotPasswordCommand(
     string Email) : IRequest<MediatR.Unit>;
 
 public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordCommand, MediatR.Unit>
 {
     private readonly IUserService _userService;
+    private readonly IEmailService _emailService;
 
-    public ForgotPasswordCommandHandler(IUserService userService)
+    public ForgotPasswordCommandHandler(
+        IUserService userService,
+        IEmailService emailService)
     {
         _userService = userService;
+        _emailService = emailService;
     }
 
     public async Task<MediatR.Unit> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
@@ -26,7 +30,6 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
 
         if (user is null)
         {
-            // Do not reveal whether the email exists.
             return MediatR.Unit.Value;
         }
 
@@ -36,7 +39,8 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
         user.SetResetPasswordToken(resetToken, DateTime.UtcNow.AddHours(1));
         await _userService.UpdateAsync(user, cancellationToken);
 
-        // TODO: send resetToken via email (Phase 7 stub — not implemented).
+        var (subject, body) = PasswordResetEmailTemplate.Build(user.FullName, resetToken);
+        await _emailService.SendAsync(email, subject, body, cancellationToken);
 
         return MediatR.Unit.Value;
     }

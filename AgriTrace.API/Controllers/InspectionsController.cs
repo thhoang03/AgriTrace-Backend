@@ -2,6 +2,7 @@ using AgriTrace.API.Models;
 using AgriTrace.Application.Features.Inspections.Commands;
 using AgriTrace.Application.Features.Inspections.Queries;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

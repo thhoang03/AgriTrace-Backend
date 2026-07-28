@@ -11,6 +11,8 @@ public class UserBasic
     public string Role { get; set; } = string.Empty;
 
     public string? OrganizationType { get; set; }
+
+    public bool MustChangePassword { get; set; }
 }
 
 public class LoginData
@@ -18,6 +20,8 @@ public class LoginData
     public string AccessToken { get; set; } = string.Empty;
 
     public string RefreshToken { get; set; } = string.Empty;
+
+    public bool MustChangePassword { get; set; }
 
     public UserBasic User { get; set; } = new();
 }

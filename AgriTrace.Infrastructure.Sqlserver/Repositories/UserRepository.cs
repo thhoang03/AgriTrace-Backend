@@ -181,8 +181,16 @@ public class UserRepository
             entity.Email;
 
 
+        model.PasswordHash =
+            entity.PasswordHash;
+
+
         model.FullName =
             entity.FullName;
+
+
+        model.Phone =
+            entity.Phone;
 
 
         model.Role =
@@ -191,6 +199,30 @@ public class UserRepository
 
         model.IsActive =
             entity.IsActive;
+
+
+        model.Status =
+            entity.Status;
+
+
+        model.MustChangePassword =
+            entity.MustChangePassword;
+
+
+        model.RefreshToken =
+            entity.RefreshToken;
+
+
+        model.RefreshTokenExpiry =
+            entity.RefreshTokenExpiry;
+
+
+        model.ResetPasswordToken =
+            entity.ResetPasswordToken;
+
+
+        model.ResetPasswordTokenExpiry =
+            entity.ResetPasswordTokenExpiry;
 
 
         model.UpdatedAt =
@@ -352,6 +384,8 @@ public class UserRepository
             model.Phone,
             model.Role,
             model.IsActive,
+            model.Status,
+            model.MustChangePassword,
             model.CreatedAt,
             model.UpdatedAt,
             model.RefreshToken,
@@ -420,6 +454,14 @@ public class UserRepository
 
             IsActive =
                 entity.IsActive,
+
+
+            Status =
+                entity.Status,
+
+
+            MustChangePassword =
+                entity.MustChangePassword,
 
 
             RefreshToken =

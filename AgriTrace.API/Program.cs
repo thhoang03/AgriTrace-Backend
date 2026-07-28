@@ -51,26 +51,7 @@ app.UseExceptionHandler();
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger(c =>
-    {
-        c.PreSerializeFilters.Add((swaggerDoc, httpReq) =>
-        {
-            try
-            {
-                using var stringWriter = new StringWriter();
-                var yamlWriter = new OpenApiYamlWriter(stringWriter);
-
-                swaggerDoc.SerializeAsV3(yamlWriter);
-
-                var filePath = Path.Combine(Directory.GetCurrentDirectory(), "swagger.yaml");
-                File.WriteAllText(filePath, stringWriter.ToString());
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[Swagger Export Error]: {ex.Message}");
-            }
-        });
-    });
+    app.UseSwagger();
     app.UseSwaggerUI(c =>
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "AgriTrace API v1");

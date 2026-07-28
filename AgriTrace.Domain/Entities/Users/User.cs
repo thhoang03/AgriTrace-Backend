@@ -1,16 +1,8 @@
 using System.Security.Cryptography;
 using AgriTrace.Domain.Common;
-using AgriTrace.Domain.Entities.Batches;
-using AgriTrace.Domain.Entities.Categories;
-using AgriTrace.Domain.Entities.Certificates;
-using AgriTrace.Domain.Entities.Events;
-using AgriTrace.Domain.Entities.Notifications;
 using AgriTrace.Domain.Entities.Organizations;
-using AgriTrace.Domain.Entities.Products;
-using AgriTrace.Domain.Entities.QualityInspections;
-using AgriTrace.Domain.Entities.Recalls;
-using AgriTrace.Domain.Entities.Units;
 using AgriTrace.Domain.Entities.Users;
+using AgriTrace.Domain.Enums;
 
 namespace AgriTrace.Domain.Entities.Users;
 
@@ -29,6 +21,10 @@ public class User : BaseEntity
     public UserRole Role { get; private set; }
 
     public bool IsActive { get; private set; }
+
+    public UserStatus Status { get; private set; }
+
+    public bool MustChangePassword { get; private set; }
 
     // Refresh token storage (Phase 7)
     public string? RefreshToken { get; private set; }
@@ -66,6 +62,8 @@ public class User : BaseEntity
         PasswordHash = passwordHash;
         Role = role;
         IsActive = true;
+        Status = UserStatus.Pending;
+        MustChangePassword = true;
     }
 
     public void UpdateProfile(
@@ -132,6 +130,7 @@ public class User : BaseEntity
     public void Activate()
     {
         IsActive = true;
+        Status = UserStatus.Active;
 
         MarkUpdated();
     }
@@ -139,13 +138,34 @@ public class User : BaseEntity
     public void Deactivate()
     {
         IsActive = false;
+        Status = UserStatus.Inactive;
 
         MarkUpdated();
     }
 
     public void SetChangeStatus(bool isActive)
     {
-        IsActive = isActive;
+        if (isActive)
+        {
+            IsActive = true;
+            Status = UserStatus.Active;
+        }
+        else
+        {
+            IsActive = false;
+            Status = UserStatus.Inactive;
+        }
+        MarkUpdated();
+    }
+
+    public void MarkPasswordChanged()
+    {
+        MustChangePassword = false;
+        if (Status == UserStatus.Pending)
+        {
+            Status = UserStatus.Active;
+            IsActive = true;
+        }
         MarkUpdated();
     }
 
@@ -203,6 +223,8 @@ public class User : BaseEntity
         string? phone,
         UserRole role,
         bool isActive,
+        UserStatus status,
+        bool mustChangePassword,
         DateTime createdAt,
         DateTime? updatedAt,
         string? refreshToken,
@@ -221,6 +243,8 @@ public class User : BaseEntity
             Id = id,
             Phone = phone,
             IsActive = isActive,
+            Status = status,
+            MustChangePassword = mustChangePassword,
             CreatedAt = createdAt,
             UpdatedAt = updatedAt,
             RefreshToken = refreshToken,
