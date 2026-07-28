@@ -1,7 +1,7 @@
 using AgriTrace.API.Models;
-using AgriTrace.API.Services;
 using AgriTrace.Application.Features.Inspections.Commands;
 using AgriTrace.Application.Features.Inspections.Queries;
+using AgriTrace.Domain.Interfaces.Inbound;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -24,6 +24,10 @@ public sealed class InspectionsController : ControllerBase
         _mediator = mediator;
         _currentUser = currentUser;
     }
+
+    private bool IsAdminOrInspectionOrg =>
+        string.Equals(_currentUser.Role, "Admin", StringComparison.OrdinalIgnoreCase)
+     || string.Equals(_currentUser.OrganizationType, "Inspection", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
     /// Danh sách tất cả kiểm định (hỗ trợ lọc theo batchId và phân trang)
@@ -65,7 +69,6 @@ public sealed class InspectionsController : ControllerBase
     /// Tạo kiểm định
     /// </summary>
     [HttpPost("api/v1/batches/{batchId:guid}/inspections")]
-    [Authorize(Roles = "Inspector,Admin")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -74,6 +77,9 @@ public sealed class InspectionsController : ControllerBase
         [FromBody] CreateInspectionRequest request,
         CancellationToken cancellationToken)
     {
+        if (!IsAdminOrInspectionOrg)
+            return Forbid();
+
         var inspectorId = _currentUser.UserId;
 
         var dto = await _mediator.Send(
@@ -149,7 +155,6 @@ public sealed class InspectionsController : ControllerBase
     /// Cập nhật kiểm định
     /// </summary>
     [HttpPut("api/v1/inspections/{inspectionId:guid}")]
-    [Authorize(Roles = "Inspector,Admin")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -158,6 +163,9 @@ public sealed class InspectionsController : ControllerBase
         [FromBody] UpdateInspectionRequest request,
         CancellationToken cancellationToken)
     {
+        if (!IsAdminOrInspectionOrg)
+            return Forbid();
+
         await _mediator.Send(
             new UpdateQualityInspectionCommand(
                 inspectionId,

@@ -101,4 +101,15 @@ public class CreateUserValidatorTests
         var result = await _validator.TestValidateAsync(cmd);
         result.ShouldHaveValidationErrorFor(x => x.Role);
     }
+
+    [Theory]
+    [InlineData("Manager")]
+    [InlineData("Admin")]
+    [InlineData("FARMER")]
+    public async Task Validate_NonStaffRole_HasValidationError(string role)
+    {
+        var cmd = ValidCommand() with { Role = role };
+        var result = await _validator.TestValidateAsync(cmd);
+        result.ShouldHaveValidationErrorFor(x => x.Role);
+    }
 }

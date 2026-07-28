@@ -59,6 +59,10 @@ public class TokenService : ITokenService
         if (user.OrganizationId.HasValue)
         {
             claims.Add(new("organizationId", user.OrganizationId.Value.ToString()));
+            if (user.Organization != null && user.Organization.OrganizationType != null)
+            {
+                claims.Add(new("organizationType", user.Organization.OrganizationType.Code));
+            }
         }
 
         var token = new JwtSecurityToken(

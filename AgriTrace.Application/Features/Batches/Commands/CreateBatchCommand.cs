@@ -34,13 +34,16 @@ public sealed class CreateBatchCommandHandler
 {
 
     private readonly IBatchWriteService _batchWriteService;
+    private readonly IProductReadService? _productReadService;
 
 
 
     public CreateBatchCommandHandler(
-        IBatchWriteService batchWriteService)
+        IBatchWriteService batchWriteService,
+        IProductReadService? productReadService = null)
     {
         _batchWriteService = batchWriteService;
+        _productReadService = productReadService;
     }
 
 
@@ -63,7 +66,22 @@ public sealed class CreateBatchCommandHandler
             command.ProductionDate,
             command.ExpiryDate);
 
-
+        if (_productReadService != null)
+        {
+            var product = await _productReadService.GetByIdAsync(command.ProductId, cancellationToken);
+            if (product != null && product.OrganizationId != Guid.Empty)
+            {
+                batch.ChangeOrganization(product.OrganizationId);
+            }
+            else
+            {
+                batch.ChangeOrganization(new Guid("50000000-0000-0000-0000-000000000001"));
+            }
+        }
+        else
+        {
+            batch.ChangeOrganization(new Guid("50000000-0000-0000-0000-000000000001"));
+        }
 
         var created = await _batchWriteService.CreateAsync(
             batch,

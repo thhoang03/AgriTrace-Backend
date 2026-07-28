@@ -57,6 +57,9 @@ public class UserListItem
     [JsonPropertyName("organizationName")]
     public string? OrganizationName { get; set; }
 
+    [JsonPropertyName("organizationTypeName")]
+    public string? OrganizationTypeName { get; set; }
+
     [JsonPropertyName("isActive")]
     public bool IsActive { get; set; }
 

@@ -17,15 +17,31 @@ public class CreateOrganizationCommandHandler : IRequestHandler<CreateOrganizati
 {
     private readonly IOrganizationService _organizationService;
     private readonly IOrganizationTypeService _organizationTypeService;
+    private readonly ICurrentUserService _currentUser;
 
-    public CreateOrganizationCommandHandler(IOrganizationService organizationService,IOrganizationTypeService organizationTypeService)
+    public CreateOrganizationCommandHandler(
+        IOrganizationService organizationService,
+        ICurrentUserService currentUser)
+                _organizationTypeService = organizationTypeService;
+
     {
         _organizationService = organizationService;
+        _currentUser = currentUser;
         _organizationTypeService = organizationTypeService;
     }
 
     public async Task<OrganizationDto> Handle(CreateOrganizationCommand request, CancellationToken cancellationToken)
     {
+        if (_currentUser.Role != "Admin")
+        {
+            throw new RbacForbiddenException("RBAC_INVALID_ROLE", "Only ADMIN can create organizations.");
+        }
+
+        if (request.Type == "SYSTEM")
+        {
+            throw new RbacForbiddenException("RBAC_ORG_PROHIBITED", "Creating SYSTEM organizations is forbidden via public API.");
+        }
+
         if (await _organizationService.GetByNameAsync(request.Name, cancellationToken) != null)
             throw new ConflictException("Organization name already exists.");
         if (await _organizationTypeService.GetByIdAsync(request.OrganizationTypeId, cancellationToken) == null)
@@ -43,6 +59,11 @@ public sealed class CreateOrganizationCommandValidator
 {
     public CreateOrganizationCommandValidator()
     {
+
+        RuleFor(x => x.Type)
+            .NotEqual("SYSTEM")
+            .WithMessage("SYSTEM organization type is prohibited.");
+
         RuleFor(x => x.Name)
             .NotEmpty()
             .MaximumLength(200);
