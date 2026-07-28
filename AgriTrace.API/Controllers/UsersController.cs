@@ -201,6 +201,25 @@ public sealed class UsersController : ControllerBase
             "Cập nhật trạng thái người dùng thành công"));
     }
 
+    /// <summary>
+    /// Admin/Manager đặt lại mật khẩu cho user
+    /// </summary>
+    [HttpPost("{userId:guid}/reset-password")]
+    [Authorize(Roles = "Admin,Manager")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse>> AdminResetPassword(
+        Guid userId,
+        [FromBody] AdminResetPasswordRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _sender.Send(
+            new AdminResetPasswordCommand(userId, request.NewPassword),
+            cancellationToken);
+
+        return Ok(ApiResponse.Success(null, "Đặt lại mật khẩu thành công"));
+    }
+
     private static UserListItem ToListItem(UserDto dto) => new()
     {
         UserId = dto.Id,

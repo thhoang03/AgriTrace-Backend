@@ -13,6 +13,8 @@ public class UserBasicInfo
     public string Email { get; set; } = string.Empty;
 
     public string Role { get; set; } = string.Empty;
+
+    public string? OrganizationType { get; set; }
 }
 
 /// <summary>

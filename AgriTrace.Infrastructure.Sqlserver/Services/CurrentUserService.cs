@@ -1,12 +1,9 @@
 using System.Security.Claims;
 using AgriTrace.Domain.Interfaces.Inbound;
+using Microsoft.AspNetCore.Http;
 
-namespace AgriTrace.API.Services;
+namespace AgriTrace.Infrastructure.Sqlserver.Services;
 
-/// <summary>
-/// Resolves the current user's identity from <see cref="IHttpContextAccessor"/> and the JWT claims
-/// set by the authentication middleware.
-/// </summary>
 public sealed class CurrentUserService : ICurrentUserService
 {
     private readonly IHttpContextAccessor _httpContextAccessor;

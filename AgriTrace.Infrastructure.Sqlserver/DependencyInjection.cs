@@ -4,6 +4,7 @@ using AgriTrace.Infrastructure.Sqlserver.Persistence;
 using AgriTrace.Infrastructure.Sqlserver.Repositories;
 using AgriTrace.Infrastructure.Sqlserver.Repositories.Read;
 using AgriTrace.Infrastructure.Sqlserver.Repositories.Write;
+using AgriTrace.Infrastructure.Sqlserver.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,7 +34,7 @@ public static class DependencyInjection
 
         RegisterRepositories(services);
 
-
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
 
         return services;
     }
