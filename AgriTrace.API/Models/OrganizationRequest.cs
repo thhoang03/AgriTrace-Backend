@@ -15,7 +15,7 @@ namespace AgriTrace.API.Models
         /// Organization type. One of: FARM, PROCESSOR, DISTRIBUTOR, RETAILER, INSPECTOR_ORG.
         /// </summary>
         [Required]
-        public string Type { get; set; } = string.Empty;
+        public Guid OrganizationTypeId { get; set; }
 
         [StringLength(500)]
         public string? Address { get; set; }

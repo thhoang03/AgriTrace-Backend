@@ -1,25 +1,28 @@
-using System.ComponentModel.DataAnnotations;
 using AgriTrace.Application.Common.Exceptions;
 using AgriTrace.Application.Contracts;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Services;
 using Mapster;
 using MediatR;
+using System.ComponentModel.DataAnnotations;
 
 namespace AgriTrace.Application.Features.Organizations.Commands;
 
 public sealed record UpdateOrganizationCommand(
     Guid Id,
-    [Required] string Type,
+    [Required] Guid OrganizationTypeId,
     [Required][StringLength(200, MinimumLength = 1)] string Name,
     [StringLength(500)] string? Address) : IRequest<OrganizationDto>;
 
 public sealed class UpdateOrganizationCommandHandler : IRequestHandler<UpdateOrganizationCommand, OrganizationDto>
 {
     private readonly IOrganizationService _organizationService;
+    private readonly IOrganizationTypeService _organizationTypeService;
 
-    public UpdateOrganizationCommandHandler(IOrganizationService organizationService)
+    public UpdateOrganizationCommandHandler(IOrganizationService organizationService, IOrganizationTypeService organizationTypeService)
     {
         _organizationService = organizationService;
+        _organizationTypeService = organizationTypeService;
     }
 
     public async Task<OrganizationDto> Handle(UpdateOrganizationCommand request, CancellationToken cancellationToken)
@@ -31,10 +34,11 @@ public sealed class UpdateOrganizationCommandHandler : IRequestHandler<UpdateOrg
         if (duplicate != null && duplicate.Id != request.Id)
             throw new ConflictException("Organization name already exists.");
 
-        // TODO Phase 8: resolve OrganizationType by code from IOrganizationTypeService.
-        var organizationTypeId = existing.OrganizationTypeId;
+        if (await _organizationTypeService.GetByIdAsync(request.OrganizationTypeId, cancellationToken) == null)
+            throw new ConflictException("OrganizationType is not exist!");
 
-        existing.UpdateInformation(organizationTypeId, request.Name, request.Address);
+
+        existing.UpdateInformation(request.OrganizationTypeId, request.Name, request.Address);
         await _organizationService.UpdateAsync(existing, cancellationToken);
 
         return existing.Adapt<OrganizationDto>();
