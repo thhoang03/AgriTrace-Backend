@@ -56,6 +56,7 @@ public sealed class OrganizationsController : ControllerBase
                 OrganizationId = x.Id,
                 Name = x.Name,
                 Type = x.OrganizationTypeCode,
+                Address=x.Address,
                 Status = x.Status.ToString()
             });
 
@@ -72,11 +73,12 @@ public sealed class OrganizationsController : ControllerBase
                 OrganizationId = x.Id,
                 Name = x.Name,
                 Type = x.OrganizationTypeCode,
+                Address = x.Address,
                 Status = x.Status.ToString()
             }),
             result.TotalCount,
             result.PageNumber,
-            result.PageSize);
+            result.PageSize);   
 
         return Ok(ApiResponse.Success(paged));
     }
