@@ -4,6 +4,7 @@ using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Features.Events.Commands;
 using AgriTrace.Application.Features.Events.Queries;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -131,7 +132,9 @@ public sealed class EventsController : ControllerBase
         EventTypeId = dto.EventTypeId,
         EventTypeCode = dto.EventTypeCode,
         OrganizationId = dto.OrganizationId,
+        OrganizationName = dto.OrganizationName,
         PerformedByUserId = dto.PerformedByUserId,
+        PerformedByName = dto.PerformedByName,
         EventData = dto.EventData,
         Location = dto.Location,
         PreviousHash = dto.PreviousHash,
@@ -146,7 +149,9 @@ public sealed class EventsController : ControllerBase
         EventTypeId = dto.EventTypeId,
         EventTypeCode = dto.EventTypeCode,
         OrganizationId = dto.OrganizationId,
+        OrganizationName = dto.OrganizationName,
         PerformedByUserId = dto.PerformedByUserId,
+        PerformedByName = dto.PerformedByName,
         EventData = dto.EventData,
         Location = dto.Location,
         PreviousHash = dto.PreviousHash,

@@ -11,6 +11,7 @@ using AgriTrace.Domain.Entities.Recalls;
 using AgriTrace.Domain.Entities.Units;
 using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using MediatR;
 
 namespace AgriTrace.Application.Features.Events.Commands;
@@ -35,6 +36,7 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
 {
     private readonly IEventService _eventService;
     private readonly IBatchReadService _batchReadService;
+    private readonly IBatchWriteService _batchWriteService;
     private readonly IUserService _userService;
     private readonly IOrganizationService _organizationService;
     private readonly IEventTypeService _eventTypeService;
@@ -43,6 +45,7 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
     public CreateEventCommandHandler(
         IEventService eventService,
         IBatchReadService batchReadService,
+        IBatchWriteService batchWriteService,
         IUserService userService,
         IOrganizationService organizationService,
         IEventTypeService eventTypeService,
@@ -50,6 +53,7 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
     {
         _eventService = eventService;
         _batchReadService = batchReadService;
+        _batchWriteService = batchWriteService;
         _userService = userService;
         _organizationService = organizationService;
         _eventTypeService = eventTypeService;
@@ -96,12 +100,27 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
             }
         }
 
-        if (!isInspectionCrossOrg && user.OrganizationId.HasValue && batch.CurrentOrganizationId != user.OrganizationId.Value)
+        bool isReceiveEvent = eventType.Code == "RECEIVE";
+
+        if (!isInspectionCrossOrg && user.OrganizationId.HasValue)
         {
-            throw new ForbiddenException($"Batch {request.BatchId} is not owned by the current user's organization.");
+            if (isReceiveEvent)
+            {
+                if (batch.CurrentOrganizationId == user.OrganizationId.Value)
+                {
+                    throw new ForbiddenException($"Batch {request.BatchId} already belongs to your organization. Cannot receive a batch you already own.");
+                }
+            }
+            else
+            {
+                if (batch.CurrentOrganizationId != user.OrganizationId.Value)
+                {
+                    throw new ForbiddenException($"Batch {request.BatchId} is not owned by the current user's organization.");
+                }
+            }
         }
 
-        var organizationId = batch.CurrentOrganizationId;
+        var organizationId = isReceiveEvent ? user.OrganizationId!.Value : batch.CurrentOrganizationId;
 
         var entity = new SupplyChainEvent(
             request.BatchId,
@@ -114,6 +133,12 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
             currentHash: null);
 
         var created = await _eventService.CreateEventAsync(entity, cancellationToken);
+
+        if (isReceiveEvent && user.OrganizationId.HasValue)
+        {
+            batch.ChangeOrganization(user.OrganizationId.Value);
+            await _batchWriteService.UpdateAsync(batch, cancellationToken);
+        }
 
         return new EventCreatedResult
         {

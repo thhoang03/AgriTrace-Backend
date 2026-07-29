@@ -5,6 +5,7 @@ using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Features.Users.Commands;
 using AgriTrace.Application.Features.Users.Queries;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -74,10 +75,10 @@ public sealed class UsersController : ControllerBase
      || string.Equals(_currentUser.OrganizationType, "System", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
-    /// Tạo User mới
+    /// Tạo User mới (Admin / Manager)
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Manager")]
+    [Authorize(Roles = "Admin,Manager")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ApiResponse>> Create(
@@ -86,7 +87,7 @@ public sealed class UsersController : ControllerBase
     {
         var result = await _sender.Send(
             new CreateUserCommand(
-                null,
+                request.OrganizationId,
                 request.FullName,
                 request.Email,
                 request.Password,

@@ -15,6 +15,8 @@ public class UserBasicInfo
     public string Role { get; set; } = string.Empty;
 
     public string? OrganizationType { get; set; }
+
+    public bool MustChangePassword { get; set; }
 }
 
 /// <summary>
@@ -25,6 +27,8 @@ public class LoginResult
     public string AccessToken { get; set; } = string.Empty;
 
     public string RefreshToken { get; set; } = string.Empty;
+
+    public bool MustChangePassword { get; set; }
 
     public UserBasicInfo User { get; set; } = new();
 }

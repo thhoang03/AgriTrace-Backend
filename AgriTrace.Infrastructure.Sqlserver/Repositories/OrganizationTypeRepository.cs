@@ -245,9 +245,12 @@ public class OrganizationTypeRepository
     {
 
         return new OrganizationType(
+            model.Id,
             model.Code,
             model.Name,
-            model.Description);
+            model.Description,
+            model.CreatedAt,
+            model.UpdatedAt);
 
     }
     private static OrganizationTypeDataModel ToModel(

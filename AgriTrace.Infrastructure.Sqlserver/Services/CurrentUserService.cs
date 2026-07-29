@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using Microsoft.AspNetCore.Http;
 
 namespace AgriTrace.Infrastructure.Sqlserver.Services;

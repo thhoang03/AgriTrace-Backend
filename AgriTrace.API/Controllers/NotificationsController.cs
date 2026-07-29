@@ -4,6 +4,7 @@ using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Features.Notifications.Commands;
 using AgriTrace.Application.Features.Notifications.Queries;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

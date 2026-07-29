@@ -24,6 +24,7 @@ public class AdminResetPasswordCommandHandler : IRequestHandler<AdminResetPasswo
             ?? throw new NotFoundException($"User {request.UserId} not found.");
 
         user.SetPassword(request.NewPassword);
+        user.MarkPasswordChanged();
         await _userService.UpdateAsync(user, cancellationToken);
 
         return MediatR.Unit.Value;

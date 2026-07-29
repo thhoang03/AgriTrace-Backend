@@ -7,6 +7,7 @@ using AgriTrace.API.Models;
 using AgriTrace.Application.Features.Organizations.Commands;
 using AgriTrace.Application.Features.Organizations.Queries;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 
 namespace AgriTrace.API.Controllers;
 

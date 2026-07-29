@@ -28,6 +28,18 @@ public class EventType : BaseEntity
         Name = name.Trim();
     }
 
+    public EventType(
+        Guid id,
+        string code,
+        string name,
+        DateTime createdAt,
+        DateTime? updatedAt)
+        : base(id, createdAt, updatedAt)
+    {
+        Code = code.Trim();
+        Name = name.Trim();
+    }
+
     public void Update(
         string code,
         string name)

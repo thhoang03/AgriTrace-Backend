@@ -12,13 +12,19 @@ public class GetEventByIdQueryHandler : IRequestHandler<GetEventByIdQuery, Event
 {
     private readonly IEventService _eventService;
     private readonly IEventTypeService _eventTypeService;
+    private readonly IOrganizationService _organizationService;
+    private readonly IUserService _userService;
 
     public GetEventByIdQueryHandler(
         IEventService eventService,
-        IEventTypeService eventTypeService)
+        IEventTypeService eventTypeService,
+        IOrganizationService organizationService,
+        IUserService userService)
     {
         _eventService = eventService;
         _eventTypeService = eventTypeService;
+        _organizationService = organizationService;
+        _userService = userService;
     }
 
     public async Task<EventDto> Handle(GetEventByIdQuery request, CancellationToken cancellationToken)
@@ -28,6 +34,9 @@ public class GetEventByIdQueryHandler : IRequestHandler<GetEventByIdQuery, Event
 
         var type = await _eventTypeService.GetByIdAsync(e.EventTypeId, cancellationToken);
 
-        return EventMapper.ToDto(e, type?.Code);
+        var org = await _organizationService.GetByIdAsync(e.OrganizationId, cancellationToken);
+        var user = await _userService.GetByIdAsync(e.PerformedByUserId, cancellationToken);
+
+        return EventMapper.ToDto(e, type?.Code, org?.Name, user?.FullName ?? user?.Email);
     }
 }

@@ -36,6 +36,8 @@ public static class DependencyInjection
 
         services.AddScoped<ICurrentUserService, CurrentUserService>();
 
+        services.AddScoped<IEmailService, GmailEmailService>();
+
         return services;
     }
 

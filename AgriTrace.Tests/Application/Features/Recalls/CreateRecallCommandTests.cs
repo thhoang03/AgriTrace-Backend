@@ -4,6 +4,7 @@ using AgriTrace.Domain.Entities.Batches;
 using AgriTrace.Domain.Entities.Recalls;
 using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using FluentAssertions;
 using Moq;
 
