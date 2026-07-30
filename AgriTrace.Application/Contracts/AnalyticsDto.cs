@@ -11,6 +11,10 @@ public class OverviewDto
     public int TotalRecalls { get; set; }
     public int ActiveBatches { get; set; }
     public int RecalledBatches { get; set; }
+    public List<MonthlyProductionDto> MonthlyProduction { get; set; } = new();
+    public List<BatchStatusDistributionItemDto> BatchStatus { get; set; } = new();
+    public List<InspectionResultDto> InspectionResults { get; set; } = new();
+    public List<RecallTrendDto> RecallTrend { get; set; } = new();
 }
 
 /// <summary>
@@ -67,4 +71,25 @@ public class RelatedOrganizationDto
     public Guid OrganizationId { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Type { get; set; }
+}
+
+public class MonthlyProductionDto
+{
+    public string Month { get; set; } = string.Empty;
+    public decimal Quantity { get; set; }
+    public int Batches { get; set; }
+}
+
+public class InspectionResultDto
+{
+    public string Month { get; set; } = string.Empty;
+    public int Pass { get; set; }
+    public int Fail { get; set; }
+    public int Pending { get; set; }
+}
+
+public class RecallTrendDto
+{
+    public string Month { get; set; } = string.Empty;
+    public int Recalls { get; set; }
 }

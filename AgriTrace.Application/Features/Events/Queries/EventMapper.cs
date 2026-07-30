@@ -30,6 +30,7 @@ public static class EventMapper
         PerformedByName = performedByName,
         EventData = e.EventData,
         Location = e.Location,
+        InspectionId = e.InspectionId,
         PreviousHash = e.PreviousHash,
         CurrentHash = e.CurrentHash,
         EventTime = e.EventTime

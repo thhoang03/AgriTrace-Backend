@@ -1,15 +1,5 @@
 using AgriTrace.Domain.Common;
-using AgriTrace.Domain.Entities.Batches;
-using AgriTrace.Domain.Entities.Categories;
-using AgriTrace.Domain.Entities.Certificates;
-using AgriTrace.Domain.Entities.Events;
-using AgriTrace.Domain.Entities.Notifications;
-using AgriTrace.Domain.Entities.Organizations;
-using AgriTrace.Domain.Entities.Products;
 using AgriTrace.Domain.Entities.QualityInspections;
-using AgriTrace.Domain.Entities.Recalls;
-using AgriTrace.Domain.Entities.Units;
-using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Inbound;
 using AgriTrace.Domain.Interfaces.Outbound;
 
@@ -29,52 +19,41 @@ public class QualityInspectionService : IQualityInspectionService
         QualityInspection entity,
         CancellationToken cancellationToken = default)
     {
-        return await _repository.AddAsync(
-            entity,
-            cancellationToken);
+        return await _repository.AddAsync(entity, cancellationToken);
     }
 
     public async Task DeleteAsync(
         Guid id,
         CancellationToken cancellationToken = default)
     {
-        await _repository.DeleteAsync(
-            id,
-            cancellationToken);
+        await _repository.DeleteAsync(id, cancellationToken);
     }
 
     public async Task<IReadOnlyList<QualityInspection>> GetAllAsync(
         CancellationToken cancellationToken = default)
     {
-        return await _repository.GetAllAsync(
-            cancellationToken);
+        return await _repository.GetAllAsync(cancellationToken);
     }
 
     public async Task<QualityInspection?> GetByIdAsync(
         Guid id,
         CancellationToken cancellationToken = default)
     {
-        return await _repository.GetByIdAsync(
-            id,
-            cancellationToken);
+        return await _repository.GetByIdAsync(id, cancellationToken);
     }
 
     public async Task<IReadOnlyList<QualityInspection>> GetByBatchAsync(
         Guid batchId,
         CancellationToken cancellationToken = default)
     {
-        return await _repository.GetByBatchAsync(
-            batchId,
-            cancellationToken);
+        return await _repository.GetByBatchAsync(batchId, cancellationToken);
     }
 
     public async Task<IReadOnlyList<QualityInspection>> GetByInspectorAsync(
         Guid inspectorId,
         CancellationToken cancellationToken = default)
     {
-        return await _repository.GetByInspectorAsync(
-            inspectorId,
-            cancellationToken);
+        return await _repository.GetByInspectorAsync(inspectorId, cancellationToken);
     }
 
     public async Task<PagedResult<QualityInspection>> GetPagedAsync(
@@ -82,18 +61,41 @@ public class QualityInspectionService : IQualityInspectionService
         int pageSize,
         CancellationToken cancellationToken = default)
     {
-        return await _repository.GetPagedAsync(
-            pageNumber,
-            pageSize,
-            cancellationToken);
+        return await _repository.GetPagedAsync(pageNumber, pageSize, cancellationToken);
     }
 
     public async Task UpdateAsync(
         QualityInspection entity,
         CancellationToken cancellationToken = default)
     {
-        await _repository.UpdateAsync(
-            entity,
-            cancellationToken);
+        await _repository.UpdateAsync(entity, cancellationToken);
+    }
+
+    public async Task<QualityInspection?> GetByIdWithLabTestsAsync(
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        return await _repository.GetByIdWithLabTestsAsync(id, cancellationToken);
+    }
+
+    public async Task<InspectionLabTest?> GetLabTestByIdAsync(
+        Guid labTestId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _repository.GetLabTestByIdAsync(labTestId, cancellationToken);
+    }
+
+    public async Task DeleteLabTestAsync(
+        Guid labTestId,
+        CancellationToken cancellationToken = default)
+    {
+        await _repository.DeleteLabTestAsync(labTestId, cancellationToken);
+    }
+
+    public async Task AddLabTestAsync(
+        InspectionLabTest labTest,
+        CancellationToken cancellationToken = default)
+    {
+        await _repository.AddLabTestAsync(labTest, cancellationToken);
     }
 }

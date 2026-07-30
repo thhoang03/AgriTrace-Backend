@@ -25,6 +25,8 @@ public class EventDto
 
     public string? Location { get; set; }
 
+    public Guid? InspectionId { get; set; }
+
     public string? PreviousHash { get; set; }
 
     public string? CurrentHash { get; set; }

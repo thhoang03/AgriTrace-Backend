@@ -24,6 +24,9 @@ public class SupplyChainEventDataModel
     public string? Location { get; set; }
 
 
+    public Guid? InspectionId { get; set; }
+
+
     public string? PreviousHash { get; set; }
 
 

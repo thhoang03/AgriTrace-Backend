@@ -69,7 +69,8 @@ public sealed class EventsController : ControllerBase
                 request.EventTypeId,
                 request.EventData,
                 request.Location,
-                _currentUser.UserId),
+                _currentUser.UserId,
+                request.InspectionId),
             cancellationToken);
 
         var data = new EventCreatedData
@@ -137,6 +138,7 @@ public sealed class EventsController : ControllerBase
         PerformedByName = dto.PerformedByName,
         EventData = dto.EventData,
         Location = dto.Location,
+        InspectionId = dto.InspectionId,
         PreviousHash = dto.PreviousHash,
         CurrentHash = dto.CurrentHash,
         EventTime = dto.EventTime
@@ -154,6 +156,7 @@ public sealed class EventsController : ControllerBase
         PerformedByName = dto.PerformedByName,
         EventData = dto.EventData,
         Location = dto.Location,
+        InspectionId = dto.InspectionId,
         PreviousHash = dto.PreviousHash,
         CurrentHash = dto.CurrentHash,
         EventTime = dto.EventTime

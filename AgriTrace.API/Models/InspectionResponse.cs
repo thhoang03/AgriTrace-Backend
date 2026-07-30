@@ -1,11 +1,37 @@
-using System;
 using System.Text.Json.Serialization;
 
 namespace AgriTrace.API.Models;
 
-/// <summary>
-/// Response DTO for a quality inspection record. Matches swagger <c>InspectionDetail</c>.
-/// </summary>
+public class LabTestResponse
+{
+    [JsonPropertyName("id")]
+    public Guid Id { get; set; }
+
+    [JsonPropertyName("testName")]
+    public string TestName { get; set; } = string.Empty;
+
+    [JsonPropertyName("measuredValue")]
+    public string? MeasuredValue { get; set; }
+
+    [JsonPropertyName("unit")]
+    public string? Unit { get; set; }
+
+    [JsonPropertyName("minStandardValue")]
+    public string? MinStandardValue { get; set; }
+
+    [JsonPropertyName("maxStandardValue")]
+    public string? MaxStandardValue { get; set; }
+
+    [JsonPropertyName("isPassed")]
+    public bool IsPassed { get; set; }
+
+    [JsonPropertyName("remark")]
+    public string? Remark { get; set; }
+
+    [JsonPropertyName("createdAt")]
+    public DateTime CreatedAt { get; set; }
+}
+
 public class InspectionResponse
 {
     [JsonPropertyName("inspectionId")]
@@ -23,21 +49,24 @@ public class InspectionResponse
     [JsonPropertyName("inspectorName")]
     public string? InspectorName { get; set; }
 
-    /// <summary>
-    /// Numeric status: 1 = Pending, 2 = Passed, 3 = Failed.
-    /// </summary>
+    [JsonPropertyName("inspectionType")]
+    public int InspectionType { get; set; }
+
     [JsonPropertyName("status")]
     public int Status { get; set; }
 
-    /// <summary>
-    /// String result: "PASS", "FAIL", or null when still Pending.
-    /// </summary>
-    [JsonPropertyName("result")]
-    public string? Result { get; set; }
+    [JsonPropertyName("overallResult")]
+    public string? OverallResult { get; set; }
+
+    [JsonPropertyName("inspectionDate")]
+    public DateTime InspectionDate { get; set; }
 
     [JsonPropertyName("notes")]
     public string? Notes { get; set; }
 
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }
+
+    [JsonPropertyName("labTests")]
+    public List<LabTestResponse> LabTests { get; set; } = new();
 }

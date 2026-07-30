@@ -407,6 +407,8 @@ public class SupplyChainEventRepository
 
             model.Location,
 
+            model.InspectionId,
+
             model.PreviousHash,
 
             model.CurrentHash,
@@ -465,6 +467,11 @@ public class SupplyChainEventRepository
 
             Location =
                 entity.Location,
+
+
+
+            InspectionId =
+                entity.InspectionId,
 
 
 

@@ -26,7 +26,8 @@ public sealed record CreateSupplyChainEventCommand(
     Guid OrganizationId,
     Guid PerformedByUserId,
     string? EventData,
-    string? Location)
+    string? Location,
+    Guid? InspectionId = null)
     : IRequest<SupplyChainEventDto>;
 
 public sealed class CreateSupplyChainEventCommandHandler
@@ -50,6 +51,7 @@ public sealed class CreateSupplyChainEventCommandHandler
             command.PerformedByUserId,
             command.EventData,
             command.Location,
+            inspectionId: command.InspectionId,
             previousHash: null,
             currentHash: null);
 
@@ -67,6 +69,7 @@ public sealed class CreateSupplyChainEventCommandHandler
         PerformedByUserId = e.PerformedByUserId,
         EventData = e.EventData,
         Location = e.Location,
+        InspectionId = e.InspectionId,
         PreviousHash = e.PreviousHash,
         CurrentHash = e.CurrentHash,
         EventTime = e.EventTime,

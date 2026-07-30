@@ -54,11 +54,11 @@ public class CertificateConfiguration
 
         builder.HasOne(x => x.Inspection)
 
-            .WithMany(x => x.Certificates)
+            .WithMany()
 
             .HasForeignKey(x => x.InspectionId)
 
-            .OnDelete(DeleteBehavior.Restrict);
+            .OnDelete(DeleteBehavior.SetNull);
 
 
 
