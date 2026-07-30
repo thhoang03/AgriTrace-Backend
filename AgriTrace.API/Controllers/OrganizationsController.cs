@@ -33,7 +33,7 @@ public sealed class OrganizationsController : ControllerBase
      || string.Equals(_currentUser.OrganizationType, "System", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>
-    /// Lấy danh sách tổ chức (Admin/System only)
+    /// Lấy danh sách tổ chức (Admin/System only) theo organizationTypeId
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
@@ -57,6 +57,7 @@ public sealed class OrganizationsController : ControllerBase
                 OrganizationId = x.Id,
                 Name = x.Name,
                 Type = x.OrganizationTypeCode,
+                OrganizationTypeId=x.OrganizationTypeId,
                 Address=x.Address,
                 Status = x.Status.ToString()
             });
@@ -73,6 +74,7 @@ public sealed class OrganizationsController : ControllerBase
             {
                 OrganizationId = x.Id,
                 Name = x.Name,
+                OrganizationTypeId = x.OrganizationTypeId,
                 Type = x.OrganizationTypeCode,
                 Address = x.Address,
                 Status = x.Status.ToString()

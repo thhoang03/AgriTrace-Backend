@@ -23,6 +23,9 @@ public class OrganizationDetailResponse
     [JsonPropertyName("address")]
     public string? Address { get; set; }
 
+    [JsonPropertyName("organizationTypeId")]
+    public Guid OrganizationTypeId { get; set; }
+
     [JsonPropertyName("type")]
     public string? Type { get; set; }
 
@@ -40,6 +43,9 @@ public class OrganizationListItem
 
     [JsonPropertyName("name")]
     public string Name { get; set; } = null!;
+
+    [JsonPropertyName("organizationTypeId")]
+    public Guid OrganizationTypeId { get; set; }
 
     [JsonPropertyName("type")]
     public string? Type { get; set; }
