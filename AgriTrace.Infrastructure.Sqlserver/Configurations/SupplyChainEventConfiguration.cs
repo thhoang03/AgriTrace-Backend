@@ -31,11 +31,16 @@ public class SupplyChainEventConfiguration
 
 
 
+
+
         builder.Property(x => x.Location)
 
             .HasMaxLength(200);
 
 
+        builder.Property(x => x.InspectionId)
+
+            .IsRequired(false);
 
 
         builder.Property(x => x.PreviousHash)

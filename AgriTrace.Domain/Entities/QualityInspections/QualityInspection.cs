@@ -1,14 +1,5 @@
 using AgriTrace.Domain.Common;
 using AgriTrace.Domain.Entities.Batches;
-using AgriTrace.Domain.Entities.Categories;
-using AgriTrace.Domain.Entities.Certificates;
-using AgriTrace.Domain.Entities.Events;
-using AgriTrace.Domain.Entities.Notifications;
-using AgriTrace.Domain.Entities.Organizations;
-using AgriTrace.Domain.Entities.Products;
-using AgriTrace.Domain.Entities.QualityInspections;
-using AgriTrace.Domain.Entities.Recalls;
-using AgriTrace.Domain.Entities.Units;
 using AgriTrace.Domain.Entities.Users;
 
 namespace AgriTrace.Domain.Entities.QualityInspections;
@@ -19,9 +10,13 @@ public class QualityInspection : BaseEntity
 
     public Guid InspectorId { get; private set; }
 
+    public InspectionType InspectionType { get; private set; }
+
     public InspectionStatus Status { get; private set; }
 
-    public string? Result { get; private set; }
+    public string? OverallResult { get; private set; }
+
+    public DateTime InspectionDate { get; private set; }
 
     public string? Notes { get; private set; }
 
@@ -30,6 +25,9 @@ public class QualityInspection : BaseEntity
     public Batch Batch { get; private set; }
 
     public User Inspector { get; private set; }
+
+    private readonly List<InspectionLabTest> _labTests = new();
+    public IReadOnlyCollection<InspectionLabTest> LabTests => _labTests.AsReadOnly();
 
     private QualityInspection()
     {
@@ -41,18 +39,17 @@ public class QualityInspection : BaseEntity
     public QualityInspection(
         Guid batchId,
         Guid inspectorId,
-        InspectionStatus status,
-        string? result,
+        InspectionType inspectionType,
+        DateTime inspectionDate,
         string? notes)
     {
-        Validate(
-            batchId,
-            inspectorId);
+        Validate(batchId, inspectorId);
 
         BatchId = batchId;
         InspectorId = inspectorId;
-        Status = status;
-        Result = result?.Trim();
+        InspectionType = inspectionType;
+        Status = InspectionStatus.Pending;
+        InspectionDate = inspectionDate;
         Notes = notes?.Trim();
     }
 
@@ -63,47 +60,86 @@ public class QualityInspection : BaseEntity
         Guid id,
         Guid batchId,
         Guid inspectorId,
+        InspectionType inspectionType,
         InspectionStatus status,
-        string? result,
+        string? overallResult,
+        DateTime inspectionDate,
         string? notes,
         DateTime createdAt,
-        DateTime? updatedAt)
+        DateTime? updatedAt,
+        IReadOnlyCollection<InspectionLabTest>? labTests = null,
+        Batch? batch = null,
+        User? inspector = null)
         : base(id, createdAt, updatedAt)
     {
         Validate(batchId, inspectorId);
 
         BatchId = batchId;
         InspectorId = inspectorId;
+        InspectionType = inspectionType;
         Status = status;
-        Result = result?.Trim();
+        OverallResult = overallResult?.Trim();
+        InspectionDate = inspectionDate;
         Notes = notes?.Trim();
+
+        if (labTests != null)
+        {
+            _labTests.AddRange(labTests);
+        }
+
+        if (batch != null) Batch = batch;
+        if (inspector != null) Inspector = inspector;
     }
 
-    public void UpdateResult(
-        InspectionStatus status,
-        string? result,
-        string? notes)
+    public void Conclude(string overallResult, string? notes)
     {
-        Status = status;
-        Result = result?.Trim();
+        if (overallResult != "PASS" && overallResult != "FAIL")
+            throw new ArgumentException("OverallResult must be 'PASS' or 'FAIL'.");
+
+        if (Status != InspectionStatus.Pending)
+            throw new InvalidOperationException("Cannot conclude an inspection that is not in Pending status.");
+
+        OverallResult = overallResult.Trim();
+        Status = overallResult == "PASS"
+            ? InspectionStatus.Passed
+            : InspectionStatus.Failed;
         Notes = notes?.Trim();
 
         MarkUpdated();
     }
 
-    private static void Validate(
-        Guid batchId,
-        Guid inspectorId)
+    public InspectionLabTest AddLabTest(
+        string testName,
+        string? measuredValue,
+        string? unit,
+        string? minStandardValue,
+        string? maxStandardValue,
+        bool isPassed,
+        string? remark)
+    {
+        var test = new InspectionLabTest(
+            Id,
+            testName,
+            measuredValue,
+            unit,
+            minStandardValue,
+            maxStandardValue,
+            isPassed,
+            remark);
+
+        _labTests.Add(test);
+        MarkUpdated();
+
+        return test;
+    }
+
+    private static void Validate(Guid batchId, Guid inspectorId)
     {
         if (batchId == Guid.Empty)
-        {
             throw new ArgumentException("Batch is required.");
-        }
 
         if (inspectorId == Guid.Empty)
-        {
             throw new ArgumentException("Inspector is required.");
-        }
     }
 }
 

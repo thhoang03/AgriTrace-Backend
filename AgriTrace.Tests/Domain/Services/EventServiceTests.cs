@@ -36,7 +36,7 @@ public class EventServiceTests
 
     private static SupplyChainEvent CreateEvent(string? eventData = "data", string? currentHash = null)
     {
-        var evt = new SupplyChainEvent(BatchId, EventTypeId, OrgId, UserId, eventData, null, null, null);
+        var evt = new SupplyChainEvent(BatchId, EventTypeId, OrgId, UserId, eventData, null, null, null, null);
         if (currentHash != null)
             evt.SetHash("GENESIS", currentHash);
         return evt;
@@ -55,7 +55,7 @@ public class EventServiceTests
             .Setup(h => h.ComputeHash("GENESIS", "harvest"))
             .Returns("COMPUTED_HASH");
 
-        var entity = new SupplyChainEvent(BatchId, EventTypeId, OrgId, UserId, "harvest", null, null, null);
+        var entity = new SupplyChainEvent(BatchId, EventTypeId, OrgId, UserId, "harvest", null, null, null, null);
 
         _repoMock
             .Setup(r => r.AddAsync(entity, default))
@@ -84,7 +84,7 @@ public class EventServiceTests
             .Setup(h => h.ComputeHash("LAST_HASH", "new data"))
             .Returns("NEW_HASH");
 
-        var newEntity = new SupplyChainEvent(BatchId, EventTypeId, OrgId, UserId, "new data", null, null, null);
+        var newEntity = new SupplyChainEvent(BatchId, EventTypeId, OrgId, UserId, "new data", null, null, null, null);
 
         _repoMock
             .Setup(r => r.AddAsync(newEntity, default))
@@ -110,7 +110,7 @@ public class EventServiceTests
             .Setup(h => h.ComputeHash(It.IsAny<string>(), It.IsAny<string>()))
             .Returns("HASH");
 
-        var entity = new SupplyChainEvent(BatchId, EventTypeId, OrgId, UserId, "d", null, null, null);
+        var entity = new SupplyChainEvent(BatchId, EventTypeId, OrgId, UserId, "d", null, null, null, null);
 
         _repoMock
             .Setup(r => r.AddAsync(entity, default))
@@ -146,10 +146,10 @@ public class EventServiceTests
         var hash1 = hashService.ComputeHash("GENESIS", data1);
         var hash2 = hashService.ComputeHash(hash1, data2);
 
-        var evt1 = new SupplyChainEvent(BatchId, EventTypeId, OrgId, UserId, data1, null, null, null);
+        var evt1 = new SupplyChainEvent(BatchId, EventTypeId, OrgId, UserId, data1, null, null, null, null);
         evt1.SetHash("GENESIS", hash1);
 
-        var evt2 = new SupplyChainEvent(BatchId, EventTypeId, OrgId, UserId, data2, null, null, null);
+        var evt2 = new SupplyChainEvent(BatchId, EventTypeId, OrgId, UserId, data2, null, null, null, null);
         evt2.SetHash(hash1, hash2);
 
         _repoMock
@@ -171,7 +171,7 @@ public class EventServiceTests
         var data1 = "event one";
         var hash1 = hashService.ComputeHash("GENESIS", data1);
 
-        var evt1 = new SupplyChainEvent(BatchId, EventTypeId, OrgId, UserId, data1, null, null, null);
+        var evt1 = new SupplyChainEvent(BatchId, EventTypeId, OrgId, UserId, data1, null, null, null, null);
         // Tamper: set a wrong CurrentHash
         evt1.SetHash("GENESIS", "TAMPERED_HASH_NOT_VALID");
 

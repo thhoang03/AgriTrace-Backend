@@ -40,6 +40,9 @@ public class EventDetail
     [JsonPropertyName("location")]
     public string? Location { get; set; }
 
+    [JsonPropertyName("inspectionId")]
+    public Guid? InspectionId { get; set; }
+
     [JsonPropertyName("previousHash")]
     public string? PreviousHash { get; set; }
 

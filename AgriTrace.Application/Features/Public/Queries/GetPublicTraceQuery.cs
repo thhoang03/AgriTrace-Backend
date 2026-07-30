@@ -92,7 +92,7 @@ public class GetPublicTraceQueryHandler : IRequestHandler<GetPublicTraceQuery, P
             var inspector = await _userService.GetByIdAsync(inspection.InspectorId, cancellationToken);
             inspectionSummaries.Add(new PublicInspectionDto
             {
-                Result = inspection.Result,
+                Result = inspection.OverallResult,
                 InspectorName = inspector?.FullName,
                 CreatedAt = inspection.CreatedAt
             });

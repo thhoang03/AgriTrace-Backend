@@ -680,9 +680,11 @@ public static class SeedData
                 Id = new Guid("A0000000-0000-0000-0000-000000000001"),
                 BatchId = new Guid("80000000-0000-0000-0000-000000000001"),
                 InspectorId = new Guid("70000000-0000-0000-0000-000000000004"), // Inspector
+                InspectionType = InspectionType.RawMaterial,
                 Status = InspectionStatus.Passed,
-                Result = "All standards met. No pesticide residue found.",
-                Notes = "Excellent quality.",
+                OverallResult = "PASS",
+                InspectionDate = new DateTime(2026, 6, 1, 0, 0, 0, DateTimeKind.Utc),
+                Notes = "Excellent quality. All standards met.",
                 CreatedAt = new DateTime(2026, 6, 2, 9, 0, 0, DateTimeKind.Utc)
             }
         );

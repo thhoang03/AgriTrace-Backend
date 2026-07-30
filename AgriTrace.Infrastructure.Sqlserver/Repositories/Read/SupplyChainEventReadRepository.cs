@@ -117,6 +117,7 @@ public sealed class SupplyChainEventReadRepository : ISupplyChainEventReadReposi
             model.PerformedByUserId,
             model.EventData,
             model.Location,
+            model.InspectionId,
             model.PreviousHash,
             model.CurrentHash,
             model.EventTime,

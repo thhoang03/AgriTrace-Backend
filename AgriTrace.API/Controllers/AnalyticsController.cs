@@ -1,5 +1,6 @@
 using AgriTrace.API.Models;
 using AgriTrace.API.Models.Analytics;
+using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Features.Analytics.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
@@ -39,7 +40,31 @@ public sealed class AnalyticsController : ControllerBase
             TotalEvents = dto.TotalEvents,
             TotalRecalls = dto.TotalRecalls,
             ActiveBatches = dto.ActiveBatches,
-            RecalledBatches = dto.RecalledBatches
+            RecalledBatches = dto.RecalledBatches,
+            MonthlyProduction = dto.MonthlyProduction.Select(m => new MonthlyProductionData
+            {
+                Month = m.Month,
+                Quantity = m.Quantity,
+                Batches = m.Batches
+            }).ToList(),
+            BatchStatus = dto.BatchStatus.Select(s => new BatchStatusDistributionItem
+            {
+                Status = s.Status,
+                StatusName = s.StatusName,
+                Count = s.Count
+            }).ToList(),
+            InspectionResults = dto.InspectionResults.Select(i => new InspectionResultData
+            {
+                Month = i.Month,
+                Pass = i.Pass,
+                Fail = i.Fail,
+                Pending = i.Pending
+            }).ToList(),
+            RecallTrend = dto.RecallTrend.Select(r => new RecallTrendData
+            {
+                Month = r.Month,
+                Recalls = r.Recalls
+            }).ToList()
         };
 
         return Ok(ApiResponse.Success(data));
