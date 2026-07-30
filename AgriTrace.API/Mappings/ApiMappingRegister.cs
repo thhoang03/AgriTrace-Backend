@@ -199,6 +199,7 @@ internal static class ApiMappings
             OrganizationId = dto.Id,
             Name = dto.Name,
             Address = dto.Address,
+            OrganizationTypeId = dto.OrganizationTypeId,
             Type = dto.OrganizationTypeCode,
             Status = dto.Status.ToString()
         };
