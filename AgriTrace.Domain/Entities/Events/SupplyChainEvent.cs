@@ -16,6 +16,8 @@ public class SupplyChainEvent : BaseEntity
 
     public string? Location { get; private set; }
 
+    public Guid? InspectionId { get; private set; }
+
     public string? PreviousHash { get; private set; }
 
     public string? CurrentHash { get; private set; }
@@ -43,6 +45,7 @@ public class SupplyChainEvent : BaseEntity
         Guid performedByUserId,
         string? eventData,
         string? location,
+        Guid? inspectionId,
         string? previousHash,
         string? currentHash,
         DateTime eventTime,
@@ -56,6 +59,7 @@ public class SupplyChainEvent : BaseEntity
         PerformedByUserId = performedByUserId;
         EventData = eventData;
         Location = location;
+        InspectionId = inspectionId;
         PreviousHash = previousHash;
         CurrentHash = currentHash;
         EventTime = eventTime;
@@ -68,6 +72,7 @@ public class SupplyChainEvent : BaseEntity
         Guid performedByUserId,
         string? eventData,
         string? location,
+        Guid? inspectionId,
         string? previousHash,
         string? currentHash)
     {
@@ -86,6 +91,7 @@ public class SupplyChainEvent : BaseEntity
         PerformedByUserId = performedByUserId;
         EventData = eventData;
         Location = location;
+        InspectionId = inspectionId;
         PreviousHash = previousHash;
         CurrentHash = currentHash;
         EventTime = DateTime.UtcNow;

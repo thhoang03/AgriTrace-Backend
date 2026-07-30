@@ -4,6 +4,7 @@ using AgriTrace.Infrastructure.Sqlserver.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgriTrace.Infrastructure.Sqlserver.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260729064433_RedesignQualityInspection")]
+    partial class RedesignQualityInspection
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -522,21 +525,17 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.Property<bool>("IsPassed")
                         .HasColumnType("bit");
 
-                    b.Property<string>("MaxStandardValue")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
                     b.Property<string>("MeasuredValue")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("MinStandardValue")
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("Remark")
                         .HasMaxLength(500)
                         .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("StandardValue")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<string>("TestName")
                         .IsRequired()
@@ -1089,9 +1088,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         .HasDefaultValueSql("GETDATE()");
 
                     b.Property<Guid>("EventTypeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("InspectionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Location")

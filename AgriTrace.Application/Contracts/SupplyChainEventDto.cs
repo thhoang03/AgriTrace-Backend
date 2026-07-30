@@ -16,6 +16,8 @@ public sealed class SupplyChainEventDto
 
     public string? Location { get; init; }
 
+    public Guid? InspectionId { get; init; }
+
     public string? PreviousHash { get; init; }
 
     public string? CurrentHash { get; init; }

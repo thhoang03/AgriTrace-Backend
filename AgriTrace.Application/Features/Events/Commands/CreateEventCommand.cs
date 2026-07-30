@@ -30,7 +30,8 @@ public record CreateEventCommand(
     Guid EventTypeId,
     string? EventData,
     string? Location,
-    Guid PerformedByUserId) : IRequest<EventCreatedResult>;
+    Guid PerformedByUserId,
+    Guid? InspectionId = null) : IRequest<EventCreatedResult>;
 
 public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, EventCreatedResult>
 {
@@ -129,6 +130,7 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
             performedByUserId,
             request.EventData,
             request.Location,
+            request.InspectionId,
             previousHash: null,
             currentHash: null);
 

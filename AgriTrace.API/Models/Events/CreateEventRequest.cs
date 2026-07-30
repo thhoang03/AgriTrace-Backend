@@ -17,4 +17,7 @@ public class CreateEventRequest
 
     [JsonPropertyName("location")]
     public string? Location { get; set; }
+
+    [JsonPropertyName("inspectionId")]
+    public Guid? InspectionId { get; set; }
 }

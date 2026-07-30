@@ -1,14 +1,4 @@
-using AgriTrace.Domain.Entities.Batches;
-using AgriTrace.Domain.Entities.Categories;
-using AgriTrace.Domain.Entities.Certificates;
-using AgriTrace.Domain.Entities.Events;
-using AgriTrace.Domain.Entities.Notifications;
-using AgriTrace.Domain.Entities.Organizations;
-using AgriTrace.Domain.Entities.Products;
 using AgriTrace.Domain.Entities.QualityInspections;
-using AgriTrace.Domain.Entities.Recalls;
-using AgriTrace.Domain.Entities.Units;
-using AgriTrace.Domain.Entities.Users;
 
 namespace AgriTrace.Domain.Interfaces.Inbound;
 
@@ -21,5 +11,21 @@ public interface IQualityInspectionService
 
     Task<IReadOnlyList<QualityInspection>> GetByInspectorAsync(
         Guid inspectorId,
+        CancellationToken cancellationToken = default);
+
+    Task<QualityInspection?> GetByIdWithLabTestsAsync(
+        Guid id,
+        CancellationToken cancellationToken = default);
+
+    Task<InspectionLabTest?> GetLabTestByIdAsync(
+        Guid labTestId,
+        CancellationToken cancellationToken = default);
+
+    Task DeleteLabTestAsync(
+        Guid labTestId,
+        CancellationToken cancellationToken = default);
+
+    Task AddLabTestAsync(
+        InspectionLabTest labTest,
         CancellationToken cancellationToken = default);
 }

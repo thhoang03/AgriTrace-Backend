@@ -86,6 +86,8 @@ public class ApplicationDbContext : DbContext
     public DbSet<QualityInspectionDataModel> QualityInspections
         => Set<QualityInspectionDataModel>();
 
+    public DbSet<InspectionLabTestDataModel> InspectionLabTests
+        => Set<InspectionLabTestDataModel>();
 
     public DbSet<CertificateDataModel> Certificates
         => Set<CertificateDataModel>();

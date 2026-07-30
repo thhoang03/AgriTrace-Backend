@@ -89,6 +89,12 @@ namespace AgriTrace.API.Common
                 case ArgumentException:
                     return (HttpStatusCode.BadRequest, exception.Message, SingleError(exception.Message));
 
+                case KeyNotFoundException:
+                    return (HttpStatusCode.NotFound, exception.Message, SingleError(exception.Message));
+
+                case InvalidOperationException:
+                    return (HttpStatusCode.BadRequest, exception.Message, SingleError(exception.Message));
+
                 default:
                     const string genericMessage = "An unexpected error occurred.";
                     return (HttpStatusCode.InternalServerError, genericMessage, SingleError(genericMessage));

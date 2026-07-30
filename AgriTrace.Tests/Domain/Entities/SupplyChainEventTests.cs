@@ -23,7 +23,7 @@ public class SupplyChainEventTests
     private static SupplyChainEvent CreateValid(
         string? eventData = "some data",
         string? location = "Ha Noi")
-        => new(ValidBatchId, ValidEventTypeId, ValidOrgId, ValidUserId, eventData, location, null, null);
+        => new(ValidBatchId, ValidEventTypeId, ValidOrgId, ValidUserId, eventData, location, null, null, null);
 
     // ── Constructor — happy path ─────────────────────────────────────────────
     [Fact]
@@ -70,7 +70,7 @@ public class SupplyChainEventTests
     public void Constructor_EmptyBatchId_Throws()
     {
         var act = () => new SupplyChainEvent(
-            Guid.Empty, ValidEventTypeId, ValidOrgId, ValidUserId, null, null, null, null);
+            Guid.Empty, ValidEventTypeId, ValidOrgId, ValidUserId, null, null, null, null, null);
         act.Should().Throw<ArgumentException>();
     }
 
@@ -78,7 +78,7 @@ public class SupplyChainEventTests
     public void Constructor_EmptyOrganizationId_Throws()
     {
         var act = () => new SupplyChainEvent(
-            ValidBatchId, ValidEventTypeId, Guid.Empty, ValidUserId, null, null, null, null);
+            ValidBatchId, ValidEventTypeId, Guid.Empty, ValidUserId, null, null, null, null, null);
         act.Should().Throw<ArgumentException>();
     }
 
@@ -86,7 +86,7 @@ public class SupplyChainEventTests
     public void Constructor_EmptyPerformedByUserId_Throws()
     {
         var act = () => new SupplyChainEvent(
-            ValidBatchId, ValidEventTypeId, ValidOrgId, Guid.Empty, null, null, null, null);
+            ValidBatchId, ValidEventTypeId, ValidOrgId, Guid.Empty, null, null, null, null, null);
         act.Should().Throw<ArgumentException>();
     }
 

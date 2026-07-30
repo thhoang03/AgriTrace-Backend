@@ -34,7 +34,7 @@ public class SupplyChainEventWriteServiceTests
     }
 
     private SupplyChainEvent BuildEntity(string? data = "data")
-        => new(BatchId, EventTypeId, OrgId, UserId, data, null, null, null);
+        => new(BatchId, EventTypeId, OrgId, UserId, data, null, null, null, null);
 
     // ── CreateAsync — no prior event ─────────────────────────────────────────
     [Fact]
