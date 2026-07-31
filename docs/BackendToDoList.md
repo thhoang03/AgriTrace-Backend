@@ -31,7 +31,7 @@
   - [x] `Unit` entity (kg, ton, box...)
   - [x] `Product` entity (thuộc Organization + Category + Unit)
   - [x] `Batch` entity (**aggregate root trung tâm**): BatchCode, QRCode, Quantity, RemainingQuantity, Status, HarvestDate, ParentBatchId, RootBatchId
-  - [x] `EventType` (enum: HARVEST, RECEIVE, PROCESSING, PACKAGING, TRANSPORT, DISTRIBUTION, RETAIL, SALE, INSPECTION, SPLIT, MERGE, RECALL)
+  - [x] `EventType` (entity, 11 event types: HARVEST, RECEIVE, PROCESSING, PACKAGING, TRANSPORT, DISTRIBUTION, RETAIL, INSPECTION, SPLIT, MERGE, RECALL)
   - [x] `SupplyChainEvent` entity (**append-only**): BatchId, EventType, OrganizationId, UserId, EventData, Location, PreviousHash, CurrentHash
   - [x] `QualityInspection` entity (BatchId, InspectorId, Status, Result, Notes)
   - [x] `Certificate` entity (BatchId, InspectionId, Type, FileUrl)
@@ -53,8 +53,11 @@
 ### 1.4 Authentication & Authorization
 - [x] JWT Authentication (Access Token + Refresh Token)
 - [x] `AuthService` (Login, RefreshToken, Logout, ChangePassword)
-- [x] Role-based Authorization (RBAC): ADMIN, MANAGER, STAFF, FARMER, INSPECTOR, CONSUMER
-- [x] Permission check theo OrganizationType + EventType
+- [x] **2-layer RBAC**:
+  - [x] **Layer 1 — Role-based**: `[Authorize]` + JWT claims (`Admin`, `Manager`, `Staff`); old roles (`Farmer`, `Inspector`, `Consumer`) migrated to `Staff` via `MigrateObsoleteRoles` migration
+  - [x] **Layer 2 — OrganizationType × EventType matrix**: `EventPermissionRules.IsAllowed(orgTypeCode, eventTypeCode)` enforces event-type permissions per org type
+  - [x] **Batch ownership guard**: `batch.CurrentOrganizationId == user.OrganizationId` (exception: `INSPECTION` org's cross-org INSPECTION events)
+  - [x] **Admin bypass**: Admin skips Layer 2 event check but still obeys batch ownership guard
 - [x] `CurrentUserService` (lấy thông tin user từ JWT claims)
 
 ### 1.5 API Contract & Response chuẩn
@@ -138,9 +141,10 @@
 - [x] `LookupController` (roles, organization-types, event-types, units, ...)
 
 ### 2.9 Testing Sprint 2
-- [ ] Unit Tests cho Domain entities (guard clauses, business rules)
-- [ ] Unit Tests cho HashChainService
-- [ ] Unit Tests cho Application handlers (Commands/Queries)
+- [x] Unit Tests cho Domain entities (guard clauses, business rules)
+- [x] Unit Tests cho HashChainService
+- [x] Unit Tests cho Application handlers (Commands/Queries)
+- [x] Unit Tests cho EventPermissionRules (Layer 2 RBAC matrix)
 - [ ] Unit Tests cho API Controllers
 - [ ] Coverage tối thiểu 60% logic nghiệp vụ
 
@@ -230,7 +234,7 @@
 - [x] **US-AUTH-04** — Là người dùng, tôi muốn đổi mật khẩu để bảo mật tài khoản.
 - [x] **US-AUTH-05** — Là người dùng, tôi muốn xem/cập nhật hồ sơ cá nhân (profile).
 - [ ] **US-AUTH-06** — Là người dùng, tôi muốn nhận thông báo lỗi rõ ràng khi sai thông tin đăng nhập / token hết hạn (chuẩn hóa mã lỗi).
-- [ ] **US-AUTH-07** — Là người dùng, tôi muốn quên mật khẩu và đặt lại qua email (forgot/reset password).
+- [x] **US-AUTH-07** — Là người dùng, tôi muốn quên mật khẩu và đặt lại qua email (forgot/reset password).
 
 ### Admin
 - [x] **US-ADM-01** — Là Admin, tôi muốn quản lý (CRUD) tổ chức để cấu hình các mắt xích chuỗi cung ứng.
@@ -247,13 +251,13 @@
 - [x] **US-MGR-02** — Là Manager, tôi muốn quản lý (CRUD) sản phẩm thuộc tổ chức.
 - [x] **US-MGR-03** — Là Manager, tôi muốn quản lý các lô hàng (Batch) thuộc phạm vi tổ chức sở hữu.
 - [x] **US-MGR-04** — Là Manager, tôi muốn xem danh sách người dùng và sản phẩm của tổ chức.
-- [ ] **US-MGR-05** — Là Manager, tôi muốn giới hạn dữ liệu chỉ thấy được của tổ chức mình (data scoping/tenant filter theo OrganizationId).
+- [ ] **US-MGR-05** — Là Manager, tôi muốn giới hạn dữ liệu chỉ thấy được của tổ chức mình (data scoping/tenant filter theo OrganizationId, batch ownership guard).
 - [ ] **US-MGR-06** — Là Manager, tôi muốn upload hình ảnh sản phẩm/batch thật (lưu trữ file/cloud storage).
 
 ### Staff / Farmer (nghiệp vụ theo Organization Type)
 - [x] **US-STF-01** — Là Staff, tôi muốn tạo lô hàng mới (Batch) kèm sinh BatchCode + QR Code.
 - [x] **US-STF-02** — Là Staff, tôi muốn ghi nhận sự kiện chuỗi cung ứng (Event) cho lô hàng.
-- [x] **US-STF-03** — Là Staff, tôi muốn chỉ được tạo loại event phù hợp với Organization Type (event permission).
+- [x] **US-STF-03** — Là Staff, tôi muốn chỉ được tạo loại event phù hợp với Organization Type (event permission, Layer 2 RBAC matrix).
 - [x] **US-STF-04** — Là Staff, tôi muốn chia lô (Split) và gộp lô (Merge) với cập nhật số lượng còn lại.
 - [x] **US-STF-05** — Là Staff, tôi muốn cập nhật trạng thái lô hàng.
 - [x] **US-STF-06** — Là Staff, tôi muốn mỗi event được ký hash chain (PreviousHash/CurrentHash) và append-only để đảm bảo toàn vẹn.
@@ -265,7 +269,7 @@
 - [x] **US-INS-03** — Là Inspector, tôi muốn cấp chứng nhận (Certificate) cho lô hàng đạt yêu cầu.
 - [x] **US-INS-04** — Là Inspector, tôi muốn thu hồi chứng nhận đã cấp.
 - [ ] **US-INS-05** — Là Inspector, tôi muốn upload file chứng nhận thật (PDF/ảnh) và đính kèm mã băm.
-- [ ] **US-INS-06** — Là Inspector, tôi muốn inspectorId được lấy tự động từ JWT thay vì truyền trong body.
+- [x] **US-INS-06** — Là Inspector, tôi muốn inspectorId được lấy tự động từ JWT thay vì truyền trong body.
 
 ### Consumer (công khai, read-only, không đăng nhập)
 - [x] **US-CON-01** — Là Consumer, tôi muốn quét QR / mở public URL để tra cứu lô hàng mà không cần đăng nhập.
@@ -281,7 +285,7 @@
 - [x] **US-ANA-01** — Là Admin/Manager, tôi muốn xem thống kê phân bố batch, thời gian xử lý, truy vết ngược.
 
 ### Chất lượng & Vận hành (non-functional / cần bổ sung)
-- [ ] **US-QA-01** — Là dev, tôi muốn có Unit Test cho Domain entities & HashChainService để đảm bảo business rule.
+- [x] **US-QA-01** — Là dev, tôi muốn có Unit Test cho Domain entities & HashChainService để đảm bảo business rule.
 - [ ] **US-QA-02** — Là dev, tôi muốn có Unit/Integration Test cho Application handlers & Controllers (coverage ≥ 60%).
 - [ ] **US-QA-03** — Là dev, tôi muốn có Integration Test API → DB và E2E test.
 - [ ] **US-OPS-01** — Là dev, tôi muốn Dockerfile + docker-compose (backend + SQL Server + Redis) để chạy đồng nhất.
@@ -334,3 +338,14 @@
 - **Frontend** (React + TypeScript + Redux) + Public Portal.
 - **Deploy** cloud + tối ưu performance + tài liệu vận hành + slide demo.
 - **Tính năng nâng cao (optional)**: QR scanner FE, blockchain simulation, geospatial, PDF export ký số, SignalR real-time.
+
+---
+
+## Ghi chú cập nhật (2026-07-30)
+
+### Đã hoàn thành sau 2026-07-20
+- **Forgot/Reset Password**: `ForgotPasswordCommand`, `ResetPasswordCommand` implemented; `AuthController` has `POST /api/v1/auth/forgot-password` and `POST /api/v1/auth/reset-password` endpoints; email templates (`PasswordResetEmailTemplate`) and email services (`GmailEmailService`, `SendGridEmailService`) wired up.
+- **inspectorId from JWT**: `InspectionsController` now gets `inspectorId` from `_currentUser.UserId` (JWT claims) instead of request body.
+- **Unit Tests**: 27 test files in `AgriTrace.Tests` covering Domain entities (User, Batch, Organization, Product, SupplyChainEvent), HashChainService, EventService, SupplyChainEventWriteService, Application Commands/Queries (CreateBatch, MergeBatch, SplitBatch, CreateOrganization, CreateProduct, CreateUser, CreateRecall, CreateSupplyChainEvent, etc.), and FluentValidation validators (13 validator tests).
+- **Migrations**: 61+ migrations reflecting schema evolution through 2026-07-30 (seed data expansions, model redesigns, user status/must-change-password fields, quality inspection refactoring, unique constraints).
+- **BatchSplitMergeController** added as a dedicated controller (split/merge endpoints).

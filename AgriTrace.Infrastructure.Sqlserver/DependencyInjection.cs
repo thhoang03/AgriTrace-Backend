@@ -20,14 +20,13 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
-
+        var connectionString = configuration.GetConnectionString("DatabaseOnline") 
+                    ?? Environment.GetEnvironmentVariable("DB_CONNECTION_STRING");
 
         services.AddDbContext<ApplicationDbContext>(
             options =>
             {
-                options.UseSqlServer(
-                    configuration.GetConnectionString(
-                        "DefaultConnection"));
+                options.UseSqlServer(connectionString);
             });
 
 
