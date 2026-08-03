@@ -41,6 +41,13 @@ public sealed class UpdateOrganizationCommandHandler : IRequestHandler<UpdateOrg
         existing.UpdateInformation(request.OrganizationTypeId, request.Name, request.Address);
         await _organizationService.UpdateAsync(existing, cancellationToken);
 
-        return existing.Adapt<OrganizationDto>();
+        var dto = existing.Adapt<OrganizationDto>();
+        var typeObj = await _organizationTypeService.GetByIdAsync(request.OrganizationTypeId, cancellationToken);
+        if (typeObj != null)
+        {
+            dto.OrganizationTypeCode = typeObj.Code;
+            dto.OrganizationTypeName = typeObj.Name;
+        }
+        return dto;
     }
 }

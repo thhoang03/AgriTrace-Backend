@@ -4,6 +4,7 @@ using AgriTrace.Infrastructure.Sqlserver.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgriTrace.Infrastructure.Sqlserver.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260731054244_AddEventRequests")]
+    partial class AddEventRequests
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -572,58 +575,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         });
                 });
 
-            modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.InspectionLabTestDataModel", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("datetime2")
-                        .HasDefaultValueSql("GETDATE()");
-
-                    b.Property<Guid>("InspectionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<bool>("IsPassed")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("MaxStandardValue")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("MeasuredValue")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("MinStandardValue")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Remark")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
-
-                    b.Property<string>("TestName")
-                        .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Unit")
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
-
-                    b.Property<DateTime?>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("InspectionId");
-
-                    b.ToTable("InspectionLabTests", (string)null);
-                });
-
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.NotificationDataModel", b =>
                 {
                     b.Property<Guid>("Id")
@@ -1005,21 +956,15 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         .HasColumnType("datetime2")
                         .HasDefaultValueSql("GETDATE()");
 
-                    b.Property<DateTime>("InspectionDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("InspectionType")
-                        .HasColumnType("int");
-
                     b.Property<Guid>("InspectorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("OverallResult")
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
+                    b.Property<string>("Result")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
@@ -1041,11 +986,9 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             Id = new Guid("a0000000-0000-0000-0000-000000000001"),
                             BatchId = new Guid("80000000-0000-0000-0000-000000000001"),
                             CreatedAt = new DateTime(2026, 6, 2, 9, 0, 0, 0, DateTimeKind.Utc),
-                            InspectionDate = new DateTime(2026, 6, 1, 0, 0, 0, 0, DateTimeKind.Utc),
-                            InspectionType = 1,
                             InspectorId = new Guid("70000000-0000-0000-0000-000000000004"),
-                            Notes = "Excellent quality. All standards met.",
-                            OverallResult = "PASS",
+                            Notes = "Excellent quality.",
+                            Result = "All standards met. No pesticide residue found.",
                             Status = 2
                         });
                 });
@@ -1156,9 +1099,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         .HasDefaultValueSql("GETDATE()");
 
                     b.Property<Guid>("EventTypeId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid?>("InspectionId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Location")
@@ -1701,26 +1641,15 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         .IsRequired();
 
                     b.HasOne("AgriTrace.Infrastructure.Sqlserver.Models.QualityInspectionDataModel", "Inspection")
-                        .WithMany()
+                        .WithMany("Certificates")
                         .HasForeignKey("InspectionId")
-                        .OnDelete(DeleteBehavior.SetNull);
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Batch");
 
                     b.Navigation("Inspection");
                 });
 
-<<<<<<< HEAD
-            modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.InspectionLabTestDataModel", b =>
-                {
-                    b.HasOne("AgriTrace.Infrastructure.Sqlserver.Models.QualityInspectionDataModel", "Inspection")
-                        .WithMany("LabTests")
-                        .HasForeignKey("InspectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Inspection");
-=======
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.EventRequestDataModel", b =>
                 {
                     b.HasOne("AgriTrace.Infrastructure.Sqlserver.Models.BatchDataModel", "Batch")
@@ -1761,7 +1690,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.Navigation("RequestedByUser");
 
                     b.Navigation("ReviewedByUser");
->>>>>>> 50363ec (feat: implement Event Requests feature and fix EventType entity rehydration)
                 });
 
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.NotificationDataModel", b =>
@@ -1960,7 +1888,7 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
 
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.QualityInspectionDataModel", b =>
                 {
-                    b.Navigation("LabTests");
+                    b.Navigation("Certificates");
                 });
 
             modelBuilder.Entity("AgriTrace.Infrastructure.Sqlserver.Models.RecallDataModel", b =>

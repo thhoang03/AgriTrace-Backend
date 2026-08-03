@@ -28,6 +28,7 @@ public sealed class LookupController : ControllerBase
     /// Danh sách Role
     /// </summary>
     [HttpGet("api/v1/roles")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse>> GetRoles(CancellationToken cancellationToken)
     {
@@ -39,6 +40,7 @@ public sealed class LookupController : ControllerBase
     /// Danh sách loại tổ chức
     /// </summary>
     [HttpGet("api/v1/organization-types")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse>> GetOrganizationTypes(CancellationToken cancellationToken)
     {
