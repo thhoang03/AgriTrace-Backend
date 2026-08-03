@@ -116,6 +116,8 @@ public sealed class CreateBatchCommandHandler
                         currentHash: null);
 
                     await _eventService.CreateEventAsync(harvestEvent, cancellationToken);
+                    created.ChangeStatus(BatchStatus.Harvested);
+                    await _batchWriteService.UpdateAsync(created, cancellationToken);
                 }
             }
             catch (Exception ex)
