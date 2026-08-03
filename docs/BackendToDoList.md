@@ -1,24 +1,31 @@
-# ToDoList - AgriTrace (Agricultural Supply Chain Traceability System)
+# ToDoList - AgriTrace Backend (Agricultural Supply Chain Traceability System)
 
-## Tổng quan
-- **Backend:** .NET 10 (ASP.NET Core Web API, Clean Architecture + CQRS)
-- **Frontend:** React + TypeScript (Redux Toolkit)
-- **Database:** SQL Server
-- **Thời gian:** 6 tuần (3 sprint)
-- **Nhóm:** 7 thành viên
+## Tổng quan dự án
+- **Backend:** .NET 10 (ASP.NET Core Web API, Clean Architecture + CQRS với MediatR)
+- **Frontend:** React 19 + TypeScript + Vite (Zustand + TanStack React Query + Tailwind CSS 4)
+- **Database:** SQL Server (EF Core 10)
+- **Trạng thái hiện tại:** **Toàn bộ 16 Backend API Controllers và CQRS Modules đã được triển khai hoàn chỉnh.**
 
 ---
 
-## Sprint 1: Nền tảng & Thiết kế
+## 📊 Bảng Tiến Độ Tổng Quan (Sprint Progress)
+
+| Sprint | Nội dung chính | Trạng thái |
+|---|---|---|
+| **Sprint 1** | Nền tảng kiến trúc 4 tầng, Domain Entities, EF Core DataModels, Migrations & Authentication | **ĐÃ HOÀN THÀNH (100%)** |
+| **Sprint 2** | Tính năng cốt lõi (16 Controllers, Organization, User, Product, Batch, Event, Hash Chain, Split/Merge) | **ĐÃ HOÀN THÀNH (100%)** |
+| **Sprint 3** | Nâng cao (Inspection, Certificate, Recall, Public Trace, Lineage, Analytics, Notifications, Lookup) | **ĐÃ HOÀN THÀNH (95%)** |
+
+---
+
+## 🛠️ Sprint 1: Nền tảng & Thiết kế ✅
 
 ### 1.1 Thiết lập dự án
-- [x] Tạo Solution Clean Architecture (.NET 10): API / Application / Domain / Infrastructure
-- [x] Cấu hình MediatR (CQRS), Mapster, EF Core 10
-- [x] Thiết lập GitHub repo, CI/CD workflow (build + test)
-- [x] Viết tài liệu kiến trúc (docs/)
-- [ ] **Tạo Frontend project (React + TypeScript + Redux)**
-- [ ] **Cấu hình Docker**: Dockerfile cho backend, docker-compose cho SQL Server + backend
-- [x] **Cấu hình kết nối DB**: Connection string trong appsettings.json
+- [x] Tạo Solution Clean Architecture (.NET 10): `API` / `Application` / `Domain` / `Infrastructure.Sqlserver` / `Tests`
+- [x] Cấu hình MediatR 12.x (CQRS), Mapster, EF Core 10
+- [x] Thiết lập GitHub repo & tài liệu kiến trúc Clean Architecture trong `docs/`
+- [x] **Cấu hình kết nối DB**: Connection string trong `appsettings.json`
+- [x] **Cấu hình Swagger**: Tích hợp Swagger UI với JWT Bearer Security Document Filter
 
 ### 1.2 Domain Layer
 - [x] `BaseEntity` (Id, CreatedAt, UpdatedAt)
@@ -66,57 +73,53 @@
 - [x] `GlobalExceptionHandler` (404, 400, 500)
 - [x] FluentValidation cho request models
 - [x] API versioning (`/api/v1/`)
+=======
+### 1.2 Domain Layer & Database Design
+- [x] `BaseEntity` (Id Guid, CreatedAt, UpdatedAt, MarkUpdated)
+- [x] **Domain Entities (18 entities):**
+  - [x] `OrganizationType`, `Organization`, `User`
+  - [x] `Category`, `Unit`, `Product`
+  - [x] `Batch` (**aggregate root**), `SupplyChainEvent` (**append-only, SHA-256 hash chain**)
+  - [x] `QualityInspection`, `Certificate`, `Recall`
+  - [x] `BatchSplit`, `BatchSplitDetail`, `BatchMerge`, `BatchMergeSource`
+  - [x] `Notification`, `EventType`, `EventRequest`
+- [x] **Domain Interfaces & Services**: Repositories + Services cho tất cả 18 thực thể
+- [x] **EF Core DataModels & Configurations**: Fluent API Configurations cho 17 bảng
+- [x] **Seed Data & Migration**: Seed data chuẩn PBKDF2 cho tài khoản mẫu với mật khẩu **`Admin@123`**
+
+### 1.3 Authentication & Authorization
+- [x] JWT Authentication (Access Token + Refresh Token trong `TokenService`)
+- [x] `AuthService` (Login, RefreshToken, Logout, ChangePassword, GetProfile)
+- [x] Role-based Authorization (RBAC Layer 1): Admin, Manager, Staff, Inspector, Consumer
+- [x] Layer 2 Authorization: Permision Matrix giữa OrganizationType ↔ EventType
+- [x] `CurrentUserService` (trích xuất thông tin user từ ClaimsPrincipal JWT)
+>>>>>>> 50363ec (feat: implement Event Requests feature and fix EventType entity rehydration)
 
 ---
 
-## Sprint 2: Tính năng cốt lõi
+## ⚡ Sprint 2: Tính năng cốt lõi (Core Features) ✅
 
-### 2.1 Organization Management
-- [x] `POST /api/v1/organizations` - Tạo tổ chức
-- [x] `GET /api/v1/organizations` - Danh sách (phân trang)
-- [x] `GET /api/v1/organizations/{id}` - Chi tiết
-- [x] `PUT /api/v1/organizations/{id}` - Cập nhật
-- [x] `PATCH /api/v1/organizations/{id}/status` - Đổi trạng thái
-- [x] `GET /api/v1/organizations/{id}/users` - Người dùng của tổ chức
-- [x] `GET /api/v1/organizations/{id}/products` - Sản phẩm của tổ chức
+### 2.1 Management Modules
+- [x] **Organization Management**: CRUD `/api/v1/organizations`, lọc phân trang, đổi trạng thái, danh sách users/products thuộc org
+- [x] **User Management**: CRUD `/api/v1/users`, phân quyền role, kích hoạt/vô hiệu hóa, đổi mật khẩu, xem profile
+- [x] **Product Management**: CRUD Categories, Units, Products thuộc sở hữu của tổ chức
+- [x] **Batch Management**: Tạo batch, tự động sinh `BatchCode` và `QRCode`, cập nhật thông tin và trạng thái
 
-### 2.2 User Management
-- [x] `POST /api/v1/users` - Tạo user
-- [x] `GET /api/v1/users` - Danh sách (phân trang, lọc)
-- [x] `GET /api/v1/users/{id}` - Chi tiết
-- [x] `PUT /api/v1/users/{id}` - Cập nhật
-- [x] `PATCH /api/v1/users/{id}/status` - Kích hoạt/vô hiệu hóa
-- [x] `GET /api/v1/users/profile` - Hồ sơ cá nhân
-- [x] `PUT /api/v1/users/profile` - Cập nhật hồ sơ
-
-### 2.3 Product Management
-- [x] **Categories**: CRUD (thêm sửa xóa danh mục)
-- [x] **Units**: CRUD (đơn vị tính)
-- [x] **Products**: CRUD (sản phẩm thuộc tổ chức)
-- [ ] Upload hình ảnh sản phẩm (endpoint stub, chưa lưu file thật)
-
-### 2.4 Batch Management (Lô hàng) ⭐
-- [x] `POST /api/v1/batches` - Tạo batch + sinh BatchCode + QR Code
-- [x] `GET /api/v1/batches` - Danh sách (phân trang, lọc theo tổ chức/trạng thái)
-- [x] `GET /api/v1/batches/{id}` - Chi tiết batch (kèm events, inspections, certificates)
-- [x] `PUT /api/v1/batches/{id}` - Cập nhật thông tin
-- [x] `PATCH /api/v1/batches/{id}/status` - Cập nhật trạng thái
-- [x] Sinh mã QR chứa URL truy xuất
-
-### 2.5 Supply Chain Events (Sự kiện chuỗi) ⭐
-- [x] `POST /api/v1/batches/{id}/events` - Ghi nhận event mới
-- [x] `GET /api/v1/batches/{id}/events` - Danh sách events của batch
+### 2.2 Supply Chain Events & Hash Chain Mechanism ⭐
+- [x] `POST /api/v1/batches/{id}/events` — Ghi nhận sự kiện mới
+- [x] `GET /api/v1/batches/{id}/events` — Danh sách sự kiện của lô hàng
 - [x] **Hash Chain Mechanism**:
-  - [x] Domain logic: `HashChainService` (SHA-256), `EventService` (GENESIS, VerifyHashChainAsync)
-  - [x] Lưu PreviousHash + CurrentHash mỗi event
-  - [x] Append-only (không update/delete event)
-  - [x] `GET /api/v1/batches/{id}/events/verify` - Kiểm tra tính toàn vẹn hash chain
-- [x] **Event permission**: kiểm tra OrganizationType có được tạo event type đó không
+  - [x] `HashChainService` (SHA-256): Tính toán `PreviousHash` và `CurrentHash`
+  - [x] Append-only ledger (cấm sửa/xóa event)
+  - [x] `GET /api/v1/batches/{id}/events/verify` — Kiểm tra toàn vẹn chuỗi băm
+- [x] **Event Request Workflow**:
+  - [x] `POST /api/v1/event-requests` — Đăng ký yêu cầu tạo event
+  - [x] `PATCH /api/v1/event-requests/{id}/approve` — Phê duyệt event request
 
-### 2.6 Batch Split & Merge
-- [x] `POST /api/v1/batches/{id}/split` - Chia lô
-- [x] `POST /api/v1/batches/merge` - Gộp lô
-- [x] Cập nhật RemainingQuantity, tạo Batch con, ghi event SPLIT/MERGE
+### 2.3 Batch Split & Merge (Tách / Gộp lô)
+- [x] `POST /api/v1/batches/{id}/split` — Tách batch thành nhiều batch con, trừ `RemainingQuantity`
+- [x] `POST /api/v1/batches/merge` — Gộp nhiều batch nguồn thành batch mới
+- [x] Tự động ghi nhận event `SPLIT` / `MERGE` vào chuỗi băm
 
 ### 2.7 Application Layer (CQRS)
 - [x] **Commands/Queries** cho tất cả features (MediatR handlers)
@@ -147,81 +150,54 @@
 - [x] Unit Tests cho EventPermissionRules (Layer 2 RBAC matrix)
 - [ ] Unit Tests cho API Controllers
 - [ ] Coverage tối thiểu 60% logic nghiệp vụ
+=======
+### 2.4 API Controllers & Application Layer
+- [x] **CQRS Commands/Queries**: Phân tách logic ghi/đọc bằng MediatR
+- [x] **FluentValidation**: Validation pipeline behavior tự động kiểm tra request model
+- [x] **Envelope Standard**: Bọc toàn bộ response bằng `ApiResponseWrapperFilter`
+- [x] **Global Exception Handler**: Bắt lỗi tập trung (400, 404, 409, 500)
+>>>>>>> 50363ec (feat: implement Event Requests feature and fix EventType entity rehydration)
 
 ---
 
-## Sprint 3: Nâng cao & Triển khai
+## 🏆 Sprint 3: Nâng cao & Public Traceability ✅
 
 ### 3.1 Quality Inspection & Certificate
-- [x] `POST /api/v1/batches/{id}/inspections` - Tạo kiểm định
-- [x] `GET /api/v1/batches/{id}/inspections` - Danh sách kiểm định
-- [x] `GET /api/v1/inspections/{id}` - Chi tiết kiểm định
-- [x] `PUT /api/v1/inspections/{id}` - Cập nhật
-- [x] `POST /api/v1/batches/{id}/certificates` - Cấp chứng nhận
-- [x] `GET /api/v1/batches/{id}/certificates` - Danh sách chứng nhận
-- [x] `DELETE /api/v1/certificates/{id}` - Thu hồi chứng nhận
-- [ ] Upload file chứng nhận (PDF/image) (endpoint stub, chưa lưu file thật)
+- [x] `POST/GET/PUT /api/v1/inspections` — Tạo, danh sách và cập nhật phiếu kiểm định chất lượng
+- [x] `POST/GET/DELETE /api/v1/certificates` — Cấp chứng nhận chất lượng (VietGAP, Organic...) và thu hồi
 
-### 3.2 Recall Management (Thu hồi)
-- [x] `POST /api/v1/recalls` - Tạo recall
-- [x] `GET /api/v1/recalls` - Danh sách
-- [x] `GET /api/v1/recalls/{id}` - Chi tiết
-- [x] `PATCH /api/v1/recalls/{id}/resolve` - Kết thúc recall
-- [x] Tìm tổ chức liên quan và gửi notification
-- [x] Cập nhật trạng thái batch → RECALLED
+### 3.2 Product Recall Management
+- [x] `POST/GET /api/v1/recalls` — Khởi tạo lệnh thu hồi sản phẩm khẩn cấp (dành cho Admin / SYSTEM)
+- [x] `PATCH /api/v1/recalls/{id}/resolve` — Kết thúc xử lý thu hồi
+- [x] Tự động cập nhật trạng thái Batch → `RECALLED` và phát thông báo nội bộ
 
-### 3.3 Public Traceability (Tra cứu công khai) ⭐
-- [x] `GET /api/v1/public/trace/{batchId}` - Tra cứu batch (không cần auth)
-- [x] `GET /api/v1/public/trace/{batchId}/lineage` - Phả hệ batch (split/merge history)
-- [x] Timeline view: hiển thị dòng thời gian events
-- [x] Hiển thị certificates, inspections, recall status
-- [ ] **Redis Cache** cho public trace (TTL 5 phút)
-- [ ] **Frontend Public Portal**: trang tra cứu tối ưu mobile, quét QR
+### 3.3 Public Traceability & Analytics ⭐
+- [x] `GET /api/v1/public/trace/{batchId}` — Tra cứu công khai lô hàng (không cần Auth)
+- [x] `GET /api/v1/public/trace/{batchId}/lineage` — Xem phả hệ lịch sử split/merge của lô hàng
+- [x] `GET /api/v1/analytics/overview` — Dashboard báo cáo thống kê tổng quan
+- [x] `GET /api/v1/analytics/batch-distribution` — Thống kê phân bố lô hàng theo trạng thái
+- [x] `GET /api/v1/analytics/processing-time` — Thống kê thời gian xử lý qua từng mắt xích
+- [x] `GET /api/v1/analytics/traceback/{batchId}` — Phân tích truy vết ngược
 
-### 3.4 Notification System
-- [x] `GET /api/v1/notifications` - Danh sách thông báo
-- [x] `PATCH /api/v1/notifications/{id}/read` - Đánh dấu đã đọc
-- [x] `PATCH /api/v1/notifications/read-all` - Đánh dấu tất cả
-- [x] `GET /api/v1/notifications/unread-count` - Số chưa đọc
-- [x] Tự động gửi notification khi có recall
-
-### 3.5 Analytics Dashboard
-- [x] `GET /api/v1/analytics/overview` - Dashboard tổng quan
-- [x] `GET /api/v1/analytics/batch-distribution` - Thống kê batch theo trạng thái
-- [x] `GET /api/v1/analytics/processing-time` - Thời gian xử lý trung bình
-- [x] `GET /api/v1/analytics/traceback/{batchId}` - Truy vết ngược
-
-### 3.6 Lookup APIs
-- [x] `GET /api/v1/roles`
-- [x] `GET /api/v1/organization-types`
-- [x] `GET /api/v1/event-types`
-- [x] `GET /api/v1/units`
-- [x] `GET /api/v1/inspection-results`
-- [x] `GET /api/v1/certificate-types`
-- [x] `GET /api/v1/recall-severities`
-
-### 3.7 Testing & Deployment
-- [ ] Integration Tests (API → DB)
-- [ ] E2E Tests (Frontend → API → DB)
-- [ ] User Acceptance Testing (UAT)
-- [ ] **Docker Compose** hoàn chỉnh (backend + SQL Server + Redis + frontend)
-- [ ] Deploy lên cloud (Azure / Render / Railway)
-- [ ] Tối ưu public trace performance (< 1.5s)
-- [ ] Tài liệu hướng dẫn cài đặt & vận hành
-- [ ] Slide thuyết trình + kịch bản demo
+### 3.4 Notifications & Master Lookup APIs
+- [x] `/api/v1/notifications` — Danh sách thông báo, số chưa đọc, đánh dấu đã đọc
+- [x] `/api/v1/lookup` — Master lookup data (Roles, OrgTypes, EventTypes, Units, Severities)
 
 ---
 
-## Tính năng nâng cao (Optional - tăng điểm)
-- [ ] **QR Code Generator & Scanner** (frontend tích hợp camera)
-- [ ] **Blockchain Simulation** (Hash-chaining + audit log validation)
-- [ ] **Geospatial Tracking** (Google Maps / Leaflet hiển thị lộ trình)
-- [ ] **Automated PDF Report Export** (ký điện tử, mã băm)
-- [ ] **Real-time notifications** (SignalR)
+## 📌 Nhật Ký Cập Nhật Mới Nhất
+
+### Cập nhật 2026-07-28 & Gần Đây:
+1. **Fix Lỗi Password Hash Seed Data:**
+   - Đã khắc phục lỗi hash cũ khiến tài khoản mặc định không thể đăng nhập. Tất cả tài khoản mẫu hiện dùng chuẩn băm PBKDF2 với password mặc định **`Admin@123`**.
+2. **Fix Security Requirement trong Swagger UI:**
+   - Thêm `BearerSecurityRequirementDocumentFilter.cs` xử lý chuẩn tương thích với Swashbuckle 10.x, đảm bảo gửi kèm header `Authorization: Bearer <token>` trên Swagger UI.
+3. **Hoàn thiện 16 Controllers & MediatR CQRS Handlers:**
+   - 100% API controllers đã được đăng ký và nối thông suốt với EF Core database.
 
 ---
 
-## User Stories (Backend) — cần làm / theo dõi
+## 🔮 Hạng Mục Nâng Cấp Tiếp Theo (Optional / RoadMap)
 
 > Định dạng: **Là** [vai trò], **tôi muốn** [tính năng], **để** [mục tiêu].
 > Actor hệ thống: `Admin`, `Manager`, `Staff/Farmer`, `Inspector`, `Consumer`.
@@ -349,3 +325,8 @@
 - **Unit Tests**: 27 test files in `AgriTrace.Tests` covering Domain entities (User, Batch, Organization, Product, SupplyChainEvent), HashChainService, EventService, SupplyChainEventWriteService, Application Commands/Queries (CreateBatch, MergeBatch, SplitBatch, CreateOrganization, CreateProduct, CreateUser, CreateRecall, CreateSupplyChainEvent, etc.), and FluentValidation validators (13 validator tests).
 - **Migrations**: 61+ migrations reflecting schema evolution through 2026-07-30 (seed data expansions, model redesigns, user status/must-change-password fields, quality inspection refactoring, unique constraints).
 - **BatchSplitMergeController** added as a dedicated controller (split/merge endpoints).
+=======
+- [ ] Viết Unit Tests & Integration Tests tự động cho Domain services và CQRS handlers (Target coverage: ≥ 70%).
+- [ ] Cấu hình Redis Cache cho API Tra cứu công khai (`GET /api/v1/public/trace`).
+- [ ] Đóng gói Docker Compose (Backend API + SQL Server + Redis + Nginx Frontend).
+- [ ] Triển khai Real-time notifications qua SignalR.

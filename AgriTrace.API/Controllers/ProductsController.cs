@@ -114,7 +114,7 @@ public sealed class ProductsController : ControllerBase
         CancellationToken cancellationToken)
     {
         var product = await _sender.Send(
-            request.ToCommand(),
+            request.ToCommand(_currentUser.OrganizationId),
             cancellationToken);
 
         return Created(

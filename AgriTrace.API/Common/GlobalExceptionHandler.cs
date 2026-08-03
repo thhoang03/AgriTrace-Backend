@@ -9,6 +9,7 @@ using AgriTrace.Application.Common.Exceptions;
 using FluentValidation;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace AgriTrace.API.Common
@@ -49,7 +50,19 @@ namespace AgriTrace.API.Common
 
             if (statusCode == HttpStatusCode.InternalServerError)
             {
-                _logger.LogError(exception, "Unhandled exception while processing {Path}", httpContext.Request.Path);
+                _logger.LogError(exception, "Unhandled exception [{ExceptionType}] while processing {Path}: {ExceptionMessage}",
+                    exception.GetType().Name,
+                    httpContext.Request.Path,
+                    exception.Message);
+            }
+
+            // Log DB errors (FK violation, constraint) với full inner exception để debug
+            if (exception is DbUpdateException dbUpdateEx)
+            {
+                _logger.LogError(dbUpdateEx,
+                    "[DbUpdateException] Path={Path} | Inner={Inner}",
+                    httpContext.Request.Path,
+                    dbUpdateEx.InnerException?.Message ?? dbUpdateEx.Message);
             }
 
             var response = ErrorResponse.Fail(message, errors);
@@ -94,6 +107,12 @@ namespace AgriTrace.API.Common
 
                 case InvalidOperationException:
                     return (HttpStatusCode.BadRequest, exception.Message, SingleError(exception.Message));
+
+                case DbUpdateException dbEx:
+                    // Lỗi database (FK violation, unique constraint, v.v.)
+                    var dbMessage = dbEx.InnerException?.Message ?? dbEx.Message;
+                    const string dbErrorMessage = "Database error: Unable to save the request. Please check your input data and try again.";
+                    return (HttpStatusCode.Conflict, dbErrorMessage, SingleError(dbMessage.Length > 300 ? dbErrorMessage : dbMessage));
 
                 default:
                     const string genericMessage = "An unexpected error occurred.";

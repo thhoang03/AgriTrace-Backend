@@ -1,53 +1,62 @@
-# RBAC Guide — AgriTrace Backend
+# RBAC Guide — Tài Liệu Phân Quyền Hệ Thống AgriTrace (Backend & Frontend)
 
-## 1. Tổng quan
+> **Hệ Thống Truy Xuất Nguồn Gốc Nông Sản AgriTrace**  
+> **Phiên bản:** 3.0 — Cập nhật phân quyền 2 lớp (Role-Based + OrganizationType/EventType Matrix)  
+> **Trạng thái:** Hoàn thiện — Phê duyệt quy tắc RECALL giới hạn cho SYSTEM Admin
 
-RBAC (Role-Based Access Control) trong AgriTrace Backend được tổ chức theo 2 lớp:
+---
 
-- **Layer 1 — Role-based (JWT + `[Authorize]`):** Kiểm tra quyền truy cập endpoint dựa trên role (`Admin`, `Manager`, `Staff`) thông qua JWT claims.
-- **Layer 2 — OrganizationType ↔ EventType matrix:** Kiểm tra quyền nghiệp vụ chi tiết: một user có được phép tạo loại event nào hay không, phụ thuộc vào `OrganizationType` của tổ chức họ.
+## 1. Tổng Quan Kiến Trúc Phân Quyền (2-Layer RBAC)
 
-## 2. Các vai trò (Roles)
+Hệ thống AgriTrace triển khai bảo mật và phân quyền theo **2 lớp độc lập**:
 
-| Role | Mô tả | Đặc quyền Layer 1 |
-| --- | --- | --- |
-| `Admin` | Quản trị hệ thống | Toàn quyền; bypass Layer 2 event check (vẫn phải tuân thủ batch ownership guard, trừ INSPECTION cross-org). |
-| `Manager` | Quản lý tổ chức | Xem analytics, quản lý category, tạo recall. |
-| `Staff` | Nhân viên thực thi | Tạo events theo loại tổ chức, xem batch/events. |
+```
+[HTTP Request] ──► [Layer 1: JWT Bearer Auth & Role Check]
+                         │
+                         ▼
+                   [Layer 2: Business Permission Checks]
+                   ├── (1) OrganizationType ↔ EventType Matrix
+                   └── (2) Batch Ownership Guard (CurrentOrganizationId == User.OrganizationId)
+```
 
-## 3. Các loại tổ chức (Organization Types)
+- **Layer 1 — Role-Based Access Control (`[Authorize(Roles = "...")]`):**
+  Kiểm tra vai trò hệ thống của người dùng (`Admin`, `Manager`, `Staff`, `Inspector`, `Consumer`) thông qua Claims trong JWT Bearer Token.
+- **Layer 2 — Matrix Permision & Ownership Check:**
+  Kiểm tra quyền nghiệp vụ chi tiết: Tổ chức thuộc loại nào (`FARM`, `PROCESSOR`, `DISTRIBUTOR`, `RETAILER`, `INSPECTION`, `SYSTEM`) thì chỉ được thực hiện những loại sự kiện nông sản (`EventType`) tương ứng. Đồng thời đảm bảo quyền sở hữu đối với Lô hàng (Batch).
 
-| Code | Tên | Mô tả |
-| --- | --- | --- |
-| `FARM` | Farm | Nông trại |
-| `PROCESSOR` | Processor | Cơ sở chế biến |
-| `DISTRIBUTOR` | Distributor | Phân phối |
-| `RETAILER` | Retailer | Bán lẻ |
-| `INSPECTION` | Inspection | Kiểm định chất lượng |
-| `SYSTEM` | System | Hệ thống (internal) |
+---
 
-## 4. Các loại Event (Event Types)
+## 2. Các Vai Trò Hệ Thống (System Roles)
 
-| Code | Tên |
-| --- | --- |
-| `HARVEST` | Thu hoạch |
-| `RECEIVE` | Nhận hàng |
-| `PROCESSING` | Chế biến |
-| `PACKAGING` | Đóng gói |
-| `TRANSPORT` | Vận chuyển |
-| `DISTRIBUTION` | Phân phối |
-| `RETAIL` | Bán lẻ |
-| `INSPECTION` | Kiểm định |
-| `SPLIT` | Tách batch |
-| `MERGE` | Gộp batch |
-| `RECALL` | Thu hồi |
+| Role | Tên Vai Trò | Phạm Vi & Quyền Hạn |
+|---|---|---|
+| `Admin` | Quản trị viên hệ thống | **Toàn quyền:** Quản lý tổ chức, người dùng, cấu hình danh mục, xem thống kê analytics, phát lệnh thu hồi (`RECALL`) toàn hệ thống. Bypass kiểm tra Layer 2 Event Matrix. |
+| `Manager` | Quản lý tổ chức | **Phạm vi tổ chức:** Quản lý nhân viên (`Staff`), quản lý sản phẩm, lô hàng (`Batch`), xem báo cáo nội bộ tổ chức. |
+| `Staff` | Nhân viên vận hành | **Nghiệp vụ trực tiếp:** Tạo lô hàng mới, ghi nhận sự kiện chuỗi cung ứng (`SupplyChainEvent`), thực hiện tách/gộp lô (`Split/Merge`) trong phạm vi tổ chức. |
+| `Inspector` | Kiểm định viên | **Độc lập:** Kiểm định chất lượng nông sản (`QualityInspection`), cấp chứng nhận (`Certificate`) và thu hồi chứng nhận. Được phép ghi sự kiện `INSPECTION` xuyên tổ chức (Cross-Org). |
+| `Consumer` | Người tiêu dùng | **Công khai:** Tra cứu thông tin lô hàng, xem timeline sự kiện và phả hệ split/merge qua mã QR mà không cần đăng nhập. |
 
-## 5. Ma trận quyền Event (Layer 2)
+---
 
-`EventPermissionRules.IsAllowed(orgTypeCode, eventTypeCode)` kiểm tra quyền tạo event:
+## 3. Các Loại Tổ Chức (Organization Types)
+
+| Mã OrgType | Tên Tổ Chức | Mô Tả Nghiệp Vụ |
+|---|---|---|
+| `FARM` | Trang trại / Nông trại | Trồng trọt, thu hoạch nông sản ban đầu |
+| `PROCESSOR` | Cơ sở chế biến | Chế biến, phân loại, đóng gói, tách/gộp lô |
+| `DISTRIBUTOR` | Nhà phân phối / Vận chuyển | Đóng gói, vận chuyển, giao nhận, tách/gộp lô |
+| `RETAILER` | Nhà bán lẻ / Siêu thị | Bán lẻ nông sản tới tay người tiêu dùng, tách lô |
+| `INSPECTION` | Cơ quan kiểm định | Đơn vị kiểm tra chất lượng độc lập |
+| `SYSTEM` | Quản trị hệ thống | Đơn vị điều hành toàn bộ nền tảng AgriTrace |
+
+---
+
+## 4. Ma Trận Quyền Sự Kiện Chuỗi Cung Ứng (Layer 2 Event Matrix)
+
+Hàm `EventPermissionRules.IsAllowed(orgTypeCode, eventTypeCode)` thực thi kiểm tra quyền tạo sự kiện:
 
 | OrganizationType | HARVEST | RECEIVE | PROCESSING | PACKAGING | TRANSPORT | DISTRIBUTION | RETAIL | INSPECTION | SPLIT | MERGE | RECALL |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|---|---|---|---|---|---|---|---|---|---|---|---|
 | `FARM` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | `PROCESSOR` | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ | ❌ |
 | `DISTRIBUTOR` | ❌ | ✅ | ❌ | ❌ | ✅ | ✅ | ❌ | ❌ | ✅ | ✅ | ❌ |
@@ -55,97 +64,42 @@ RBAC (Role-Based Access Control) trong AgriTrace Backend được tổ chức th
 | `INSPECTION` | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | `SYSTEM` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 
-> **Lưu ý:**
-> - `Admin` bypass Layer 2 event check.
-> - `INSPECTION` org có quyền tạo `INSPECTION` event **xuyên tổ chức** (cross-org), bỏ qua batch ownership guard.
-> - Mọi user (trừ `INSPECTION` cross-org) phải tuân thủ **batch ownership guard**: `batch.CurrentOrganizationId == user.OrganizationId`.
+### Các Quy Tắc Đặc Bẫy Nghiệp Vụ (Business Rules):
+1. **Chỉ `SYSTEM` Admin được tạo `RECALL`:** Thu hồi nông sản là lệnh đặc biệt nghiêm trọng, chỉ Admin tối cao mới được phát lệnh.
+2. **Quyền Cross-Org của `INSPECTION`:** Tổ chức `INSPECTION` có quyền lập kiểm định và ghi nhận event `INSPECTION` trên lô hàng của tổ chức khác (bỏ qua Batch Ownership Guard).
+3. **Batch Ownership Guard:** ngoại trừ trường hợp `INSPECTION` và `SYSTEM`, tất cả thao tác của các tổ chức khác bắt buộc thỏa mãn: `batch.CurrentOrganizationId == currentUser.OrganizationId`.
 
-## 6. Luồng xác thực (Authentication Flow)
+---
 
-```
-Client → JWT Login → TokenService.GenerateAccessToken(user)
-         ↓
-   Token chứa claims:
-     - sub (UserId)
-     - email
-     - role (Admin/Manager/Staff)
-     - organizationId (nếu có)
-         ↓
-   Middleware: JWT Bearer Authentication
-         ↓
-   Controller: [Authorize(Roles = "Admin,Manager")]
-         ↓
-   Command Handler: kiểm tra Layer 2 (EventPermissionRules + ownership guard)
-```
+## 5. Quy Trình Xác Thực & Phân Quyền Trong Code
 
-## 7. Cấu trúc code liên quan
+### Backend (.NET 10):
+```csharp
+// 1. Controller Guard (Layer 1)
+[Authorize(Roles = "Admin,Manager,Staff")]
+[HttpPost("{id}/events")]
+public async Task<IActionResult> CreateEvent(Guid id, [FromBody] CreateEventRequest request)
+{
+    // 2. Extracted Current User (ClaimsPrincipal)
+    var userId = _currentUserService.UserId;
+    var userOrgType = _currentUserService.OrganizationType;
 
-| File | Vai trò |
-| --- | --- |
-| `AgriTrace.Domain/Entities/Users/UserRole.cs` | Enum 3 vai trò. |
-| `AgriTrace.Domain/Common/EventPermissionRules.cs` | Ma trận quyền Layer 2. |
-| `AgriTrace.Application/Features/Events/Commands/CreateEventCommand.cs` | Handler thực thi Layer 2 + ownership guard. |
-| `AgriTrace.Application/Common/Exceptions/ForbiddenException.cs` | Exception 403 Forbidden. |
-| `AgriTrace.API/Common/GlobalExceptionHandler.cs` | Map `ForbiddenException` → HTTP 403. |
-| `AgriTrace.API/Controllers/CertificatesController.cs` | Narrow `[Authorize]`: `Admin` cho issue/revoke cert. |
-| `AgriTrace.API/Controllers/InspectionsController.cs` | Narrow `[Authorize]`: `Admin` cho create/update inspection. |
-| `AgriTrace.Infrastructure.Sqlserver/Migrations/20260724081545_MigrateObsoleteRoles.cs` | Migration chuyển `Farmer`/`Inspector`/`Consumer` → `Staff`. |
-| `AgriTrace.Infrastructure.Sqlserver/Persistence/SeedData.cs` | Seed data đã cập nhật role + email. |
-
-## 8. Quy tắc đặc biệt
-
-### 8.1 Batch Ownership Guard
-Khi tạo event:
-- User **phải** thuộc tổ chức hiện tại đang sở hữu batch (`batch.CurrentOrganizationId == user.OrganizationId`).
-- **Exception:** User thuộc `INSPECTION` org tạo `INSPECTION` event → được phép cross-org.
-
-### 8.2 Admin Bypass
-- `Admin` được **miễn** Layer 2 event permission check.
-- `Admin` **vẫn phải** tuân thủ batch ownership guard (trừ trường hợp `INSPECTION` cross-org).
-
-### 8.3 Controller Auth Rules
-| Controller / Action | Role yêu cầu |
-| --- | --- |
-| `AnalyticsController` | `Admin,Manager` |
-| `CategoriesController` (Create/Update/Delete) | `Admin,Manager` |
-| `CertificatesController::IssueCertificate` | `Admin,Manager` |
-| `CertificatesController::RevokeCertificate` | `Admin,Manager` |
-| `InspectionsController::CreateInspection` | `Admin,Manager` |
-| `InspectionsController::UpdateInspection` | `Admin,Manager` |
-| `OrganizationsController` (mutations) | `Admin,Manager` |
-| `RecallsController::Create` | `Admin,Manager` |
-| `RecallsController::Resolve` | `Admin,Manager` |
-| `UsersController` (mutations) | `Admin,Manager` |
-
-## 9. Migration dữ liệu
-
-Chạy lệnh để áp dụng migration:
-
-```bash
-dotnet ef database update --project AgriTrace.Infrastructure.Sqlserver --startup-project AgriTrace.API
+    // 3. Command Handler (Layer 2 Check)
+    var isAllowed = EventPermissionRules.IsAllowed(userOrgType, request.EventType);
+    if (!isAllowed)
+        throw new ConflictException("Tổ chức của bạn không có quyền ghi nhận loại sự kiện này.");
+        
+    // 4. Batch Ownership Guard Check
+    if (batch.CurrentOrganizationId != _currentUserService.OrganizationId && userOrgType != "INSPECTION")
+        throw new ConflictException("Lô hàng hiện không thuộc quyền sở hữu của tổ chức bạn.");
+}
 ```
 
-Migration `MigrateObsoleteRoles` sẽ:
-- Cập nhật seed users (`Id: ...0002` và `...0004`) về `Staff`.
-- Chạy raw SQL: `UPDATE Users SET Role = 'Staff' WHERE Role IN ('Farmer', 'Inspector', 'Consumer')`.
-
-## 10. Testing
-
-### Unit tests cho Layer 2
-File: `AgriTrace.Tests/Domain/Common/EventPermissionRulesTests.cs`
-
-```bash
-dotnet test --filter "EventPermissionRulesTests"
+### Frontend (React 19 / TypeScript):
+```typescript
+// Role Adapter Map (Map các vai trò từ API sang frontend permissions)
+export function hasPermission(userRole: string, requiredRoles: string[]): boolean {
+  if (userRole === "Admin") return true;
+  return requiredRoles.includes(userRole);
+}
 ```
-
-### Toàn bộ test suite
-```bash
-dotnet test
-```
-
-## 11. Lưu ý phát triển
-
-- **Không thêm role mới** vào `UserRole` enum mà không cập nhật `EventPermissionRules` + seed data + migration.
-- **Không hardcode** role strings trong controller; dùng `[Authorize(Roles = "...")]` hoặc kiểm tra qua `ICurrentUserService`.
-- Khi thêm `EventType` mới, cần cập nhật ma trận trong `EventPermissionRules.cs`.
-- JWT claims được tạo bởi `TokenService.GenerateAccessToken()`; role claim tự động lấy từ `UserRole.ToString()`.

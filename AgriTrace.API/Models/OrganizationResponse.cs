@@ -52,6 +52,7 @@ public class OrganizationListItem
 
     [JsonPropertyName("status")]
     public string Status { get; set; } = null!;
+
     [JsonPropertyName("address")]
     public string? Address { get; set; }
 }
