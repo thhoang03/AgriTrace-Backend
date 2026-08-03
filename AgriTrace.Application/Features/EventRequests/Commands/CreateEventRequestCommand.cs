@@ -22,6 +22,7 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
     private readonly ICurrentUserService _currentUser;
     private readonly IOrganizationRepository _organizationRepository;
     private readonly IEventTypeRepository _eventTypeRepository;
+    private readonly ISupplyChainEventRepository _eventRepository;
 
     public CreateEventRequestCommandHandler(
         IEventRequestRepository eventRequestRepository,
@@ -29,7 +30,8 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
         IUserService userService,
         ICurrentUserService currentUser,
         IOrganizationRepository organizationRepository,
-        IEventTypeRepository eventTypeRepository)
+        IEventTypeRepository eventTypeRepository,
+        ISupplyChainEventRepository eventRepository)
     {
         _eventRequestRepository = eventRequestRepository;
         _batchReadService = batchReadService;
@@ -37,6 +39,7 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
         _currentUser = currentUser;
         _organizationRepository = organizationRepository;
         _eventTypeRepository = eventTypeRepository;
+        _eventRepository = eventRepository;
     }
 
     public async Task<EventRequestDto> Handle(CreateEventRequestCommand request, CancellationToken cancellationToken)
@@ -49,10 +52,11 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
 
         // 1. Verify EventTypeId exists in DB (or fallback to first EventType)
         Guid finalEventTypeId = request.EventTypeId;
+        EventType? targetEventType = null;
         if (finalEventTypeId != Guid.Empty)
         {
-            var eventType = await _eventTypeRepository.GetByIdAsync(finalEventTypeId, cancellationToken);
-            if (eventType == null)
+            targetEventType = await _eventTypeRepository.GetByIdAsync(finalEventTypeId, cancellationToken);
+            if (targetEventType == null)
             {
                 finalEventTypeId = Guid.Empty;
             }
@@ -60,7 +64,8 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
         if (finalEventTypeId == Guid.Empty)
         {
             var allTypes = await _eventTypeRepository.GetAllAsync(cancellationToken);
-            finalEventTypeId = allTypes.FirstOrDefault()?.Id 
+            targetEventType = allTypes.FirstOrDefault();
+            finalEventTypeId = targetEventType?.Id 
                 ?? throw new ConflictException("No EventType exists in the system.");
         }
 
@@ -102,6 +107,38 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
             var allOrgs = await _organizationRepository.GetAllAsync(cancellationToken);
             organizationId = allOrgs.FirstOrDefault()?.Id 
                 ?? throw new ConflictException("No Organization exists in the system.");
+        }
+
+        // 4. Validate Event Sequence Prerequisites
+        var targetCode = targetEventType?.Code?.ToUpper() ?? "";
+        if (targetCode != "HARVEST" && _eventRepository != null)
+        {
+            var existingEvents = await _eventRepository.GetByBatchAsync(finalBatchId, cancellationToken);
+            var existingCodes = existingEvents
+                .Select(e => e.EventType?.Code?.ToUpper() ?? "")
+                .Where(c => !string.IsNullOrEmpty(c))
+                .ToList();
+
+            if (targetCode == "TRANSPORT" && !existingCodes.Any(c => c == "HARVEST" || c == "PACKAGING" || c == "PROCESSING" || c == "RECEIVE" || c == "SPLIT" || c == "MERGE"))
+            {
+                throw new ConflictException("Lô hàng chưa được thu hoạch hoặc tiếp nhận/đóng gói. Không thể tạo yêu cầu Vận chuyển (TRANSPORT).");
+            }
+            if (targetCode == "PROCESSING" && !existingCodes.Any(c => c == "RECEIVE" || c == "HARVEST"))
+            {
+                throw new ConflictException("Lô hàng chưa được tiếp nhận hoặc thu hoạch. Không thể tạo yêu cầu Chế biến (PROCESSING).");
+            }
+            if (targetCode == "PACKAGING" && !existingCodes.Any(c => c == "PROCESSING" || c == "RECEIVE" || c == "HARVEST"))
+            {
+                throw new ConflictException("Lô hàng chưa được chế biến hoặc tiếp nhận/thu hoạch. Không thể tạo yêu cầu Đóng gói (PACKAGING).");
+            }
+            if (targetCode == "DISTRIBUTION" && !existingCodes.Any(c => c == "TRANSPORT" || c == "PACKAGING" || c == "RECEIVE"))
+            {
+                throw new ConflictException("Lô hàng chưa trải qua vận chuyển hoặc đóng gói. Không thể tạo yêu cầu Phân phối (DISTRIBUTION).");
+            }
+            if (targetCode == "RETAIL" && !existingCodes.Any(c => c == "DISTRIBUTION" || c == "RECEIVE"))
+            {
+                throw new ConflictException("Lô hàng chưa được phân phối hoặc tiếp nhận tại điểm bán. Không thể tạo yêu cầu Bán lẻ (RETAIL).");
+            }
         }
 
         var entity = new EventRequest(

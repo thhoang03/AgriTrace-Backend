@@ -76,7 +76,45 @@ graph TD
 
 ---
 
-## 🔄 4. Quy Trình Yêu Cầu Sự Kiện (Event Request Workflow)
+## 🔗 4. Quy Định Tiền Điều Kiện & Thứ Tự Sự Kiện (Event Sequence & Prerequisite Rules)
+
+Để đảm bảo dữ liệu truy xuất hợp lệ và logic thực tế (tránh trường hợp ghi nhận sự kiện vô lý như **Vận chuyển khi chưa Thu hoạch**, **Bán lẻ khi chưa Phân phối**, hoặc **Đóng gói khi chưa Tiếp nhận**), hệ thống áp dụng **Ma trận Tiền điều kiện Sự kiện (Prerequisite Events Matrix)**:
+
+```mermaid
+graph LR
+    HARVEST["1. HARVEST (Thu hoạch)"] --> RECEIVE_PROC["2. RECEIVE (Tiếp nhận tại NM)"]
+    RECEIVE_PROC --> PROCESSING["3. PROCESSING (Chế biến)"]
+    PROCESSING --> PACKAGING["4. PACKAGING (Đóng gói)"]
+    PACKAGING --> TRANSPORT["5. TRANSPORT (Vận chuyển)"]
+    TRANSPORT --> DISTRIBUTION["6. DISTRIBUTION (Phân phối)"]
+    DISTRIBUTION --> RECEIVE_RET["7. RECEIVE (Tiếp nhận tại Siêu thị)"]
+    RECEIVE_RET --> RETAIL["8. RETAIL (Bán lẻ)"]
+
+    style HARVEST fill:#E8F5E9,stroke:#2E7D32,stroke-width:2px
+    style PROCESSING fill:#FFF3E0,stroke:#F57C00,stroke-width:2px
+    style PACKAGING fill:#E3F2FD,stroke:#1565C0,stroke-width:2px
+    style TRANSPORT fill:#F3E5F5,stroke:#7B1FA2,stroke-width:2px
+    style RETAIL fill:#E8F5E9,stroke:#1B5E20,stroke-width:2px
+```
+
+### Bảng Ràng Buộc Tiền Điều Kiện Chi Tiết:
+
+| Sự Kiện Muốn Ghi Nhận (`Target Event`) | Điều Kiện Bắt Buộc Phải Có Trước (`Prerequisite Events`) | Diễn Giải Logic Nghiệp Vụ |
+| :--- | :--- | :--- |
+| **`HARVEST`** (Thu hoạch) | *(Không có)* | Sự kiện khởi đầu của lô hàng nông sản thô tại trang trại. |
+| **`RECEIVE`** (Tiếp nhận) | `HARVEST` hoặc `TRANSPORT` hoặc `PACKAGING` hoặc `SPLIT` / `MERGE` | **Bắt buộc lô hàng đã được Thu hoạch** hoặc Vận chuyển/Chuyển giao từ nhà máy/kho trước đó mới được tiếp nhận. |
+| **`PROCESSING`** (Chế biến) | `RECEIVE` hoặc `HARVEST` | Phải tiếp nhận lô hàng tại cơ sở chế biến (hoặc thu hoạch trực tiếp tại trang trại) thì mới được chế biến. |
+| **`PACKAGING`** (Đóng gói) | `PROCESSING` hoặc `RECEIVE` hoặc `HARVEST` | Phải qua khâu sơ chế/chế biến hoặc thu hoạch/tiếp nhận trước khi tiến hành đóng gói bao bì thành phẩm. |
+| **`TRANSPORT`** (Vận chuyển) | `HARVEST` hoặc `PACKAGING` hoặc `PROCESSING` hoặc `RECEIVE` hoặc `SPLIT` / `MERGE` | **Không thể vận chuyển lô hàng chưa tồn tại/chưa thu hoạch.** Lô hàng phải được thu hoạch, đóng gói hoặc tiếp nhận trước khi xếp lên xe vận tải. |
+| **`DISTRIBUTION`** (Phân phối) | `TRANSPORT` hoặc `PACKAGING` hoặc `RECEIVE` | Lô hàng phải trải qua vận chuyển hoặc đóng gói/tiếp nhận kho phân phối trước khi xuất kho phân phối. |
+| **`RETAIL`** (Bán lẻ) | `DISTRIBUTION` hoặc `RECEIVE` | **Phải được phân phối/tiếp nhận tại siêu thị/điểm bán** trước khi đưa lên kệ bán lẻ cho người tiêu dùng. |
+| **`INSPECTION`** (Kiểm định) | Tối thiểu phải có `HARVEST` | Có thể kiểm định tại nông trại (sau thu hoạch), nhà máy (sau chế biến/đóng gói) hoặc kho phân phối. |
+| **`RECALL`** (Thu hồi khẩn cấp) | Tối thiểu phải có `HARVEST` | Chỉ thực hiện thu hồi với lô hàng đã thu hoạch và đang lưu thông trên hệ thống. |
+| **`SPLIT` / `MERGE`** (Tách / Gộp) | Tối thiểu phải có `HARVEST` hoặc `RECEIVE` | Phải có lô hàng nguồn hợp lệ đang tồn tại mới được tách hoặc gộp. |
+
+---
+
+## 🔄 5. Quy Trình Yêu Cầu Sự Kiện (Event Request Workflow)
 
 Để ngăn chặn nhân viên tự ý ghi nhận sự kiện sai lệch vào sổ cái băm, hệ thống áp dụng **Quy trình Phê duyệt Sự kiện (Event Request Workflow)**:
 
