@@ -58,8 +58,7 @@ public sealed class OrganizationsController : ControllerBase
                 Name = x.Name,
                 Address = x.Address,
                 Type = x.OrganizationTypeCode,
-                OrganizationTypeId=x.OrganizationTypeId,
-                Address=x.Address,
+                OrganizationTypeId = x.OrganizationTypeId,
                 Status = x.Status.ToString()
             });
 

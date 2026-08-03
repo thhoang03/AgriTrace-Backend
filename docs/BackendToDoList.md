@@ -27,7 +27,6 @@
 - [x] **Cấu hình kết nối DB**: Connection string trong `appsettings.json`
 - [x] **Cấu hình Swagger**: Tích hợp Swagger UI với JWT Bearer Security Document Filter
 
-<<<<<<< HEAD
 ### 1.2 Domain Layer
 - [x] `BaseEntity` (Id, CreatedAt, UpdatedAt)
 - [x] ~~`Farm` + `Crop` entity (mẫu)~~ - **Đã xóa symlink mẫu**
@@ -122,7 +121,6 @@
 - [x] `POST /api/v1/batches/merge` — Gộp nhiều batch nguồn thành batch mới
 - [x] Tự động ghi nhận event `SPLIT` / `MERGE` vào chuỗi băm
 
-<<<<<<< HEAD
 ### 2.7 Application Layer (CQRS)
 - [x] **Commands/Queries** cho tất cả features (MediatR handlers)
 - [x] **Mapping** (Mapster) giữa Domain ↔ DataModel ↔ DTO
@@ -201,7 +199,6 @@
 
 ## 🔮 Hạng Mục Nâng Cấp Tiếp Theo (Optional / RoadMap)
 
-<<<<<<< HEAD
 > Định dạng: **Là** [vai trò], **tôi muốn** [tính năng], **để** [mục tiêu].
 > Actor hệ thống: `Admin`, `Manager`, `Staff/Farmer`, `Inspector`, `Consumer`.
 > Trạng thái `[x]` = API backend đã có; `[ ]` = chưa làm / cần bổ sung.
@@ -333,4 +330,3 @@
 - [ ] Cấu hình Redis Cache cho API Tra cứu công khai (`GET /api/v1/public/trace`).
 - [ ] Đóng gói Docker Compose (Backend API + SQL Server + Redis + Nginx Frontend).
 - [ ] Triển khai Real-time notifications qua SignalR.
->>>>>>> 50363ec (feat: implement Event Requests feature and fix EventType entity rehydration)
