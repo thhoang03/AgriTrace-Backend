@@ -37,7 +37,8 @@ public class CategoriesController : ControllerBase
             query.Page,
             query.PageSize,
             query.SortBy,
-            query.SortDir), cancellationToken);
+            query.SortDir,
+            query.Status), cancellationToken);
 
         var response = new CategoryPagedResponse(
             result.Items.Select(ToResponse),

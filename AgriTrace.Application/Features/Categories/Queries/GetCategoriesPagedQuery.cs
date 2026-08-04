@@ -14,7 +14,8 @@ public record GetCategoriesPagedQuery(
     int Page,
     int PageSize,
     string? SortBy,
-    string? SortDir) : IRequest<PagedResult<CategoryDto>>;
+    string? SortDir,
+    string? Status) : IRequest<PagedResult<CategoryDto>>;
 
 public class GetCategoriesPagedQueryHandler : IRequestHandler<GetCategoriesPagedQuery, PagedResult<CategoryDto>>
 {
@@ -33,6 +34,7 @@ public class GetCategoriesPagedQueryHandler : IRequestHandler<GetCategoriesPaged
             request.PageSize,
             request.SortBy,
             request.SortDir,
+            request.Status,
             cancellationToken);
 
         var dtoItems = pagedResult.Items.Adapt<List<CategoryDto>>();

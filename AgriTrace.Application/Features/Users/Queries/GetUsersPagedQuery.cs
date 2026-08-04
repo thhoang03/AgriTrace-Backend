@@ -12,6 +12,7 @@ using AgriTrace.Domain.Entities.QualityInspections;
 using AgriTrace.Domain.Entities.Recalls;
 using AgriTrace.Domain.Entities.Units;
 using AgriTrace.Domain.Entities.Users;
+using AgriTrace.Domain.Enums;
 using AgriTrace.Domain.Interfaces.Inbound;
 using MediatR;
 
@@ -21,6 +22,8 @@ public record GetUsersPagedQuery(
     Guid? OrganizationId,
     string? Role,
     string? Search,
+    string? Status,
+    string? OrgType,
     int Page,
     int PageSize) : IRequest<PagedResult<UserDto>>;
 
@@ -56,6 +59,23 @@ public class GetUsersPagedQueryHandler : IRequestHandler<GetUsersPagedQuery, Pag
             query = query.Where(x =>
                 x.FullName.ToLowerInvariant().Contains(search)
                 || x.Email.ToLowerInvariant().Contains(search));
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.Status)
+            && Enum.TryParse<UserStatus>(request.Status, ignoreCase: true, out var status))
+        {
+            query = query.Where(x => x.Status == status);
+        }
+
+        if (!string.IsNullOrWhiteSpace(request.OrgType))
+        {
+            query = query.Where(x =>
+                x.Organization != null
+                && x.Organization.OrganizationType != null
+                && string.Equals(
+                    x.Organization.OrganizationType.Name,
+                    request.OrgType,
+                    StringComparison.OrdinalIgnoreCase));
         }
 
         var totalCount = query.Count();

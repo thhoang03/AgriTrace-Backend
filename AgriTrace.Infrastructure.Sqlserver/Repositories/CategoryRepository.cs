@@ -59,7 +59,7 @@ public class CategoryRepository
         int pageSize,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(null, pageNumber, pageSize, null, null, cancellationToken);
+        return await GetPagedAsync(null, pageNumber, pageSize, null, null, null, cancellationToken);
     }
 
     public async Task<PagedResult<Category>> GetPagedAsync(
@@ -68,7 +68,7 @@ public class CategoryRepository
         int pageSize,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(search, pageNumber, pageSize, null, null, cancellationToken);
+        return await GetPagedAsync(search, pageNumber, pageSize, null, null, null, cancellationToken);
     }
 
     public async Task<PagedResult<Category>> GetPagedAsync(
@@ -77,6 +77,7 @@ public class CategoryRepository
         int pageSize,
         string? sortBy,
         string? sortDir,
+        string? status,
         CancellationToken cancellationToken = default)
     {
         var query = _context.Categories.AsQueryable();
@@ -84,6 +85,12 @@ public class CategoryRepository
         if (!string.IsNullOrWhiteSpace(search))
         {
             query = query.Where(x => x.Name.Contains(search));
+        }
+
+        if (!string.IsNullOrWhiteSpace(status))
+        {
+            var isActive = string.Equals(status, "Active", StringComparison.OrdinalIgnoreCase);
+            query = query.Where(x => x.IsActive == isActive);
         }
 
         var effectiveSortBy = string.Equals(sortBy, "name", StringComparison.OrdinalIgnoreCase) ? "name" : "createdAt";
