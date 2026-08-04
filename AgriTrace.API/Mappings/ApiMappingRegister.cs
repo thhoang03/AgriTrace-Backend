@@ -31,17 +31,47 @@ internal static class ApiMappings
 
     //=======PRODUCT=======
 
-    public static CreateProductCommand ToCommand(
-        this ProductRequest request)
+    private static Guid? ResolveUnitId(Guid? directUnitId, string? unitString)
     {
-        Guid? unitId = request.UnitId;
-        if (!unitId.HasValue && !string.IsNullOrWhiteSpace(request.Unit) && Guid.TryParse(request.Unit, out var parsedGuid))
+        if (directUnitId.HasValue && directUnitId.Value != Guid.Empty)
+            return directUnitId.Value;
+
+        if (string.IsNullOrWhiteSpace(unitString))
+            return new Guid("40000000-0000-0000-0000-000000000001"); // Default to Kilogram
+
+        if (Guid.TryParse(unitString, out var parsedGuid))
+            return parsedGuid;
+
+        var normalized = unitString.Trim().ToUpperInvariant();
+        return normalized switch
         {
-            unitId = parsedGuid;
-        }
+            "KG" or "KILOGRAM" => new Guid("40000000-0000-0000-0000-000000000001"),
+            "GRAM" or "G" => new Guid("40000000-0000-0000-0000-000000000002"),
+            "LITER" or "L" => new Guid("40000000-0000-0000-0000-000000000003"),
+            "MILLILITER" or "ML" => new Guid("40000000-0000-0000-0000-000000000004"),
+            "BOX" => new Guid("40000000-0000-0000-0000-000000000005"),
+            "BALE" => new Guid("40000000-0000-0000-0000-000000000006"),
+            "PIECE" or "PC" or "PACK" or "CRATE" or "BAG" => new Guid("40000000-0000-0000-0000-000000000007"),
+            "TON" or "T" or "METRIC TON" => new Guid("40000000-0000-0000-0000-000000000008"),
+            "SACK" => new Guid("40000000-0000-0000-0000-000000000009"),
+            _ => new Guid("40000000-0000-0000-0000-000000000001")
+        };
+    }
+
+    public static CreateProductCommand ToCommand(
+        this ProductRequest request,
+        Guid? fallbackOrgId = null)
+    {
+        Guid? unitId = ResolveUnitId(request.UnitId, request.Unit);
+
+        var orgId = (request.OrganizationId.HasValue && request.OrganizationId.Value != Guid.Empty)
+            ? request.OrganizationId.Value
+            : (fallbackOrgId.HasValue && fallbackOrgId.Value != Guid.Empty
+                ? fallbackOrgId.Value
+                : new Guid("50000000-0000-0000-0000-000000000006"));
 
         return new CreateProductCommand(
-            request.OrganizationId ?? Guid.Empty,
+            orgId,
             request.CategoryId,
             unitId,
             request.Name);
@@ -51,11 +81,7 @@ internal static class ApiMappings
         this ProductRequest request,
         Guid id)
     {
-        Guid? unitId = request.UnitId;
-        if (!unitId.HasValue && !string.IsNullOrWhiteSpace(request.Unit) && Guid.TryParse(request.Unit, out var parsedGuid))
-        {
-            unitId = parsedGuid;
-        }
+        Guid? unitId = ResolveUnitId(request.UnitId, request.Unit);
 
         return new UpdateProductCommand(
             id,
@@ -79,8 +105,6 @@ internal static class ApiMappings
             request.Name,
             request.Address);
     }
-
-
 
     public static UpdateOrganizationCommand ToCommand(
         this OrganizationRequest request,

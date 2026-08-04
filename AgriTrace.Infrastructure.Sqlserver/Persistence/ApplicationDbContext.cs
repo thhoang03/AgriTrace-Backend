@@ -63,6 +63,9 @@ public class ApplicationDbContext : DbContext
     public DbSet<SupplyChainEventDataModel> SupplyChainEvents
         => Set<SupplyChainEventDataModel>();
 
+    public DbSet<EventRequestDataModel> EventRequests
+        => Set<EventRequestDataModel>();
+
 
     public DbSet<BatchSplitDataModel> BatchSplits
         => Set<BatchSplitDataModel>();

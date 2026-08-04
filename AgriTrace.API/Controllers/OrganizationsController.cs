@@ -56,9 +56,9 @@ public sealed class OrganizationsController : ControllerBase
             {
                 OrganizationId = x.Id,
                 Name = x.Name,
+                Address = x.Address,
                 Type = x.OrganizationTypeCode,
-                OrganizationTypeId=x.OrganizationTypeId,
-                Address=x.Address,
+                OrganizationTypeId = x.OrganizationTypeId,
                 Status = x.Status.ToString()
             });
 
@@ -112,7 +112,7 @@ public sealed class OrganizationsController : ControllerBase
     /// Tạo tổ chức mới
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,ADMIN")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     public async Task<ActionResult<ApiResponse>> Create(
@@ -125,14 +125,14 @@ public sealed class OrganizationsController : ControllerBase
         return Created(
             $"/api/v1/organizations/{organization.Id}",
             ApiResponse.Success(
-                organization));
+                organization.ToResponse()));
     }
 
     /// <summary>
     /// Cập nhật tổ chức
     /// </summary>
     [HttpPut("{id:guid}")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,ADMIN")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
@@ -154,7 +154,7 @@ public sealed class OrganizationsController : ControllerBase
     /// Thay đổi trạng thái tổ chức
     /// </summary>
     [HttpPatch("{id:guid}/status")]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,ADMIN")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse>> UpdateStatus(
@@ -221,7 +221,7 @@ public sealed class OrganizationsController : ControllerBase
 
     // Not in swagger.yaml — internal-only endpoint, suppressed from OpenAPI docs (Phase 12 decision: keep suppressed).
     [ApiExplorerSettings(IgnoreApi = true)]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,ADMIN")]
     [HttpDelete("{id:guid}")]
     public async Task<ActionResult<ApiResponse>> Delete(
         Guid id,

@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 
 namespace AgriTrace.API.Models
 {
@@ -12,7 +12,7 @@ namespace AgriTrace.API.Models
         public string Name { get; set; } = string.Empty;
 
         /// <summary>
-        /// Organization type. One of: FARM, PROCESSOR, DISTRIBUTOR, RETAILER, INSPECTOR_ORG.
+        /// Organization type ID (Guid from GET /api/v1/organization-types).
         /// </summary>
         [Required]
         public Guid OrganizationTypeId { get; set; }

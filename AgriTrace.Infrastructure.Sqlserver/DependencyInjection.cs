@@ -67,6 +67,7 @@ public static class DependencyInjection
         services.AddScoped<IBatchMergeRepository, BatchMergeRepository>();
         services.AddScoped<IRecallRepository, RecallRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
+        services.AddScoped<IEventRequestRepository, EventRequestRepository>();
     }
 
 }
