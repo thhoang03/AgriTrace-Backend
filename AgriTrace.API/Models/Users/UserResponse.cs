@@ -27,11 +27,20 @@ public class UserDetail
     [JsonPropertyName("organizationId")]
     public Guid? OrganizationId { get; set; }
 
+    [JsonPropertyName("organizationName")]
+    public string? OrganizationName { get; set; }
+
+    [JsonPropertyName("organizationTypeName")]
+    public string? OrganizationTypeName { get; set; }
+
     [JsonPropertyName("phone")]
     public string? Phone { get; set; }
 
     [JsonPropertyName("isActive")]
     public bool IsActive { get; set; }
+
+    [JsonPropertyName("createdAt")]
+    public DateTime CreatedAt { get; set; }
 }
 
 /// <summary>
