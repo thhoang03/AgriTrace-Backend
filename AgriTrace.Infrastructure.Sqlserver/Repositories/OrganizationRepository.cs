@@ -94,12 +94,47 @@ public class OrganizationRepository
         int pageSize,
         CancellationToken cancellationToken = default)
     {
+        return await GetPagedAsync(
+            null,
+            null,
+            null,
+            pageNumber,
+            pageSize,
+            cancellationToken);
+    }
+
+    public async Task<PagedResult<Organization>> GetPagedAsync(
+        string? search,
+        string? status,
+        Guid? organizationTypeId,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
 
         var query = _context.Organizations
             .Include(x => x.OrganizationType)
             .AsQueryable();
 
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var keyword = search.Trim();
+            query = query.Where(x =>
+                x.Name.Contains(keyword)
+                || x.OrganizationType != null && x.OrganizationType.Name.Contains(keyword)
+                || x.OrganizationType != null && x.OrganizationType.Code.Contains(keyword));
+        }
 
+        if (!string.IsNullOrWhiteSpace(status)
+            && Enum.TryParse<OrganizationStatus>(status, ignoreCase: true, out var orgStatus))
+        {
+            query = query.Where(x => x.Status == orgStatus);
+        }
+
+        if (organizationTypeId.HasValue)
+        {
+            query = query.Where(x => x.OrganizationTypeId == organizationTypeId.Value);
+        }
 
         var totalCount = await query
             .CountAsync(cancellationToken);
@@ -158,7 +193,7 @@ public class OrganizationRepository
 
 
         // Tr? l?i entity du?c rehydrate t? model v?a luu d? d?m b?o
-        // Id/CreatedAt tr? v? kh?p chính xác v?i d? li?u dã persist.
+        // Id/CreatedAt tr? v? kh?p chï¿½nh xï¿½c v?i d? li?u dï¿½ persist.
         return ToEntity(model);
 
     }
@@ -317,9 +352,9 @@ public class OrganizationRepository
         OrganizationDataModel model)
     {
 
-        // Dùng constructor rehydrate d? gi? dúng Id/Status/CreatedAt/UpdatedAt
-        // t? database, thay vì constructor "t?o m?i" (s? sinh Id ng?u nhiên
-        // và luôn set Status = Active).
+        // Dï¿½ng constructor rehydrate d? gi? dï¿½ng Id/Status/CreatedAt/UpdatedAt
+        // t? database, thay vï¿½ constructor "t?o m?i" (s? sinh Id ng?u nhiï¿½n
+        // vï¿½ luï¿½n set Status = Active).
         return new Organization(
             model.Id,
             model.OrganizationTypeId,

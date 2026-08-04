@@ -1,3 +1,4 @@
+using AgriTrace.Domain.Common;
 using AgriTrace.Domain.Entities.Batches;
 using AgriTrace.Domain.Entities.Categories;
 using AgriTrace.Domain.Entities.Certificates;
@@ -21,5 +22,13 @@ public interface IOrganizationRepository
 
     Task<Organization?> GetByNameAsync(
         string name,
+        CancellationToken cancellationToken = default);
+
+    Task<PagedResult<Organization>> GetPagedAsync(
+        string? search,
+        string? status,
+        Guid? organizationTypeId,
+        int pageNumber,
+        int pageSize,
         CancellationToken cancellationToken = default);
 }

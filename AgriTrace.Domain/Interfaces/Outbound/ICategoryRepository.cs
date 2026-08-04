@@ -26,6 +26,7 @@ public interface ICategoryRepository
         int pageSize,
         string? sortBy,
         string? sortDir,
+        string? status,
         CancellationToken cancellationToken = default);
 
     Task<bool> HasProductsAsync(

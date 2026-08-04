@@ -12,4 +12,7 @@ public class CategoryQuery : PaginationRequest
 
     [RegularExpression("^(asc|desc)$", ErrorMessage = "sortDir must be 'asc' or 'desc'.")]
     public string? SortDir { get; set; }
+
+    [RegularExpression("^(Active|Inactive)$", ErrorMessage = "Status must be 'Active' or 'Inactive'.")]
+    public string? Status { get; set; }
 }
