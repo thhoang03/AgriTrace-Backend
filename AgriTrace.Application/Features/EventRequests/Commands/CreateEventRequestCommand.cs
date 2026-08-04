@@ -8,16 +8,13 @@ using MediatR;
 namespace AgriTrace.Application.Features.EventRequests.Commands;
 
 public record CreateEventRequestCommand(
-    Guid BatchId,
     Guid EventTypeId,
     string? Location,
-    string? Description,
-    string? EventData) : IRequest<EventRequestDto>;
+    string? Description) : IRequest<EventRequestDto>;
 
 public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventRequestCommand, EventRequestDto>
 {
     private readonly IEventRequestRepository _eventRequestRepository;
-    private readonly IBatchReadService _batchReadService;
     private readonly IUserService _userService;
     private readonly ICurrentUserService _currentUser;
     private readonly IOrganizationRepository _organizationRepository;
@@ -25,14 +22,12 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
 
     public CreateEventRequestCommandHandler(
         IEventRequestRepository eventRequestRepository,
-        IBatchReadService batchReadService,
         IUserService userService,
         ICurrentUserService currentUser,
         IOrganizationRepository organizationRepository,
         IEventTypeRepository eventTypeRepository)
     {
         _eventRequestRepository = eventRequestRepository;
-        _batchReadService = batchReadService;
         _userService = userService;
         _currentUser = currentUser;
         _organizationRepository = organizationRepository;
@@ -47,78 +42,58 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
         var user = await _userService.GetByIdAsync(_currentUser.UserId, cancellationToken)
             ?? throw new NotFoundException($"User {_currentUser.UserId} not found");
 
-        // 1. Verify EventTypeId exists in DB (or fallback to first EventType)
-        Guid finalEventTypeId = request.EventTypeId;
-        if (finalEventTypeId != Guid.Empty)
-        {
-            var eventType = await _eventTypeRepository.GetByIdAsync(finalEventTypeId, cancellationToken);
-            if (eventType == null)
-            {
-                finalEventTypeId = Guid.Empty;
-            }
-        }
-        if (finalEventTypeId == Guid.Empty)
-        {
-            var allTypes = await _eventTypeRepository.GetAllAsync(cancellationToken);
-            finalEventTypeId = allTypes.FirstOrDefault()?.Id 
-                ?? throw new ConflictException("No EventType exists in the system.");
-        }
+        // 1. Verify EventTypeId exists in DB
+        if (request.EventTypeId == Guid.Empty)
+            throw new ConflictException("EventType ID is required to submit an expansion request.");
 
-        // 2. Verify BatchId exists in DB (or fallback to first Batch)
-        Guid finalBatchId = request.BatchId;
-        if (finalBatchId != Guid.Empty)
-        {
-            var batch = await _batchReadService.GetByIdAsync(finalBatchId, cancellationToken);
-            if (batch == null)
-            {
-                finalBatchId = Guid.Empty;
-            }
-        }
-        if (finalBatchId == Guid.Empty)
-        {
-            var allBatches = await _batchReadService.GetAllAsync(cancellationToken);
-            if (allBatches.Count > 0)
-            {
-                finalBatchId = allBatches.First().Id;
-            }
-            else
-            {
-                throw new ConflictException("No Batch exists in the system to submit an event request.");
-            }
-        }
+        var targetEventType = await _eventTypeRepository.GetByIdAsync(request.EventTypeId, cancellationToken)
+            ?? throw new NotFoundException($"EventType {request.EventTypeId} not found.");
 
-        // 3. Verify OrganizationId exists in DB (or fallback to first Organization)
+        // 2. Guard: SPLIT, MERGE, RECALL cannot be requested as expansions
+        var targetCode = targetEventType.Code?.ToUpper() ?? "";
+        if (targetCode is "SPLIT" or "MERGE" or "RECALL")
+            throw new ConflictException($"Event type '{targetCode}' is a system-level operation and cannot be requested as an organization expansion.");
+
+        // 3. Verify OrganizationId exists in DB
         Guid organizationId = user.OrganizationId ?? Guid.Empty;
         if (organizationId != Guid.Empty)
         {
             var org = await _organizationRepository.GetByIdAsync(organizationId, cancellationToken);
             if (org == null)
-            {
                 organizationId = Guid.Empty;
-            }
         }
         if (organizationId == Guid.Empty)
         {
             var allOrgs = await _organizationRepository.GetAllAsync(cancellationToken);
-            organizationId = allOrgs.FirstOrDefault()?.Id 
+            organizationId = allOrgs.FirstOrDefault()?.Id
                 ?? throw new ConflictException("No Organization exists in the system.");
         }
 
+        // 4. Check for duplicate pending/approved request for the same org + event type
+        var existing = await _eventRequestRepository.GetAllAsync(cancellationToken);
+        var duplicate = existing.FirstOrDefault(r =>
+            r.OrganizationId == organizationId &&
+            r.EventTypeId == request.EventTypeId &&
+            (r.Status == Domain.Enums.EventRequestStatus.Pending || r.Status == Domain.Enums.EventRequestStatus.Approved));
+        if (duplicate != null)
+        {
+            var statusLabel = duplicate.Status == Domain.Enums.EventRequestStatus.Approved ? "đã được phê duyệt" : "đang chờ xét duyệt";
+            throw new ConflictException($"Tổ chức của bạn đã có yêu cầu mở rộng cho event type '{targetEventType.Name}' ({statusLabel}).");
+        }
+
         var entity = new EventRequest(
-            finalBatchId,
-            finalEventTypeId,
+            batchId: null,
+            request.EventTypeId,
             organizationId,
             _currentUser.UserId,
-            request.EventData,
+            eventData: null,
             request.Location,
             request.Description
         );
 
         await _eventRequestRepository.AddAsync(entity, cancellationToken);
 
-        // Fetch re-populated entity
         var created = await _eventRequestRepository.GetByIdAsync(entity.Id, cancellationToken) ?? entity;
-
         return MapToDto(created);
     }
 
@@ -127,7 +102,7 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
         return new EventRequestDto
         {
             Id = req.Id,
-            BatchId = req.BatchId,
+            BatchId = req.BatchId ?? Guid.Empty,
             BatchCode = req.Batch?.BatchCode,
             EventTypeId = req.EventTypeId,
             EventTypeCode = req.EventType?.Code,

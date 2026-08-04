@@ -1,6 +1,5 @@
 using AgriTrace.Application.Common.Exceptions;
 using AgriTrace.Application.Contracts;
-using AgriTrace.Application.Features.Events.Commands;
 using AgriTrace.Domain.Interfaces.Inbound;
 using AgriTrace.Domain.Interfaces.Outbound;
 using MediatR;
@@ -12,16 +11,13 @@ public record ApproveEventRequestCommand(Guid RequestId) : IRequest<EventRequest
 public class ApproveEventRequestCommandHandler : IRequestHandler<ApproveEventRequestCommand, EventRequestDto>
 {
     private readonly IEventRequestRepository _eventRequestRepository;
-    private readonly ISender _sender;
     private readonly ICurrentUserService _currentUser;
 
     public ApproveEventRequestCommandHandler(
         IEventRequestRepository eventRequestRepository,
-        ISender sender,
         ICurrentUserService currentUser)
     {
         _eventRequestRepository = eventRequestRepository;
-        _sender = sender;
         _currentUser = currentUser;
     }
 
@@ -30,19 +26,14 @@ public class ApproveEventRequestCommandHandler : IRequestHandler<ApproveEventReq
         if (!_currentUser.IsAuthenticated)
             throw new ForbiddenException("User is not authenticated");
 
+        if (_currentUser.Role != "Admin")
+            throw new ForbiddenException("Chỉ Admin hệ thống mới có quyền phê duyệt yêu cầu mở rộng event type.");
+
         var eventReq = await _eventRequestRepository.GetByIdAsync(request.RequestId, cancellationToken)
             ?? throw new NotFoundException($"EventRequest {request.RequestId} not found");
 
+        // Grant org-level permission — mark as Approved only, do NOT create any SupplyChainEvent
         eventReq.Approve(_currentUser.UserId);
-
-        // Create actual SupplyChainEvent & Compute Hash Chain
-        await _sender.Send(new CreateEventCommand(
-            eventReq.BatchId,
-            eventReq.EventTypeId,
-            eventReq.EventData,
-            eventReq.Location,
-            eventReq.RequestedByUserId
-        ), cancellationToken);
 
         await _eventRequestRepository.UpdateAsync(eventReq, cancellationToken);
 
