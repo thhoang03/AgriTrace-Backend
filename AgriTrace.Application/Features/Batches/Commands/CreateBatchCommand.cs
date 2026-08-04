@@ -1,3 +1,4 @@
+using AgriTrace.Application.Common.Exceptions;
 using AgriTrace.Application.Contracts;
 using AgriTrace.Domain.Entities.Batches;
 using AgriTrace.Domain.Entities.Categories;
@@ -58,6 +59,11 @@ public sealed class CreateBatchCommandHandler
         CreateBatchCommand command,
         CancellationToken cancellationToken)
     {
+        if (_currentUser != null && _currentUser.IsAuthenticated && _currentUser.Role != "Admin" && _currentUser.OrganizationType != "FARM")
+        {
+            throw new ForbiddenException("Chỉ đơn vị Trang trại (FARM) hoặc Admin hệ thống mới được phép khởi tạo Lô hàng mới.");
+        }
+
         // Server-side batch code generation
         var batchCode = Guid.NewGuid().ToString("N")[..8].ToUpper();
 
@@ -89,42 +95,6 @@ public sealed class CreateBatchCommandHandler
         var created = await _batchWriteService.CreateAsync(
             batch,
             cancellationToken);
-
-        // Auto-create initial HARVEST event
-        if (_eventTypeRepository != null && _eventService != null)
-        {
-            try
-            {
-                var allTypes = await _eventTypeRepository.GetAllAsync(cancellationToken);
-                var harvestType = allTypes.FirstOrDefault(e => e.Code.Equals("HARVEST", StringComparison.OrdinalIgnoreCase))
-                    ?? allTypes.FirstOrDefault();
-
-                if (harvestType != null)
-                {
-                    var userId = (_currentUser != null && _currentUser.IsAuthenticated) ? _currentUser.UserId : (created.CurrentOrganizationId);
-                    if (userId == Guid.Empty) userId = new Guid("10000000-0000-0000-0000-000000000001");
-
-                    var harvestEvent = new SupplyChainEvent(
-                        created.Id,
-                        harvestType.Id,
-                        created.CurrentOrganizationId,
-                        userId,
-                        eventData: $"Thu hoạch nông sản ban đầu cho lô hàng {created.BatchCode}",
-                        location: "Farm Location",
-                        inspectionId: null,
-                        previousHash: null,
-                        currentHash: null);
-
-                    await _eventService.CreateEventAsync(harvestEvent, cancellationToken);
-                    created.ChangeStatus(BatchStatus.Harvested);
-                    await _batchWriteService.UpdateAsync(created, cancellationToken);
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"[CreateBatchCommand] Note: Initial HARVEST event creation skipped: {ex.Message}");
-            }
-        }
 
         return created.Adapt<BatchDto>();
     }

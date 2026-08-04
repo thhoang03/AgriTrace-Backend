@@ -56,17 +56,15 @@ public sealed class EventRequestsController : ControllerBase
     {
         var result = await _sender.Send(
             new CreateEventRequestCommand(
-                model.BatchId,
                 model.EventTypeId,
                 model.Location,
-                model.Description,
-                model.EventData
+                model.Description
             ),
             cancellationToken);
 
         return StatusCode(
             StatusCodes.Status201Created,
-            ApiResponse.Success(result, "Tạo yêu cầu sự kiện thành công"));
+            ApiResponse.Success(result, "Tạo yêu cầu mở rộng thành công. Vui lòng chờ Admin xét duyệt."));
     }
 
     /// <summary>

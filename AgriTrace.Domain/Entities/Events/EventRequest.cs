@@ -8,7 +8,7 @@ namespace AgriTrace.Domain.Entities.Events;
 
 public class EventRequest : BaseEntity
 {
-    public Guid BatchId { get; private set; }
+    public Guid? BatchId { get; private set; }
     public Guid EventTypeId { get; private set; }
     public Guid OrganizationId { get; private set; }
     public Guid RequestedByUserId { get; private set; }
@@ -20,7 +20,7 @@ public class EventRequest : BaseEntity
     public DateTime? ReviewedAt { get; private set; }
     public Guid? ReviewedByUserId { get; private set; }
 
-    public Batch Batch { get; private set; } = null!;
+    public Batch? Batch { get; private set; }
     public EventType EventType { get; private set; } = null!;
     public Organization Organization { get; private set; } = null!;
     public User RequestedByUser { get; private set; } = null!;
@@ -29,7 +29,7 @@ public class EventRequest : BaseEntity
     private EventRequest() { }
 
     public EventRequest(
-        Guid batchId,
+        Guid? batchId,
         Guid eventTypeId,
         Guid organizationId,
         Guid requestedByUserId,
@@ -37,8 +37,6 @@ public class EventRequest : BaseEntity
         string? location,
         string? description)
     {
-        if (batchId == Guid.Empty)
-            throw new ArgumentException("Batch ID is required", nameof(batchId));
         if (eventTypeId == Guid.Empty)
             throw new ArgumentException("Event Type ID is required", nameof(eventTypeId));
         if (organizationId == Guid.Empty)
@@ -60,7 +58,7 @@ public class EventRequest : BaseEntity
 
     public static EventRequest Rehydrate(
         Guid id,
-        Guid batchId,
+        Guid? batchId,
         Guid eventTypeId,
         Guid organizationId,
         Guid requestedByUserId,

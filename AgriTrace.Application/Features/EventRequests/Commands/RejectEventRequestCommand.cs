@@ -26,6 +26,9 @@ public class RejectEventRequestCommandHandler : IRequestHandler<RejectEventReque
         if (!_currentUser.IsAuthenticated)
             throw new ForbiddenException("User is not authenticated");
 
+        if (_currentUser.Role != "Admin" && _currentUser.Role != "Manager")
+            throw new ForbiddenException("Chỉ Quản lý (Manager) hoặc Admin mới có quyền từ chối yêu cầu sự kiện.");
+
         var eventReq = await _eventRequestRepository.GetByIdAsync(request.RequestId, cancellationToken)
             ?? throw new NotFoundException($"EventRequest {request.RequestId} not found");
 
