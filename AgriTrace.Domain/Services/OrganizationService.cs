@@ -100,7 +100,21 @@ public class OrganizationService : IOrganizationService
         int pageSize,
         CancellationToken cancellationToken = default)
     {
+        return await GetPagedAsync(null, null, null, pageNumber, pageSize, cancellationToken);
+    }
+
+    public async Task<PagedResult<Organization>> GetPagedAsync(
+        string? search,
+        string? status,
+        Guid? organizationTypeId,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
         return await _repository.GetPagedAsync(
+            search,
+            status,
+            organizationTypeId,
             pageNumber,
             pageSize,
             cancellationToken);
