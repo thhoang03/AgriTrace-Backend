@@ -80,6 +80,7 @@ public static class SeedData
     private static void SeedEventTypes(ModelBuilder builder)
     {
         builder.Entity<EventTypeDataModel>().HasData(
+            new EventTypeDataModel { Id = new Guid("20000000-0000-0000-0000-000000000000"), Code = "CREATED", Name = "Created" },
             new EventTypeDataModel { Id = new Guid("20000000-0000-0000-0000-000000000001"), Code = "HARVEST", Name = "Harvest" },
             new EventTypeDataModel { Id = new Guid("20000000-0000-0000-0000-000000000002"), Code = "RECEIVE", Name = "Receive" },
             new EventTypeDataModel { Id = new Guid("20000000-0000-0000-0000-000000000003"), Code = "PROCESSING", Name = "Processing" },

@@ -96,6 +96,33 @@ public sealed class CreateBatchCommandHandler
             batch,
             cancellationToken);
 
+        if (_eventTypeRepository != null && _eventService != null)
+        {
+            var eventType = await _eventTypeRepository.GetByCodeAsync("CREATED", cancellationToken)
+                         ?? await _eventTypeRepository.GetByCodeAsync("HARVEST", cancellationToken);
+            if (eventType != null)
+            {
+                var performedByUserId = _currentUser?.UserId ?? Guid.Empty;
+                if (performedByUserId == Guid.Empty)
+                {
+                    performedByUserId = new Guid("70000000-0000-0000-0000-000000000002");
+                }
+
+                var supplyChainEvent = new SupplyChainEvent(
+                    created.Id,
+                    eventType.Id,
+                    batch.CurrentOrganizationId,
+                    performedByUserId,
+                    eventData: $"Lô hàng {batchCode} được khởi tạo. Sản lượng: {command.Quantity}",
+                    location: "Farm",
+                    inspectionId: null,
+                    previousHash: null,
+                    currentHash: null);
+
+                await _eventService.CreateEventAsync(supplyChainEvent, cancellationToken);
+            }
+        }
+
         return created.Adapt<BatchDto>();
     }
 
