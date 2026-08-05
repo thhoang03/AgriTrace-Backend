@@ -38,6 +38,8 @@ public sealed class OrganizationsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse>> GetAll(
+        string? search,
+        string? status,
         Guid? organizationTypeId,
         int page = 1,
         int pageSize = 20,
@@ -46,27 +48,8 @@ public sealed class OrganizationsController : ControllerBase
         if (!IsAdmin)
             return Forbid();
 
-        if (organizationTypeId.HasValue)
-        {
-            var byType = await _sender.Send(
-                new GetOrganizationsByTypeQuery(organizationTypeId.Value),
-                cancellationToken);
-
-            var items = byType.Select(x => new OrganizationListItem
-            {
-                OrganizationId = x.Id,
-                Name = x.Name,
-                Address = x.Address,
-                Type = x.OrganizationTypeCode,
-                OrganizationTypeId = x.OrganizationTypeId,
-                Status = x.Status.ToString()
-            });
-
-            return Ok(ApiResponse.Success(items));
-        }
-
         var result = await _sender.Send(
-            new GetOrganizationsPagedQuery(page, pageSize),
+            new GetOrganizationsPagedQuery(search, status, organizationTypeId, page, pageSize),
             cancellationToken);
 
         var paged = new OrganizationPagedResponse(

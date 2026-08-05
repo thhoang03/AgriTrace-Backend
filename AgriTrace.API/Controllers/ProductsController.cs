@@ -38,6 +38,7 @@ public sealed class ProductsController : ControllerBase
     [HttpGet]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse>> GetAll(
+        Guid? organizationId,
         Guid? categoryId,
         string? search,
         int page = 1,
@@ -46,17 +47,17 @@ public sealed class ProductsController : ControllerBase
     {
         Guid? orgId = _currentUser.OrganizationId;
 
-        if (!IsAdmin)
+        if (IsAdmin)
+        {
+            orgId = organizationId;
+        }
+        else
         {
             if (!orgId.HasValue)
             {
                 var empty = new ProductPagedResponse([], 0, page, pageSize);
                 return Ok(ApiResponse.Success(empty));
             }
-        }
-        else
-        {
-            orgId = null;
         }
 
         var result = await _sender.Send(

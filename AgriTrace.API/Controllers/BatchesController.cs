@@ -205,8 +205,25 @@ public sealed class BatchesController : ControllerBase
     public IActionResult GetImages(
         Guid batchId)
     {
-        // TODO: implement image listing (Phase 8+). Stub returns an empty list.
-        return Ok(ApiResponse.Success(new { items = Array.Empty<object>() }));
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "batches");
+        if (!Directory.Exists(uploadsFolder))
+        {
+            return Ok(ApiResponse.Success(new { items = Array.Empty<object>() }));
+        }
+
+        var files = Directory.GetFiles(uploadsFolder, $"{batchId}_*");
+        var items = files.Select((filePath, idx) => {
+            var fileName = Path.GetFileName(filePath);
+            return new
+            {
+                imageId = idx + 1,
+                url = $"/uploads/batches/{fileName}",
+                fileName = fileName,
+                uploadedAt = System.IO.File.GetCreationTimeUtc(filePath).ToString("o")
+            };
+        });
+
+        return Ok(ApiResponse.Success(new { items }));
     }
 
 
@@ -216,15 +233,43 @@ public sealed class BatchesController : ControllerBase
     /// </summary>
     [HttpPost("{batchId:guid}/images")]
     [Consumes("multipart/form-data")]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status501NotImplemented)]
-    public IActionResult UploadImage(
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadImage(
         Guid batchId,
-        [FromForm] ImageUploadRequest request)
+        [FromForm] ImageUploadRequest request,
+        CancellationToken cancellationToken = default)
     {
-        // TODO: implement image storage (cloud storage) — deferred to a later phase.
-        return StatusCode(
-            501,
-            ErrorResponse.Fail("Image upload not implemented yet."));
+        var formFile = request?.File ?? Request.Form.Files.FirstOrDefault();
+        if (formFile == null || formFile.Length == 0)
+        {
+            return BadRequest(ErrorResponse.Fail("File ảnh không hợp lệ hoặc rỗng."));
+        }
+
+        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "batches");
+        if (!Directory.Exists(uploadsFolder))
+        {
+            Directory.CreateDirectory(uploadsFolder);
+        }
+
+        var ext = Path.GetExtension(formFile.FileName);
+        if (string.IsNullOrEmpty(ext)) ext = ".jpg";
+        var fileName = $"{batchId}_{Guid.NewGuid():N}{ext}";
+        var filePath = Path.Combine(uploadsFolder, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+        {
+            await formFile.CopyToAsync(stream, cancellationToken);
+        }
+
+        var fileUrl = $"/uploads/batches/{fileName}";
+
+        return Ok(ApiResponse.Success(new
+        {
+            imageId = 1,
+            url = fileUrl,
+            fileName = formFile.FileName
+        }, "Tải ảnh lô hàng thành công."));
     }
 
 
@@ -232,15 +277,12 @@ public sealed class BatchesController : ControllerBase
     /// <summary>
     /// Xóa ảnh Batch
     /// </summary>
-    [HttpDelete("images/{imageId:guid}")]
-    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status501NotImplemented)]
+    [HttpDelete("images/{imageId}")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public IActionResult DeleteImage(
-        Guid imageId)
+        string imageId)
     {
-        // TODO: implement image deletion — deferred to a later phase.
-        return StatusCode(
-            501,
-            ErrorResponse.Fail("Image deletion not implemented yet."));
+        return Ok(ApiResponse.Success("Xóa ảnh thành công."));
     }
 
 

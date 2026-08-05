@@ -5,8 +5,6 @@ namespace AgriTrace.API.Models.EventRequests;
 
 public class CreateEventRequestModel
 {
-    public Guid BatchId { get; set; }
-
     [Required]
     public Guid EventTypeId { get; set; }
 
@@ -15,8 +13,6 @@ public class CreateEventRequestModel
 
     [StringLength(1000)]
     public string? Description { get; set; }
-
-    public string? EventData { get; set; }
 }
 
 public class RejectEventRequestModel

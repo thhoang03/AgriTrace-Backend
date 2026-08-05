@@ -145,7 +145,11 @@ public sealed class ProductReadRepository : IProductReadRepository
         {
             var keyword = search.Trim();
 
-            query = query.Where(x => x.Name.Contains(keyword));
+            query = query.Where(x =>
+                x.Name.Contains(keyword)
+                || x.Organization.Name.Contains(keyword)
+                || x.Category != null && x.Category.Name.Contains(keyword)
+                || x.Unit != null && (x.Unit.Name.Contains(keyword) || x.Unit.Code.Contains(keyword)));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);

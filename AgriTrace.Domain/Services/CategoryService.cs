@@ -89,7 +89,7 @@ public class CategoryService : ICategoryService
         int pageSize,
         CancellationToken cancellationToken = default)
     {
-        return await GetPagedAsync(null, pageNumber, pageSize, null, null, cancellationToken);
+        return await GetPagedAsync(null, pageNumber, pageSize, null, null, null, cancellationToken);
     }
 
     public async Task<PagedResult<Category>> GetPagedAsync(
@@ -98,6 +98,7 @@ public class CategoryService : ICategoryService
         int pageSize,
         string? sortBy,
         string? sortDir,
+        string? status,
         CancellationToken cancellationToken = default)
     {
         return await _repository.GetPagedAsync(
@@ -106,6 +107,7 @@ public class CategoryService : ICategoryService
             pageSize,
             sortBy,
             sortDir,
+            status,
             cancellationToken);
     }
 

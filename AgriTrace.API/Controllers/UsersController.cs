@@ -38,6 +38,8 @@ public sealed class UsersController : ControllerBase
     public async Task<ActionResult<ApiResponse>> GetAll(
         string? role,
         string? search,
+        string? status,
+        string? orgType,
         int page = 1,
         int pageSize = 20,
         CancellationToken cancellationToken = default)
@@ -58,7 +60,7 @@ public sealed class UsersController : ControllerBase
         }
 
         var result = await _sender.Send(
-            new GetUsersPagedQuery(orgId, role, search, page, pageSize),
+            new GetUsersPagedQuery(orgId, role, search, status, orgType, page, pageSize),
             cancellationToken);
 
         var paged = new UserPagedResponse(
@@ -241,8 +243,11 @@ public sealed class UsersController : ControllerBase
         Email = dto.Email,
         Role = dto.Role,
         OrganizationId = dto.OrganizationId,
+        OrganizationName = dto.OrganizationName,
+        OrganizationTypeName = dto.OrganizationTypeName,
         Phone = dto.Phone,
-        IsActive = dto.IsActive
+        IsActive = dto.IsActive,
+        CreatedAt = dto.CreatedAt
     };
 
     private Guid GetCurrentUserId()
