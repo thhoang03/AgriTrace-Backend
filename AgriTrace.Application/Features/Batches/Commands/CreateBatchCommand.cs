@@ -40,19 +40,25 @@ public sealed class CreateBatchCommandHandler
     private readonly IEventTypeRepository? _eventTypeRepository;
     private readonly IEventService? _eventService;
     private readonly ICurrentUserService? _currentUser;
+    private readonly INotificationService? _notificationService;
+    private readonly IUserService? _userService;
 
     public CreateBatchCommandHandler(
         IBatchWriteService batchWriteService,
         IProductReadService? productReadService = null,
         IEventTypeRepository? eventTypeRepository = null,
         IEventService? eventService = null,
-        ICurrentUserService? currentUser = null)
+        ICurrentUserService? currentUser = null,
+        INotificationService? notificationService = null,
+        IUserService? userService = null)
     {
         _batchWriteService = batchWriteService;
         _productReadService = productReadService;
         _eventTypeRepository = eventTypeRepository;
         _eventService = eventService;
         _currentUser = currentUser;
+        _notificationService = notificationService;
+        _userService = userService;
     }
 
     public async Task<BatchDto> Handle(
@@ -98,8 +104,21 @@ public sealed class CreateBatchCommandHandler
 
         if (_eventTypeRepository != null && _eventService != null)
         {
-            var eventType = await _eventTypeRepository.GetByCodeAsync("CREATED", cancellationToken)
-                         ?? await _eventTypeRepository.GetByCodeAsync("HARVEST", cancellationToken);
+            var eventType = await _eventTypeRepository.GetByCodeAsync("CREATED", cancellationToken);
+            if (eventType == null)
+            {
+                var newEventType = new EventType(
+                    "CREATED",
+                    "Created");
+                try
+                {
+                    eventType = await _eventTypeRepository.AddAsync(newEventType, cancellationToken);
+                }
+                catch
+                {
+                    eventType = await _eventTypeRepository.GetByCodeAsync("HARVEST", cancellationToken);
+                }
+            }
             if (eventType != null)
             {
                 var performedByUserId = _currentUser?.UserId ?? Guid.Empty;
@@ -120,6 +139,19 @@ public sealed class CreateBatchCommandHandler
                     currentHash: null);
 
                 await _eventService.CreateEventAsync(supplyChainEvent, cancellationToken);
+            }
+        }
+
+        if (_notificationService != null && _userService != null && batch.CurrentOrganizationId != Guid.Empty)
+        {
+            var orgUsers = await _userService.GetByOrganizationAsync(batch.CurrentOrganizationId, cancellationToken);
+            foreach (var u in orgUsers)
+            {
+                var notif = new Notification(
+                    u.Id,
+                    "📦 LÔ HÀNG MỚI ĐƯỢC KHỞI TẠO",
+                    $"Lô hàng {batchCode} (Sản lượng: {command.Quantity}) vừa được khởi tạo thành công trên hệ thống.");
+                await _notificationService.CreateAsync(notif, cancellationToken);
             }
         }
 

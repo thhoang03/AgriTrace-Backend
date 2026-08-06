@@ -174,6 +174,38 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             SourceQuantity = 20m,
                             Status = 7,
                             UnitId = new Guid("40000000-0000-0000-0000-000000000009")
+                        },
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000005"),
+                            BatchCode = "DIST-20260115-001",
+                            CreatedAt = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000003"),
+                            ExpiryDate = new DateTime(2026, 2, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = new Guid("60000000-0000-0000-0000-000000000005"),
+                            ProductionDate = new DateTime(2026, 1, 15, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Quantity = 100m,
+                            RemainingQuantity = 100m,
+                            RootBatchId = new Guid("80000000-0000-0000-0000-000000000005"),
+                            SourceQuantity = 100m,
+                            Status = 5,
+                            UnitId = new Guid("40000000-0000-0000-0000-000000000001")
+                        },
+                        new
+                        {
+                            Id = new Guid("80000000-0000-0000-0000-000000000006"),
+                            BatchCode = "RETAIL-20260118-001",
+                            CreatedAt = new DateTime(2026, 1, 18, 0, 0, 0, 0, DateTimeKind.Utc),
+                            CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000005"),
+                            ExpiryDate = new DateTime(2027, 1, 18, 0, 0, 0, 0, DateTimeKind.Utc),
+                            ProductId = new Guid("60000000-0000-0000-0000-000000000006"),
+                            ProductionDate = new DateTime(2026, 1, 18, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Quantity = 50m,
+                            RemainingQuantity = 50m,
+                            RootBatchId = new Guid("80000000-0000-0000-0000-000000000006"),
+                            SourceQuantity = 50m,
+                            Status = 6,
+                            UnitId = new Guid("40000000-0000-0000-0000-000000000005")
                         });
                 });
 
@@ -493,6 +525,13 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.ToTable("EventTypes", (string)null);
 
                     b.HasData(
+                        new
+                        {
+                            Id = new Guid("20000000-0000-0000-0000-000000000000"),
+                            Code = "CREATED",
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Name = "Created"
+                        },
                         new
                         {
                             Id = new Guid("20000000-0000-0000-0000-000000000001"),
@@ -988,6 +1027,24 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                             Name = "Jasmine Rice",
                             OrganizationId = new Guid("50000000-0000-0000-0000-000000000002"),
                             UnitId = new Guid("40000000-0000-0000-0000-000000000009")
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0000-0000-0000-000000000005"),
+                            CategoryId = new Guid("30000000-0000-0000-0000-000000000001"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Distributed Organic Cabbage",
+                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000003"),
+                            UnitId = new Guid("40000000-0000-0000-0000-000000000001")
+                        },
+                        new
+                        {
+                            Id = new Guid("60000000-0000-0000-0000-000000000006"),
+                            CategoryId = new Guid("30000000-0000-0000-0000-000000000004"),
+                            CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Name = "Retail Premium Mango",
+                            OrganizationId = new Guid("50000000-0000-0000-0000-000000000005"),
+                            UnitId = new Guid("40000000-0000-0000-0000-000000000001")
                         });
                 });
 

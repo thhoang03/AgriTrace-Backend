@@ -309,6 +309,24 @@ public static class SeedData
                 UnitId = new Guid("40000000-0000-0000-0000-000000000009"),
                 Name = "Jasmine Rice",
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new ProductDataModel
+            {
+                Id = new Guid("60000000-0000-0000-0000-000000000005"),
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000003"), // Fresh Link Distributor
+                CategoryId = new Guid("30000000-0000-0000-0000-000000000001"),
+                UnitId = new Guid("40000000-0000-0000-0000-000000000001"),
+                Name = "Distributed Organic Cabbage",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new ProductDataModel
+            {
+                Id = new Guid("60000000-0000-0000-0000-000000000006"),
+                OrganizationId = new Guid("50000000-0000-0000-0000-000000000005"), // Fresh Market Retailer
+                CategoryId = new Guid("30000000-0000-0000-0000-000000000004"),
+                UnitId = new Guid("40000000-0000-0000-0000-000000000001"),
+                Name = "Retail Premium Mango",
+                CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)
             }
         );
     }
@@ -506,6 +524,38 @@ public static class SeedData
                 Status = BatchStatus.Recalled,
                 RootBatchId = new Guid("80000000-0000-0000-0000-000000000004"),
                 CreatedAt = new DateTime(2026, 1, 12, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new BatchDataModel
+            {
+                Id = new Guid("80000000-0000-0000-0000-000000000005"),
+                ProductId = new Guid("60000000-0000-0000-0000-000000000005"),      // Distributed Organic Cabbage
+                CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000003"), // Fresh Link Distributor
+                UnitId = new Guid("40000000-0000-0000-0000-000000000001"),         // KG
+                BatchCode = "DIST-20260115-001",
+                ProductionDate = new DateTime(2026, 1, 15, 0, 0, 0, DateTimeKind.Utc),
+                ExpiryDate = new DateTime(2026, 2, 1, 0, 0, 0, DateTimeKind.Utc),
+                Quantity = 100m,
+                RemainingQuantity = 100m,
+                SourceQuantity = 100m,
+                Status = BatchStatus.Distributed,
+                RootBatchId = new Guid("80000000-0000-0000-0000-000000000005"),
+                CreatedAt = new DateTime(2026, 1, 15, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new BatchDataModel
+            {
+                Id = new Guid("80000000-0000-0000-0000-000000000006"),
+                ProductId = new Guid("60000000-0000-0000-0000-000000000006"),      // Retail Premium Mango
+                CurrentOrganizationId = new Guid("50000000-0000-0000-0000-000000000005"), // Fresh Market Retailer
+                UnitId = new Guid("40000000-0000-0000-0000-000000000005"),         // Box
+                BatchCode = "RETAIL-20260118-001",
+                ProductionDate = new DateTime(2026, 1, 18, 0, 0, 0, DateTimeKind.Utc),
+                ExpiryDate = new DateTime(2027, 1, 18, 0, 0, 0, DateTimeKind.Utc),
+                Quantity = 50m,
+                RemainingQuantity = 50m,
+                SourceQuantity = 50m,
+                Status = BatchStatus.Retail,
+                RootBatchId = new Guid("80000000-0000-0000-0000-000000000006"),
+                CreatedAt = new DateTime(2026, 1, 18, 0, 0, 0, DateTimeKind.Utc)
             }
         );
     }
