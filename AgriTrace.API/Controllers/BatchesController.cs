@@ -8,6 +8,8 @@ using AgriTrace.Application.Features.Batches.Commands;
 using AgriTrace.Application.Features.Batches.Queries;
 
 
+using AgriTrace.Domain.Interfaces.Outbound;
+
 namespace AgriTrace.API.Controllers;
 
 
@@ -21,12 +23,15 @@ public sealed class BatchesController : ControllerBase
 {
 
     private readonly ISender _sender;
+    private readonly ICurrentUserService _currentUser;
 
 
     public BatchesController(
-        ISender sender)
+        ISender sender,
+        ICurrentUserService currentUser)
     {
         _sender = sender;
+        _currentUser = currentUser;
     }
 
 
@@ -45,10 +50,16 @@ public sealed class BatchesController : ControllerBase
         CancellationToken cancellationToken = default)
     {
 
+        var effectiveOrgId = organizationId;
+        if (!effectiveOrgId.HasValue && _currentUser.IsAuthenticated && _currentUser.OrganizationType != "SYSTEM" && _currentUser.Role != "ADMIN" && _currentUser.Role != "Admin")
+        {
+            effectiveOrgId = _currentUser.OrganizationId;
+        }
+
         var result = await _sender.Send(
             new GetBatchesQuery(
                 productId,
-                organizationId,
+                effectiveOrgId,
                 search,
                 page,
                 pageSize),

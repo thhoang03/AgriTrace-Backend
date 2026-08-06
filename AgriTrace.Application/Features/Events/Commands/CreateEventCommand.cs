@@ -42,6 +42,7 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
     private readonly IOrganizationService _organizationService;
     private readonly IEventTypeService _eventTypeService;
     private readonly ICurrentUserService _currentUser;
+    private readonly INotificationService? _notificationService;
 
     public CreateEventCommandHandler(
         IEventService eventService,
@@ -50,7 +51,8 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
         IUserService userService,
         IOrganizationService organizationService,
         IEventTypeService eventTypeService,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        INotificationService? notificationService = null)
     {
         _eventService = eventService;
         _batchReadService = batchReadService;
@@ -59,12 +61,18 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
         _organizationService = organizationService;
         _eventTypeService = eventTypeService;
         _currentUser = currentUser;
+        _notificationService = notificationService;
     }
 
     public async Task<EventCreatedResult> Handle(CreateEventCommand request, CancellationToken cancellationToken)
     {
         var batch = await _batchReadService.GetByIdAsync(request.BatchId, cancellationToken)
             ?? throw new NotFoundException($"Batch {request.BatchId} not found.");
+
+        if (batch.Status == AgriTrace.Domain.Entities.Batches.BatchStatus.Recalled)
+        {
+            throw new ConflictException("Cannot add events to a batch that has been recalled.");
+        }
 
         var performedByUserId = request.PerformedByUserId;
         if (performedByUserId == Guid.Empty)
@@ -140,6 +148,19 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
         {
             batch.ChangeOrganization(user.OrganizationId.Value);
             await _batchWriteService.UpdateAsync(batch, cancellationToken);
+        }
+
+        if (_notificationService != null && organizationId != Guid.Empty)
+        {
+            var orgUsers = await _userService.GetByOrganizationAsync(organizationId, cancellationToken);
+            foreach (var u in orgUsers)
+            {
+                var notif = new Notification(
+                    u.Id,
+                    "🔄 SỰ KIỆN MỚI TRÊN LÔ HÀNG",
+                    $"Sự kiện '{eventType.Name}' vừa được thêm thành công vào chuỗi hành trình của lô hàng {batch.BatchCode}.");
+                await _notificationService.CreateAsync(notif, cancellationToken);
+            }
         }
 
         return new EventCreatedResult

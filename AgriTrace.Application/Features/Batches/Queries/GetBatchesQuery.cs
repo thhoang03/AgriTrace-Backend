@@ -22,17 +22,23 @@ public sealed class GetBatchesQueryHandler
     private readonly IUnitRepository? _unitRepository;
     private readonly IProductReadService? _productReadService;
     private readonly IOrganizationRepository? _organizationRepository;
+    private readonly IEventService? _eventService;
+    private readonly IUserService? _userService;
 
     public GetBatchesQueryHandler(
         IBatchReadService batchReadService,
         IUnitRepository? unitRepository = null,
         IProductReadService? productReadService = null,
-        IOrganizationRepository? organizationRepository = null)
+        IOrganizationRepository? organizationRepository = null,
+        IEventService? eventService = null,
+        IUserService? userService = null)
     {
         _batchReadService = batchReadService;
         _unitRepository = unitRepository;
         _productReadService = productReadService;
         _organizationRepository = organizationRepository;
+        _eventService = eventService;
+        _userService = userService;
     }
 
     public async Task<PagedResult<BatchDto>> Handle(
@@ -68,31 +74,42 @@ public sealed class GetBatchesQueryHandler
             orgNames = orgs.ToDictionary(o => o.Id, o => o.Name);
         }
 
-        var dtoItems = pagedBatches.Items
-            .Select(b =>
+        var dtoItems = new List<BatchDto>();
+
+        foreach (var b in pagedBatches.Items)
+        {
+            var dto = b.Adapt<BatchDto>();
+            dto.CurrentOrganizationId = b.CurrentOrganizationId;
+            dto.QrCodeUrl = b.QRCode;
+
+            if (unitCodes != null && unitCodes.TryGetValue(b.UnitId, out var uCode))
             {
-                var dto = b.Adapt<BatchDto>();
-                dto.CurrentOrganizationId = b.CurrentOrganizationId;
-                dto.QrCodeUrl = b.QRCode;
+                dto.UnitCode = uCode;
+            }
 
-                if (unitCodes != null && unitCodes.TryGetValue(b.UnitId, out var uCode))
+            if (products != null && products.TryGetValue(b.ProductId, out var prodName))
+            {
+                dto.ProductName = prodName;
+            }
+
+            if (orgNames != null && orgNames.TryGetValue(b.CurrentOrganizationId, out var oName))
+            {
+                dto.OrganizationName = oName;
+            }
+
+            if (_eventService != null && _userService != null)
+            {
+                var events = await _eventService.GetByBatchAsync(b.Id, cancellationToken);
+                var firstEvent = events.OrderBy(e => e.CreatedAt).FirstOrDefault();
+                if (firstEvent != null)
                 {
-                    dto.UnitCode = uCode;
+                    var user = await _userService.GetByIdAsync(firstEvent.PerformedByUserId, cancellationToken);
+                    dto.FarmerName = user?.FullName ?? user?.Email;
                 }
+            }
 
-                if (products != null && products.TryGetValue(b.ProductId, out var prodName))
-                {
-                    dto.ProductName = prodName;
-                }
-
-                if (orgNames != null && orgNames.TryGetValue(b.CurrentOrganizationId, out var oName))
-                {
-                    dto.OrganizationName = oName;
-                }
-
-                return dto;
-            })
-            .ToList();
+            dtoItems.Add(dto);
+        }
 
         return new PagedResult<BatchDto>(
             dtoItems,

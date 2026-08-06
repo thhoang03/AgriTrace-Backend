@@ -12,13 +12,19 @@ public class ApproveEventRequestCommandHandler : IRequestHandler<ApproveEventReq
 {
     private readonly IEventRequestRepository _eventRequestRepository;
     private readonly ICurrentUserService _currentUser;
+    private readonly INotificationService? _notificationService;
+    private readonly IUserService? _userService;
 
     public ApproveEventRequestCommandHandler(
         IEventRequestRepository eventRequestRepository,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        INotificationService? notificationService = null,
+        IUserService? userService = null)
     {
         _eventRequestRepository = eventRequestRepository;
         _currentUser = currentUser;
+        _notificationService = notificationService;
+        _userService = userService;
     }
 
     public async Task<EventRequestDto> Handle(ApproveEventRequestCommand request, CancellationToken cancellationToken)
@@ -36,6 +42,20 @@ public class ApproveEventRequestCommandHandler : IRequestHandler<ApproveEventReq
         eventReq.Approve(_currentUser.UserId);
 
         await _eventRequestRepository.UpdateAsync(eventReq, cancellationToken);
+
+        if (_notificationService != null && _userService != null)
+        {
+            var orgUsers = await _userService.GetByOrganizationAsync(eventReq.OrganizationId, cancellationToken);
+            foreach (var u in orgUsers)
+            {
+                var eventName = eventReq.EventType?.Name ?? "sự kiện";
+                var notif = new Notification(
+                    u.Id,
+                    "✅ YÊU CẦU ĐÃ ĐƯỢC PHÊ DUYỆT",
+                    $"Yêu cầu mở rộng quy trình cho sự kiện '{eventName}' của tổ chức bạn đã được Quản trị viên hệ thống phê duyệt.");
+                await _notificationService.CreateAsync(notif, cancellationToken);
+            }
+        }
 
         var updated = await _eventRequestRepository.GetByIdAsync(eventReq.Id, cancellationToken) ?? eventReq;
         return CreateEventRequestCommandHandler.MapToDto(updated);

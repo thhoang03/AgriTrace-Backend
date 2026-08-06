@@ -38,15 +38,24 @@ public class MergeBatchCommandHandler : IRequestHandler<MergeBatchCommand, Merge
     private readonly IBatchReadService _batchReadService;
     private readonly IBatchWriteService _batchWriteService;
     private readonly IBatchMergeRepository _mergeRepository;
+    private readonly IEventTypeRepository? _eventTypeRepository;
+    private readonly IEventService? _eventService;
+    private readonly ICurrentUserService? _currentUser;
 
     public MergeBatchCommandHandler(
         IBatchReadService batchReadService,
         IBatchWriteService batchWriteService,
-        IBatchMergeRepository mergeRepository)
+        IBatchMergeRepository mergeRepository,
+        IEventTypeRepository? eventTypeRepository = null,
+        IEventService? eventService = null,
+        ICurrentUserService? currentUser = null)
     {
         _batchReadService = batchReadService;
         _batchWriteService = batchWriteService;
         _mergeRepository = mergeRepository;
+        _eventTypeRepository = eventTypeRepository;
+        _eventService = eventService;
+        _currentUser = currentUser;
     }
 
     public async Task<MergeBatchResult> Handle(MergeBatchCommand request, CancellationToken cancellationToken)
@@ -62,6 +71,12 @@ public class MergeBatchCommandHandler : IRequestHandler<MergeBatchCommand, Merge
         {
             var source = await _batchReadService.GetByIdAsync(id, cancellationToken)
                 ?? throw new NotFoundException($"Source batch {id} not found.");
+
+            if (source.Status == BatchStatus.Recalled)
+            {
+                throw new ConflictException($"Không thể gộp vì lô hàng nguồn {source.BatchCode} đang ở trạng thái bị thu hồi (Recalled).");
+            }
+
             sources.Add(source);
         }
 
@@ -95,6 +110,38 @@ public class MergeBatchCommandHandler : IRequestHandler<MergeBatchCommand, Merge
         }
 
         await _mergeRepository.AddAsync(merge, cancellationToken);
+
+        // Record immutable SupplyChainEvent to ledger
+        if (_eventTypeRepository != null && _eventService != null)
+        {
+            var eventType = await _eventTypeRepository.GetByCodeAsync("MERGE", cancellationToken);
+            if (eventType != null)
+            {
+                var performedBy = _currentUser?.UserId ?? Guid.Empty;
+                var sourceCodes = string.Join(", ", sources.Select(s => s.BatchCode));
+
+                var eventData = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    description = $"Gộp {sources.Count} lô hàng ({sourceCodes}) thành lô mới {batchCode}.",
+                    newBatchId = newBatch.Id,
+                    newBatchCode = batchCode,
+                    sourceBatchIds = request.SourceBatchIds
+                });
+
+                var mergeEvent = new SupplyChainEvent(
+                    newBatch.Id,
+                    eventType.Id,
+                    newBatch.CurrentOrganizationId,
+                    performedBy,
+                    eventData: eventData,
+                    location: "Processing / Packaging Facility",
+                    inspectionId: null,
+                    previousHash: null,
+                    currentHash: null);
+
+                await _eventService.CreateEventAsync(mergeEvent, cancellationToken);
+            }
+        }
 
         return new MergeBatchResult
         {
