@@ -55,7 +55,7 @@ public sealed class RecallsController : ControllerBase
     /// Tạo Recall (thu hồi Batch)
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin,ADMIN")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]
@@ -98,7 +98,7 @@ public sealed class RecallsController : ControllerBase
     /// Kết thúc Recall
     /// </summary>
     [HttpPatch("{recallId:guid}/resolve")]
-    [Authorize(Roles = "Admin,Manager")]
+    [Authorize(Roles = "Admin,ADMIN,Manager,MANAGER")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]

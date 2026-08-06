@@ -3,6 +3,7 @@ using AgriTrace.Domain.Entities.Events;
 using AgriTrace.Domain.Entities.QualityInspections;
 using AgriTrace.Domain.Interfaces.Inbound;
 using AgriTrace.Domain.Interfaces.Outbound;
+using AgriTrace.Domain.Entities.Notifications;
 using FluentValidation;
 using MediatR;
 using System.Text.Json;
@@ -27,19 +28,25 @@ public sealed class CreateQualityInspectionCommandHandler
     private readonly IEventTypeService _eventTypeService;
     private readonly IBatchReadService _batchReadService;
     private readonly ICurrentUserService _currentUser;
+    private readonly INotificationService? _notificationService;
+    private readonly IUserService? _userService;
 
     public CreateQualityInspectionCommandHandler(
         IQualityInspectionService service,
         IMediator mediator,
         IEventTypeService eventTypeService,
         IBatchReadService batchReadService,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        INotificationService? notificationService = null,
+        IUserService? userService = null)
     {
         _service = service;
         _mediator = mediator;
         _eventTypeService = eventTypeService;
         _batchReadService = batchReadService;
         _currentUser = currentUser;
+        _notificationService = notificationService;
+        _userService = userService;
     }
 
     public async Task<QualityInspectionDto> Handle(
@@ -56,6 +63,25 @@ public sealed class CreateQualityInspectionCommandHandler
         var created = await _service.CreateAsync(inspection, cancellationToken);
 
         await TryCreateInspectionEventAsync(command, created, cancellationToken);
+
+        if (_notificationService != null && _userService != null)
+        {
+            var batch = await _batchReadService.GetByIdAsync(command.BatchId, cancellationToken);
+            if (batch != null && batch.CurrentOrganizationId != Guid.Empty)
+            {
+                var orgUsers = await _userService.GetByOrganizationAsync(batch.CurrentOrganizationId, cancellationToken);
+                foreach (var u in orgUsers)
+                {
+                    var resultStr = created.OverallResult == "PASS" ? "ĐẠT" :
+                                    created.OverallResult == "FAIL" ? "KHÔNG ĐẠT" : "CẢNH BÁO";
+                    var notif = new Notification(
+                        u.Id,
+                        "🔬 KẾT QUẢ KIỂM ĐỊNH MỚI",
+                        $"Lô hàng {batch.BatchCode} vừa có kết quả kiểm định mới. Kết quả đánh giá chung: {resultStr}.");
+                    await _notificationService.CreateAsync(notif, cancellationToken);
+                }
+            }
+        }
 
         return new QualityInspectionDto
         {

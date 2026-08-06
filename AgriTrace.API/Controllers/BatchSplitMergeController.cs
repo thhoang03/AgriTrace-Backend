@@ -5,6 +5,9 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
+using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
+
 namespace AgriTrace.API.Controllers;
 
 /// <summary>
@@ -15,10 +18,12 @@ namespace AgriTrace.API.Controllers;
 public sealed class BatchSplitMergeController : ControllerBase
 {
     private readonly ISender _sender;
+    private readonly ICurrentUserService _currentUser;
 
-    public BatchSplitMergeController(ISender sender)
+    public BatchSplitMergeController(ISender sender, ICurrentUserService currentUser)
     {
         _sender = sender;
+        _currentUser = currentUser;
     }
 
     /// <summary>
@@ -38,7 +43,7 @@ public sealed class BatchSplitMergeController : ControllerBase
             .ToList();
 
         var result = await _sender.Send(
-            new SplitBatchCommand(batchId, splits, Guid.Empty),
+            new SplitBatchCommand(batchId, splits, _currentUser.UserId),
             cancellationToken);
 
         var data = new SplitBatchResponse

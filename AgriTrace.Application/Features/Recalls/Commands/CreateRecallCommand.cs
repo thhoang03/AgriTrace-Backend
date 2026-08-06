@@ -37,19 +37,34 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
     private readonly IBatchWriteService _batchWriteService;
     private readonly IUserService _userService;
     private readonly ICurrentUserService _currentUser;
+    private readonly IBatchSplitService? _batchSplitService;
+    private readonly IBatchMergeService? _batchMergeService;
+    private readonly IEventTypeRepository? _eventTypeRepository;
+    private readonly IEventService? _eventService;
+    private readonly INotificationService? _notificationService;
 
     public CreateRecallCommandHandler(
         IRecallService recallService,
         IBatchReadService batchReadService,
         IBatchWriteService batchWriteService,
         IUserService userService,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        IBatchSplitService? batchSplitService = null,
+        IBatchMergeService? batchMergeService = null,
+        IEventTypeRepository? eventTypeRepository = null,
+        IEventService? eventService = null,
+        INotificationService? notificationService = null)
     {
         _recallService = recallService;
         _batchReadService = batchReadService;
         _batchWriteService = batchWriteService;
         _userService = userService;
         _currentUser = currentUser;
+        _batchSplitService = batchSplitService;
+        _batchMergeService = batchMergeService;
+        _eventTypeRepository = eventTypeRepository;
+        _eventService = eventService;
+        _notificationService = notificationService;
     }
 
     public async Task<RecallCreatedResult> Handle(CreateRecallCommand request, CancellationToken cancellationToken)
@@ -59,7 +74,7 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
             throw new UnauthorizedAccessException("Authentication required to create recalls.");
         }
 
-        if (_currentUser.Role != "Admin" || _currentUser.OrganizationType != "SYSTEM")
+        if ((_currentUser.Role != "Admin" && _currentUser.Role != "ADMIN") || _currentUser.OrganizationType != "SYSTEM")
         {
             throw new RbacForbiddenException("RBAC_FORBIDDEN", "Only system administrator can create recall events.");
         }
@@ -69,21 +84,23 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
             throw new ArgumentException("Severity must be between 1 and 3.");
         }
 
-        var batch = await _batchReadService.GetByIdAsync(request.BatchId, cancellationToken)
+        var primaryBatch = await _batchReadService.GetByIdAsync(request.BatchId, cancellationToken)
             ?? throw new NotFoundException($"Batch {request.BatchId} not found.");
 
-        if (!batch.CanBeRecalled()) {
+        if (!primaryBatch.CanBeRecalled()) {
             throw new ConflictException($"Batch {request.BatchId} is already under an active recall.");
         }
 
-        // CreatedBy comes from the auth context in Phase 10; fall back to any user until then.
         var createdBy = request.CreatedByUserId;
         if (createdBy == Guid.Empty)
         {
-            var users = await _userService.GetAllAsync(cancellationToken);
-            createdBy = users.FirstOrDefault()?.Id
-                ?? throw new ArgumentException(
-                    "Cannot create recall without a creating user (no users exist and auth is not yet wired).");
+            createdBy = _currentUser.UserId;
+            if (createdBy == Guid.Empty)
+            {
+                var users = await _userService.GetAllAsync(cancellationToken);
+                createdBy = users.FirstOrDefault()?.Id
+                    ?? throw new ArgumentException("Cannot create recall without a valid user context.");
+            }
         }
 
         var recall = new Recall(
@@ -94,9 +111,111 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
 
         var created = await _recallService.CreateAsync(recall, cancellationToken);
 
-        // Setting the batch status to Recalled.
-        batch.Recall();
-        await _batchWriteService.UpdateAsync(batch, cancellationToken);
+        // --- CASCADING GRAPH TRAVERSAL (Split & Merge Descendants) ---
+        var affectedBatchIds = new HashSet<Guid> { request.BatchId };
+        var queue = new Queue<Guid>();
+        queue.Enqueue(request.BatchId);
+
+        IReadOnlyList<BatchMerge>? allMerges = null;
+        if (_batchMergeService != null)
+        {
+            allMerges = await _batchMergeService.GetAllAsync(cancellationToken);
+        }
+
+        while (queue.Count > 0)
+        {
+            var currentId = queue.Dequeue();
+
+            // 1. Trace Split children
+            if (_batchSplitService != null)
+            {
+                var splits = await _batchSplitService.GetBySourceBatchAsync(currentId, cancellationToken);
+                foreach (var split in splits)
+                {
+                    foreach (var detail in split.Details)
+                    {
+                        if (affectedBatchIds.Add(detail.TargetBatchId))
+                        {
+                            queue.Enqueue(detail.TargetBatchId);
+                        }
+                    }
+                }
+            }
+
+            // 2. Trace Merge target batches
+            if (allMerges != null)
+            {
+                foreach (var merge in allMerges.Where(m => m.Sources.Any(s => s.SourceBatchId == currentId)))
+                {
+                    if (affectedBatchIds.Add(merge.NewBatchId))
+                    {
+                        queue.Enqueue(merge.NewBatchId);
+                    }
+                }
+            }
+        }
+
+        // --- APPLY RECALL STATUS, SEND NOTIFICATIONS & LOG LEDGER EVENTS FOR ALL AFFECTED BATCHES ---
+        EventType? recallEventType = null;
+        if (_eventTypeRepository != null)
+        {
+            recallEventType = await _eventTypeRepository.GetByCodeAsync("RECALL", cancellationToken)
+                ?? await _eventTypeRepository.GetByCodeAsync("RECALL_INITIATED", cancellationToken);
+        }
+
+        var notifiedOrgIds = new HashSet<Guid>();
+
+        foreach (var batchId in affectedBatchIds)
+        {
+            var targetBatch = await _batchReadService.GetByIdAsync(batchId, cancellationToken);
+            if (targetBatch is null) continue;
+
+            if (targetBatch.CanBeRecalled())
+            {
+                targetBatch.Recall();
+                await _batchWriteService.UpdateAsync(targetBatch, cancellationToken);
+            }
+
+            // Record SupplyChainEvent to Blockchain Ledger
+            if (recallEventType != null && _eventService != null)
+            {
+                var eventData = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    description = $"THU HỒI KHẨN CẤP lô hàng {targetBatch.BatchCode}. Lý do: {request.Reason}",
+                    recallId = created.Id,
+                    severity = request.Severity,
+                    primaryBatchId = request.BatchId,
+                    primaryBatchCode = primaryBatch.BatchCode
+                });
+
+                var recallEvent = new SupplyChainEvent(
+                    targetBatch.Id,
+                    recallEventType.Id,
+                    targetBatch.CurrentOrganizationId,
+                    createdBy,
+                    eventData: eventData,
+                    location: "Safety & Recall Center",
+                    inspectionId: null,
+                    previousHash: null,
+                    currentHash: null);
+
+                await _eventService.CreateEventAsync(recallEvent, cancellationToken);
+            }
+
+            // Send Stakeholder Notifications
+            if (_notificationService != null && notifiedOrgIds.Add(targetBatch.CurrentOrganizationId))
+            {
+                var usersInOrg = await _userService.GetByOrganizationAsync(targetBatch.CurrentOrganizationId, cancellationToken);
+                foreach (var u in usersInOrg)
+                {
+                    var notif = new Notification(
+                        u.Id,
+                        "🚨 CẢNH BÁO THU HỒI LÔ HÀNG",
+                        $"CẢNH BÁO: Lô hàng {targetBatch.BatchCode} của đơn vị bạn bị THU HỒI do ảnh hưởng từ đợt kiểm tra an toàn. Lý do: {request.Reason}. Vui lòng dừng phân phối và cách ly sản phẩm!");
+                    await _notificationService.CreateAsync(notif, cancellationToken);
+                }
+            }
+        }
         
         return new RecallCreatedResult
         {

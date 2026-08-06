@@ -40,15 +40,24 @@ public class SplitBatchCommandHandler : IRequestHandler<SplitBatchCommand, Split
     private readonly IBatchReadService _batchReadService;
     private readonly IBatchWriteService _batchWriteService;
     private readonly IBatchSplitRepository _splitRepository;
+    private readonly IEventTypeRepository? _eventTypeRepository;
+    private readonly IEventService? _eventService;
+    private readonly ICurrentUserService? _currentUser;
 
     public SplitBatchCommandHandler(
         IBatchReadService batchReadService,
         IBatchWriteService batchWriteService,
-        IBatchSplitRepository splitRepository)
+        IBatchSplitRepository splitRepository,
+        IEventTypeRepository? eventTypeRepository = null,
+        IEventService? eventService = null,
+        ICurrentUserService? currentUser = null)
     {
         _batchReadService = batchReadService;
         _batchWriteService = batchWriteService;
         _splitRepository = splitRepository;
+        _eventTypeRepository = eventTypeRepository;
+        _eventService = eventService;
+        _currentUser = currentUser;
     }
 
     public async Task<SplitBatchResult> Handle(SplitBatchCommand request, CancellationToken cancellationToken)
@@ -60,6 +69,11 @@ public class SplitBatchCommandHandler : IRequestHandler<SplitBatchCommand, Split
 
         var parent = await _batchReadService.GetByIdAsync(request.BatchId, cancellationToken)
             ?? throw new NotFoundException($"Batch {request.BatchId} not found.");
+
+        if (parent.Status == BatchStatus.Recalled)
+        {
+            throw new ConflictException($"Lô hàng {parent.BatchCode} đang ở trạng thái bị thu hồi (Recalled), không thể thực hiện tách lô.");
+        }
 
         var split = new BatchSplit(parent.Id);
 
@@ -81,6 +95,39 @@ public class SplitBatchCommandHandler : IRequestHandler<SplitBatchCommand, Split
         // Persist the split audit record and the parent's updated remaining quantity.
         await _splitRepository.AddAsync(split, cancellationToken);
         await _batchWriteService.UpdateAsync(parent, cancellationToken);
+
+        // Record immutable SupplyChainEvent to ledger
+        if (_eventTypeRepository != null && _eventService != null)
+        {
+            var eventType = await _eventTypeRepository.GetByCodeAsync("SPLIT", cancellationToken);
+            if (eventType != null)
+            {
+                var performedBy = request.PerformedByUserId != Guid.Empty
+                    ? request.PerformedByUserId
+                    : (_currentUser?.UserId ?? Guid.Empty);
+
+                var eventData = System.Text.Json.JsonSerializer.Serialize(new
+                {
+                    description = $"Tách lô hàng {parent.BatchCode} thành {childIds.Count} lô con.",
+                    parentBatchId = parent.Id,
+                    parentBatchCode = parent.BatchCode,
+                    childBatchIds = childIds
+                });
+
+                var splitEvent = new SupplyChainEvent(
+                    parent.Id,
+                    eventType.Id,
+                    parent.CurrentOrganizationId,
+                    performedBy,
+                    eventData: eventData,
+                    location: "Processing Facility",
+                    inspectionId: null,
+                    previousHash: null,
+                    currentHash: null);
+
+                await _eventService.CreateEventAsync(splitEvent, cancellationToken);
+            }
+        }
 
         return new SplitBatchResult
         {

@@ -2,6 +2,7 @@ using AgriTrace.API.Models;
 using AgriTrace.API.Models.Analytics;
 using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Features.Analytics.Queries;
+using AgriTrace.Domain.Interfaces.Outbound;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -13,15 +14,17 @@ namespace AgriTrace.API.Controllers;
 /// </summary>
 [ApiController]
 [Route("api/v1/analytics")]
-[Authorize(Roles = "Admin,Manager")]
+[Authorize(Roles = "Admin,Manager,Staff")]
 [Produces("application/json")]
 public sealed class AnalyticsController : ControllerBase
 {
     private readonly ISender _sender;
+    private readonly ICurrentUserService _currentUser;
 
-    public AnalyticsController(ISender sender)
+    public AnalyticsController(ISender sender, ICurrentUserService currentUser)
     {
         _sender = sender;
+        _currentUser = currentUser;
     }
 
     /// <summary>
@@ -31,7 +34,13 @@ public sealed class AnalyticsController : ControllerBase
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     public async Task<ActionResult<ApiResponse>> GetOverview(CancellationToken cancellationToken)
     {
-        var dto = await _sender.Send(new GetOverviewQuery(), cancellationToken);
+        Guid? effectiveOrgId = null;
+        if (_currentUser.IsAuthenticated && _currentUser.Role != "ADMIN" && _currentUser.Role != "Admin")
+        {
+            effectiveOrgId = _currentUser.OrganizationId;
+        }
+
+        var dto = await _sender.Send(new GetOverviewQuery(effectiveOrgId), cancellationToken);
 
         var data = new OverviewData
         {
@@ -81,8 +90,14 @@ public sealed class AnalyticsController : ControllerBase
         DateTime? toDate,
         CancellationToken cancellationToken)
     {
+        var effectiveOrgId = organizationId;
+        if (!effectiveOrgId.HasValue && _currentUser.IsAuthenticated && _currentUser.Role != "ADMIN" && _currentUser.Role != "Admin")
+        {
+            effectiveOrgId = _currentUser.OrganizationId;
+        }
+
         var dto = await _sender.Send(
-            new GetBatchDistributionQuery(organizationId, fromDate, toDate),
+            new GetBatchDistributionQuery(effectiveOrgId, fromDate, toDate),
             cancellationToken);
 
         var data = new BatchDistributionData
@@ -111,8 +126,14 @@ public sealed class AnalyticsController : ControllerBase
         DateTime? toDate,
         CancellationToken cancellationToken)
     {
+        var effectiveOrgId = organizationId;
+        if (!effectiveOrgId.HasValue && _currentUser.IsAuthenticated && _currentUser.Role != "ADMIN" && _currentUser.Role != "Admin")
+        {
+            effectiveOrgId = _currentUser.OrganizationId;
+        }
+
         var dto = await _sender.Send(
-            new GetProcessingTimeQuery(organizationId, eventTypeId, fromDate, toDate),
+            new GetProcessingTimeQuery(effectiveOrgId, eventTypeId, fromDate, toDate),
             cancellationToken);
 
         var data = new ProcessingTimeData

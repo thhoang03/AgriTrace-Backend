@@ -61,5 +61,7 @@ public sealed class BatchDto
     public string? OrganizationName { get; set; }
 
     public string? QrCodeUrl { get; set; }
+
+    public string? FarmerName { get; set; }
 }
 

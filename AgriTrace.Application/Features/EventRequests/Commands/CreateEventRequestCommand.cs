@@ -19,19 +19,22 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
     private readonly ICurrentUserService _currentUser;
     private readonly IOrganizationRepository _organizationRepository;
     private readonly IEventTypeRepository _eventTypeRepository;
+    private readonly INotificationService? _notificationService;
 
     public CreateEventRequestCommandHandler(
         IEventRequestRepository eventRequestRepository,
         IUserService userService,
         ICurrentUserService currentUser,
         IOrganizationRepository organizationRepository,
-        IEventTypeRepository eventTypeRepository)
+        IEventTypeRepository eventTypeRepository,
+        INotificationService? notificationService = null)
     {
         _eventRequestRepository = eventRequestRepository;
         _userService = userService;
         _currentUser = currentUser;
         _organizationRepository = organizationRepository;
         _eventTypeRepository = eventTypeRepository;
+        _notificationService = notificationService;
     }
 
     public async Task<EventRequestDto> Handle(CreateEventRequestCommand request, CancellationToken cancellationToken)
@@ -92,6 +95,29 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
         );
 
         await _eventRequestRepository.AddAsync(entity, cancellationToken);
+
+        if (_notificationService != null)
+        {
+            var systemAdmins = await _userService.GetByRoleAsync(Domain.Entities.Users.UserRole.Admin, cancellationToken);
+            var orgName = "Tổ chức không xác định";
+            if (organizationId != Guid.Empty)
+            {
+                var org = await _organizationRepository.GetByIdAsync(organizationId, cancellationToken);
+                if (org != null)
+                {
+                    orgName = org.Name;
+                }
+            }
+            
+            foreach (var admin in systemAdmins)
+            {
+                var notif = new Notification(
+                    admin.Id,
+                    "📝 CÓ YÊU CẦU MỞ RỘNG MỚI",
+                    $"Tổ chức '{orgName}' vừa gửi một yêu cầu mở rộng quy trình mới cho sự kiện '{targetEventType.Name}'. Vui lòng kiểm tra và xét duyệt.");
+                await _notificationService.CreateAsync(notif, cancellationToken);
+            }
+        }
 
         var created = await _eventRequestRepository.GetByIdAsync(entity.Id, cancellationToken) ?? entity;
         return MapToDto(created);

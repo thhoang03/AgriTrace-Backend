@@ -68,6 +68,7 @@ public static class DependencyInjection
         services.AddScoped<IRecallRepository, RecallRepository>();
         services.AddScoped<INotificationRepository, NotificationRepository>();
         services.AddScoped<IEventRequestRepository, EventRequestRepository>();
+        services.AddScoped<IAnalyticsRepository, AnalyticsRepository>();
     }
 
 }
