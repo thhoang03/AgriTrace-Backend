@@ -20,22 +20,23 @@ public sealed class GetBatchByIdQueryHandler
 {
 
     private readonly IBatchReadService _batchReadService;
-
-
+    private readonly IEventService? _eventService;
+    private readonly IUserService? _userService;
 
     public GetBatchByIdQueryHandler(
-        IBatchReadService batchReadService)
+        IBatchReadService batchReadService,
+        IEventService? eventService = null,
+        IUserService? userService = null)
     {
         _batchReadService = batchReadService;
+        _eventService = eventService;
+        _userService = userService;
     }
-
-
 
     public async Task<BatchDto> Handle(
         GetBatchByIdQuery request,
         CancellationToken cancellationToken)
     {
-
         var batch = await _batchReadService.GetByIdAsync(
             request.Id,
             cancellationToken);
@@ -45,8 +46,22 @@ public sealed class GetBatchByIdQueryHandler
             throw new NotFoundException("Batch not found.");
         }
 
-        return batch.Adapt<BatchDto>();
+        var dto = batch.Adapt<BatchDto>();
+        dto.CurrentOrganizationId = batch.CurrentOrganizationId;
+        dto.QrCodeUrl = batch.QRCode;
 
+        if (_eventService != null && _userService != null)
+        {
+            var events = await _eventService.GetByBatchAsync(batch.Id, cancellationToken);
+            var firstEvent = events.OrderBy(e => e.CreatedAt).FirstOrDefault();
+            if (firstEvent != null)
+            {
+                var user = await _userService.GetByIdAsync(firstEvent.PerformedByUserId, cancellationToken);
+                dto.FarmerName = user?.FullName ?? user?.Email;
+            }
+        }
+
+        return dto;
     }
 
 }

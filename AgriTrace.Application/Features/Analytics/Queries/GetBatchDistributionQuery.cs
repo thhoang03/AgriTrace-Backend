@@ -11,6 +11,8 @@ using AgriTrace.Domain.Entities.Recalls;
 using AgriTrace.Domain.Entities.Units;
 using AgriTrace.Domain.Entities.Users;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
+using AgriTrace.Domain.Models.Analytics;
 using MediatR;
 
 namespace AgriTrace.Application.Features.Analytics.Queries;
@@ -22,39 +24,26 @@ public record GetBatchDistributionQuery(
 
 public class GetBatchDistributionQueryHandler : IRequestHandler<GetBatchDistributionQuery, BatchDistributionDto>
 {
-    private readonly IBatchReadService _batchReadService;
+    private readonly IAnalyticsRepository _analyticsRepository;
 
-    public GetBatchDistributionQueryHandler(IBatchReadService batchReadService)
+    public GetBatchDistributionQueryHandler(IAnalyticsRepository analyticsRepository)
     {
-        _batchReadService = batchReadService;
+        _analyticsRepository = analyticsRepository;
     }
 
     public async Task<BatchDistributionDto> Handle(GetBatchDistributionQuery request, CancellationToken cancellationToken)
     {
-        IReadOnlyList<Batch> batches = request.OrganizationId.HasValue
-            ? await _batchReadService.GetByOrganizationAsync(request.OrganizationId.Value, cancellationToken)
-            : await _batchReadService.GetAllAsync(cancellationToken);
-
-        var filtered = batches.Where(b =>
-            (!request.FromDate.HasValue || b.CreatedAt >= request.FromDate.Value) &&
-            (!request.ToDate.HasValue || b.CreatedAt <= request.ToDate.Value))
-            .ToList();
-
-        var items = filtered
-            .GroupBy(b => b.Status)
-            .Select(g => new BatchStatusDistributionItemDto
-            {
-                Status = (int)g.Key,
-                StatusName = g.Key.ToString().ToUpperInvariant(),
-                Count = g.Count()
-            })
-            .OrderBy(i => i.Status)
-            .ToList();
+        var result = await _analyticsRepository.GetBatchDistributionAsync(request.OrganizationId, request.FromDate, request.ToDate, cancellationToken);
 
         return new BatchDistributionDto
         {
-            Items = items,
-            TotalCount = filtered.Count
+            Items = result.Items.Select(i => new BatchStatusDistributionItemDto
+            {
+                Status = i.Status,
+                StatusName = i.StatusName,
+                Count = i.Count
+            }).ToList(),
+            TotalCount = result.TotalCount
         };
     }
 }
