@@ -66,6 +66,20 @@ public sealed class PublicController : ControllerBase
         return Ok(ApiResponse.Success(data));
     }
 
+    /// <summary>
+    /// Public traceability lookup by batch code (e.g. RICE-20260112-001). No authentication required.
+    /// </summary>
+    [HttpGet("trace/code/{batchCode}")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse>> GetTraceByCode(
+        string batchCode,
+        CancellationToken cancellationToken)
+    {
+        var dto = await _sender.Send(new GetPublicTraceByCodeQuery(batchCode), cancellationToken);
+        return Ok(ApiResponse.Success(ToData(dto)));
+    }
+
     private static PublicTraceData ToData(PublicTraceDto dto) => new()
     {
         BatchId = dto.BatchId,
