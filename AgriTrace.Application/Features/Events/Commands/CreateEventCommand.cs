@@ -111,7 +111,7 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
 
         bool isReceiveEvent = eventType.Code == "RECEIVE";
 
-        if (!isInspectionCrossOrg && user.OrganizationId.HasValue)
+        if (!isAdmin && !isInspectionCrossOrg && user.OrganizationId.HasValue)
         {
             if (isReceiveEvent)
             {
@@ -155,10 +155,16 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
             var orgUsers = await _userService.GetByOrganizationAsync(organizationId, cancellationToken);
             foreach (var u in orgUsers)
             {
+                var titleJson = System.Text.Json.JsonSerializer.Serialize(new { en = "🔄 NEW EVENT ON BATCH", vi = "🔄 SỰ KIỆN MỚI TRÊN LÔ HÀNG" });
+                var msgJson = System.Text.Json.JsonSerializer.Serialize(new { 
+                    en = $"Event '{eventType.Name}' was successfully added to the supply chain of batch {batch.BatchCode}.",
+                    vi = $"Sự kiện '{eventType.Name}' vừa được thêm thành công vào chuỗi hành trình của lô hàng {batch.BatchCode}."
+                });
+
                 var notif = new Notification(
                     u.Id,
-                    "🔄 SỰ KIỆN MỚI TRÊN LÔ HÀNG",
-                    $"Sự kiện '{eventType.Name}' vừa được thêm thành công vào chuỗi hành trình của lô hàng {batch.BatchCode}.");
+                    titleJson,
+                    msgJson);
                 await _notificationService.CreateAsync(notif, cancellationToken);
             }
         }

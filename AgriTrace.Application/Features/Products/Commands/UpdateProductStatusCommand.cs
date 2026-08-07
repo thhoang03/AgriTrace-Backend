@@ -2,6 +2,7 @@ using AgriTrace.Application.Common.Exceptions;
 using AgriTrace.Application.Contracts;
 using AgriTrace.Domain.Entities.Products;
 using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using Mapster;
 using MediatR;
 
@@ -14,27 +15,21 @@ public sealed record UpdateProductStatusCommand(
 public sealed class UpdateProductStatusCommandHandler
     : IRequestHandler<UpdateProductStatusCommand, ProductDto>
 {
-    private readonly IProductWriteService _productWriteService;
+    private readonly IProductWriteRepository _repository;
 
-    public UpdateProductStatusCommandHandler(IProductWriteService productWriteService)
+    public UpdateProductStatusCommandHandler(IProductWriteRepository repository)
     {
-        _productWriteService = productWriteService;
+        _repository = repository;
     }
 
     public async Task<ProductDto> Handle(UpdateProductStatusCommand command, CancellationToken cancellationToken)
     {
-        var product = await _productWriteService.GetByIdAsync(command.ProductId, cancellationToken)
+        var product = await _repository.GetByIdAsync(command.ProductId, cancellationToken)
             ?? throw new NotFoundException($"Product {command.ProductId} not found.");
 
-        // Toggle the in-memory status. NOTE: Product.Status is not yet persisted (no DB column /
-        // migration in this phase); the write path below preserves the existing product fields so the
-        // entity's UpdatedAt is bumped. Real status persistence is a Phase 11 follow-up.
         product.ChangeStatus(command.Status);
 
-        await _productWriteService.UpdateAsync(
-            command.ProductId,
-            new UpdateProduct(product.CategoryId, product.UnitId, product.Name),
-            cancellationToken);
+        await _repository.UpdateAsync(product, cancellationToken);
 
         var dto = product.Adapt<ProductDto>();
 

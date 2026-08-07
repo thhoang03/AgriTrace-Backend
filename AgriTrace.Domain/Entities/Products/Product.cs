@@ -52,6 +52,7 @@ public class Product : BaseEntity
         Guid? categoryId,
         Guid? unitId,
         string name,
+        ProductStatus status,
         DateTime createdAt,
         DateTime? updatedAt,
         Category? category,
@@ -63,6 +64,7 @@ public class Product : BaseEntity
         CategoryId = categoryId;
         UnitId = unitId;
         Name = name;
+        Status = status;
         Category = category;
         Unit = unit;
         Organization = organization;
@@ -85,9 +87,6 @@ public class Product : BaseEntity
         MarkUpdated();
     }
 
-    // NOTE: The Product domain entity does not yet persist a Status flag (no DB column / migration
-    // in this phase). ChangeStatus toggles the in-memory field; persistence follows in a later phase
-    // (Phase 11 follow-up) once the column and mapping are added.
     public ProductStatus Status { get; private set; } = ProductStatus.Created;
 
     public void ChangeStatus(ProductStatus status)

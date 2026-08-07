@@ -47,8 +47,12 @@ public sealed class InspectionsController : ControllerBase
             return await GetInspectionsByBatch(batchId.Value, page, pageSize, cancellationToken);
         }
 
+        Guid? orgId = string.Equals(_currentUser.OrganizationType, "Inspection", StringComparison.OrdinalIgnoreCase)
+            ? _currentUser.OrganizationId
+            : null;
+
         var result = await _mediator.Send(
-            new GetQualityInspectionsPagedQuery(page, pageSize),
+            new GetQualityInspectionsPagedQuery(orgId, page, pageSize),
             cancellationToken);
 
         var items = result.Items.Select(ToResponse).ToList();
@@ -78,13 +82,44 @@ public sealed class InspectionsController : ControllerBase
             return NotFound(ErrorResponse.Fail($"Batch '{batchId}' was not found."));
 
         var inspectorId = _currentUser.UserId;
+        var orgId = string.Equals(_currentUser.OrganizationType, "Inspection", StringComparison.OrdinalIgnoreCase)
+            ? _currentUser.OrganizationId
+            : request.OrganizationId;
 
         var dto = await _mediator.Send(
             new CreateQualityInspectionCommand(
                 batch.Id,
                 inspectorId,
+                orgId,
                 request.InspectionType,
                 request.InspectionDate,
+                request.Notes),
+            cancellationToken);
+
+        return CreatedAtAction(
+            nameof(GetInspectionById),
+            new { inspectionId = dto.Id },
+            ApiResponse.Success(new { inspectionId = dto.Id }));
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // POST /api/v1/batches/{batchId}/inspections/request
+    // ─────────────────────────────────────────────────────────────
+
+    [HttpPost("api/v1/batches/{batchId:guid}/inspections/request")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RequestInspection(
+        Guid batchId,
+        [FromBody] RequestInspectionBody request,
+        CancellationToken cancellationToken)
+    {
+        // Any authenticated user from a farm/manufacturer can request inspection
+        var dto = await _mediator.Send(
+            new RequestQualityInspectionCommand(
+                batchId,
+                request.TargetOrganizationId,
                 request.Notes),
             cancellationToken);
 
@@ -232,6 +267,7 @@ public sealed class InspectionsController : ControllerBase
             InspectionId = dto.Id,
             BatchId = dto.BatchId,
             BatchCode = dto.BatchCode,
+            OrganizationId = dto.OrganizationId,
             InspectorId = dto.InspectorId,
             InspectorName = dto.InspectorName,
             InspectionType = dto.InspectionType,
@@ -267,4 +303,8 @@ public record AddLabTestRequestBody(
 
 public record ConcludeInspectionRequest(
     string OverallResult,
+    string? Notes);
+
+public record RequestInspectionBody(
+    Guid TargetOrganizationId,
     string? Notes);

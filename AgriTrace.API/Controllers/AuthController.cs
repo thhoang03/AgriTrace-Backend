@@ -84,28 +84,8 @@ public sealed class AuthController : ControllerBase
             ),
             cancellationToken);
 
-        // 4. Auto-login created user
-        var loginResult = await _sender.Send(
-            new LoginCommand(request.Email, request.Password),
-            cancellationToken);
-
-        var loginData = new LoginData
-        {
-            AccessToken = loginResult.AccessToken,
-            RefreshToken = loginResult.RefreshToken,
-            MustChangePassword = loginResult.MustChangePassword,
-            User = new UserBasic
-            {
-                Id = loginResult.User.Id,
-                Name = loginResult.User.Name,
-                Email = loginResult.User.Email,
-                Role = loginResult.User.Role,
-                OrganizationType = loginResult.User.OrganizationType,
-                MustChangePassword = loginResult.User.MustChangePassword
-            }
-        };
-
-        return Ok(ApiResponse.Success(loginData, "Đăng ký tài khoản doanh nghiệp thành công"));
+        // 4. Return success response (do not auto-login)
+        return Ok(ApiResponse.Success(null, "Đăng ký tài khoản doanh nghiệp thành công. Tài khoản của bạn đang chờ quản trị viên phê duyệt."));
     }
 
     /// <summary>

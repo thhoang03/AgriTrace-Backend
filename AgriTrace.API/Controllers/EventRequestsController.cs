@@ -57,6 +57,8 @@ public sealed class EventRequestsController : ControllerBase
         var result = await _sender.Send(
             new CreateEventRequestCommand(
                 model.EventTypeId,
+                model.BatchId,
+                model.TargetOrganizationId,
                 model.Location,
                 model.Description
             ),

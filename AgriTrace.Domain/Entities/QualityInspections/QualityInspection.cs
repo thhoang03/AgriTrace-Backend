@@ -8,7 +8,9 @@ public class QualityInspection : BaseEntity
 {
     public Guid BatchId { get; private set; }
 
-    public Guid InspectorId { get; private set; }
+    public Guid? OrganizationId { get; private set; }
+
+    public Guid? InspectorId { get; private set; }
 
     public InspectionType InspectionType { get; private set; }
 
@@ -24,7 +26,7 @@ public class QualityInspection : BaseEntity
 
     public Batch Batch { get; private set; }
 
-    public User Inspector { get; private set; }
+    public User? Inspector { get; private set; }
 
     private readonly List<InspectionLabTest> _labTests = new();
     public IReadOnlyCollection<InspectionLabTest> LabTests => _labTests.AsReadOnly();
@@ -38,7 +40,8 @@ public class QualityInspection : BaseEntity
     /// </summary>
     public QualityInspection(
         Guid batchId,
-        Guid inspectorId,
+        Guid? organizationId,
+        Guid? inspectorId,
         InspectionType inspectionType,
         DateTime inspectionDate,
         string? notes)
@@ -46,6 +49,7 @@ public class QualityInspection : BaseEntity
         Validate(batchId, inspectorId);
 
         BatchId = batchId;
+        OrganizationId = organizationId;
         InspectorId = inspectorId;
         InspectionType = inspectionType;
         Status = InspectionStatus.Pending;
@@ -59,7 +63,8 @@ public class QualityInspection : BaseEntity
     public QualityInspection(
         Guid id,
         Guid batchId,
-        Guid inspectorId,
+        Guid? organizationId,
+        Guid? inspectorId,
         InspectionType inspectionType,
         InspectionStatus status,
         string? overallResult,
@@ -75,6 +80,7 @@ public class QualityInspection : BaseEntity
         Validate(batchId, inspectorId);
 
         BatchId = batchId;
+        OrganizationId = organizationId;
         InspectorId = inspectorId;
         InspectionType = inspectionType;
         Status = status;
@@ -133,13 +139,10 @@ public class QualityInspection : BaseEntity
         return test;
     }
 
-    private static void Validate(Guid batchId, Guid inspectorId)
+    private static void Validate(Guid batchId, Guid? inspectorId)
     {
         if (batchId == Guid.Empty)
             throw new ArgumentException("Batch is required.");
-
-        if (inspectorId == Guid.Empty)
-            throw new ArgumentException("Inspector is required.");
     }
 }
 

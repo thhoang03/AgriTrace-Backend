@@ -19,7 +19,8 @@ public sealed class QualityInspectionDto
     public Guid Id { get; init; }
     public Guid BatchId { get; init; }
     public string? BatchCode { get; init; }
-    public Guid InspectorId { get; init; }
+    public Guid? OrganizationId { get; init; }
+    public Guid? InspectorId { get; init; }
     public string? InspectorName { get; init; }
     public int InspectionType { get; init; }
     public int Status { get; init; }

@@ -35,7 +35,7 @@ public class Organization : BaseEntity
         OrganizationTypeId = organizationTypeId;
         Name = name.Trim();
         Address = address?.Trim();
-        Status = OrganizationStatus.Active;
+        Status = OrganizationStatus.Pending;
     }
 
     // Dùng khi dựng lại (rehydrate) Organization từ dữ liệu đã có trong database,

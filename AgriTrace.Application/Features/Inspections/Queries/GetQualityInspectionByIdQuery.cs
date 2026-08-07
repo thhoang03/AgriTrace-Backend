@@ -38,6 +38,7 @@ public sealed class GetQualityInspectionByIdQueryHandler
             Id = inspection.Id,
             BatchId = inspection.BatchId,
             BatchCode = inspection.Batch?.BatchCode,
+            OrganizationId = inspection.OrganizationId,
             InspectorId = inspection.InspectorId,
             InspectorName = inspection.Inspector?.FullName,
             InspectionType = (int)inspection.InspectionType,

@@ -7,7 +7,9 @@ public class QualityInspectionDataModel : BaseDataModel
 {
     public Guid BatchId { get; set; }
 
-    public Guid InspectorId { get; set; }
+    public Guid? OrganizationId { get; set; }
+
+    public Guid? InspectorId { get; set; }
 
     public InspectionType InspectionType { get; set; }
 
@@ -23,7 +25,7 @@ public class QualityInspectionDataModel : BaseDataModel
 
     public BatchDataModel Batch { get; set; } = null!;
 
-    public UserDataModel Inspector { get; set; } = null!;
+    public UserDataModel? Inspector { get; set; }
 
     public ICollection<InspectionLabTestDataModel> LabTests { get; set; }
         = new List<InspectionLabTestDataModel>();

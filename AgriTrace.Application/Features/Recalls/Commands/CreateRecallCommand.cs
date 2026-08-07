@@ -208,10 +208,16 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
                 var usersInOrg = await _userService.GetByOrganizationAsync(targetBatch.CurrentOrganizationId, cancellationToken);
                 foreach (var u in usersInOrg)
                 {
+                    var titleJson = System.Text.Json.JsonSerializer.Serialize(new { en = "🚨 BATCH RECALL ALERT", vi = "🚨 CẢNH BÁO THU HỒI LÔ HÀNG" });
+                    var msgJson = System.Text.Json.JsonSerializer.Serialize(new { 
+                        en = $"ALERT: Batch {targetBatch.BatchCode} belonging to your organization is being RECALLED due to safety inspection failure. Reason: {request.Reason}. Please halt distribution and isolate the product!",
+                        vi = $"CẢNH BÁO: Lô hàng {targetBatch.BatchCode} của đơn vị bạn bị THU HỒI do ảnh hưởng từ đợt kiểm tra an toàn. Lý do: {request.Reason}. Vui lòng dừng phân phối và cách ly sản phẩm!"
+                    });
+
                     var notif = new Notification(
                         u.Id,
-                        "🚨 CẢNH BÁO THU HỒI LÔ HÀNG",
-                        $"CẢNH BÁO: Lô hàng {targetBatch.BatchCode} của đơn vị bạn bị THU HỒI do ảnh hưởng từ đợt kiểm tra an toàn. Lý do: {request.Reason}. Vui lòng dừng phân phối và cách ly sản phẩm!");
+                        titleJson,
+                        msgJson);
                     await _notificationService.CreateAsync(notif, cancellationToken);
                 }
             }

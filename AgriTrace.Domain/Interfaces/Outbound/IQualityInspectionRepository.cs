@@ -1,3 +1,4 @@
+using AgriTrace.Domain.Common;
 using AgriTrace.Domain.Entities.QualityInspections;
 
 namespace AgriTrace.Domain.Interfaces.Outbound;
@@ -11,6 +12,12 @@ public interface IQualityInspectionRepository
 
     Task<IReadOnlyList<QualityInspection>> GetByInspectorAsync(
         Guid inspectorId,
+        CancellationToken cancellationToken = default);
+
+    Task<PagedResult<QualityInspection>> GetPagedByOrganizationAsync(
+        Guid? organizationId,
+        int pageNumber,
+        int pageSize,
         CancellationToken cancellationToken = default);
 
     Task<QualityInspection?> GetByIdWithLabTestsAsync(

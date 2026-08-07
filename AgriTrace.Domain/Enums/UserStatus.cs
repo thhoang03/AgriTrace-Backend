@@ -2,7 +2,8 @@ namespace AgriTrace.Domain.Enums;
 
 public enum UserStatus
 {
-    Pending,
-    Active,
-    Inactive
+    Pending = 0,
+    Active = 1,
+    Inactive = 2,
+    Rejected = 3
 }
