@@ -82,12 +82,12 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
         var primaryBatch = await _batchReadService.GetByIdAsync(request.BatchId, cancellationToken)
             ?? throw new NotFoundException($"Batch {request.BatchId} not found.");
 
-        if (_currentUser.Role != "Admin" && _currentUser.Role != "ADMIN" && _currentUser.OrganizationType != "SYSTEM")
+        bool isAdmin = _currentUser.Role == "Admin" || _currentUser.Role == "ADMIN";
+        bool isInspectionOrg = _currentUser.OrganizationType == "INSPECTION";
+
+        if (!isAdmin && !isInspectionOrg)
         {
-            if (_currentUser.OrganizationType != "INSPECTION")
-            {
-                throw new RbacForbiddenException("RBAC_FORBIDDEN", "Only system administrator or inspection organization can create recall events.");
-            }
+            throw new RbacForbiddenException("RBAC_FORBIDDEN", "Only system administrator or inspection organization can create recall events.");
         }
 
         if (!primaryBatch.CanBeRecalled()) {

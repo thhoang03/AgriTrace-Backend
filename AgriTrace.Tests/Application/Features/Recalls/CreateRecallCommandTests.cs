@@ -45,7 +45,7 @@ public class CreateRecallCommandTests
         var recallMock = new Mock<IRecallService>();
         var userMock = new Mock<IUserService>();
 
-        var sut = new CreateRecallCommandHandler(recallMock.Object, batchMock.Object, writeMock.Object, userMock.Object, BuildCurrentUser(role: "Manager").Object);
+        var sut = new CreateRecallCommandHandler(recallMock.Object, batchMock.Object, writeMock.Object, userMock.Object, BuildCurrentUser(role: "Manager", orgType: "FARM").Object);
         var cmd = new CreateRecallCommand(batch.Id, "Defect", 2, Guid.NewGuid());
 
         var act = () => sut.Handle(cmd, default);
@@ -55,7 +55,7 @@ public class CreateRecallCommandTests
     }
 
     [Fact]
-    public async Task Handle_AdminNonSystem_ThrowsRbacForbiddenException()
+    public async Task Handle_InspectionOrg_ValidCommand_CreatesRecall()
     {
         var batch = BuildBatch();
         var batchMock = new Mock<IBatchReadService>();
@@ -64,15 +64,18 @@ public class CreateRecallCommandTests
 
         var writeMock = new Mock<IBatchWriteService>();
         var recallMock = new Mock<IRecallService>();
+        recallMock.Setup(s => s.CreateAsync(It.IsAny<Recall>(), default))
+            .ReturnsAsync((Recall r, CancellationToken _) => r);
         var userMock = new Mock<IUserService>();
 
-        var sut = new CreateRecallCommandHandler(recallMock.Object, batchMock.Object, writeMock.Object, userMock.Object, BuildCurrentUser(role: "Admin", orgType: "FARM").Object);
+        var sut = new CreateRecallCommandHandler(recallMock.Object, batchMock.Object, writeMock.Object, userMock.Object, BuildCurrentUser(role: "Staff", orgType: "INSPECTION").Object);
         var cmd = new CreateRecallCommand(batch.Id, "Defect", 2, Guid.NewGuid());
 
-        var act = () => sut.Handle(cmd, default);
+        var result = await sut.Handle(cmd, default);
 
-        await act.Should().ThrowAsync<RbacForbiddenException>()
-            .WithMessage("*system administrator*");
+        result.Should().NotBeNull();
+        recallMock.Verify(s => s.CreateAsync(It.IsAny<Recall>(), default), Times.Once);
+        writeMock.Verify(s => s.UpdateAsync(It.IsAny<Batch>(), default), Times.Once);
     }
 
     [Fact]
