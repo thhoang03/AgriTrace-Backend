@@ -54,6 +54,20 @@ public sealed class CreateQualityInspectionCommandHandler
         CreateQualityInspectionCommand command,
         CancellationToken cancellationToken)
     {
+        if (command.OrganizationId.HasValue && command.OrganizationId.Value != Guid.Empty)
+        {
+            var existingInspections = await _service.GetByBatchAsync(command.BatchId, cancellationToken);
+            var pendingOtherOrg = existingInspections.FirstOrDefault(i =>
+                i.OrganizationId.HasValue &&
+                i.OrganizationId.Value != command.OrganizationId.Value &&
+                i.Status == Domain.Entities.QualityInspections.InspectionStatus.Pending);
+
+            if (pendingOtherOrg != null)
+            {
+                throw new ArgumentException("Lô hàng này đã được yêu cầu/chỉ định kiểm tra cho một tổ chức kiểm định khác.");
+            }
+        }
+
         var inspection = new QualityInspection(
             command.BatchId,
             command.OrganizationId, // use the provided org Id
@@ -124,6 +138,7 @@ public sealed class CreateQualityInspectionCommandHandler
 
             var eventData = JsonSerializer.Serialize(new
             {
+                description = $"Khởi tạo phiếu kiểm định chất lượng",
                 inspectionId = created.Id,
                 inspectionType = command.InspectionType,
                 status = (int)created.Status,

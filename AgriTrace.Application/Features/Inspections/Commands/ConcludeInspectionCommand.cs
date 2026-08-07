@@ -70,8 +70,10 @@ public sealed class ConcludeInspectionCommandHandler
 
             if (eventType is null) return;
 
+            var resultText = inspection.OverallResult == "PASS" ? "ĐẠT (PASS)" : inspection.OverallResult == "FAIL" ? "KHÔNG ĐẠT (FAIL)" : inspection.OverallResult;
             var eventData = JsonSerializer.Serialize(new
             {
+                description = $"Kết luận kiểm định chất lượng: {resultText}" + (string.IsNullOrWhiteSpace(inspection.Notes) ? "" : $" - {inspection.Notes}"),
                 inspectionId = inspection.Id,
                 overallResult = inspection.OverallResult,
                 status = inspection.Status.ToString(),

@@ -70,6 +70,19 @@ public class RecallService : IRecallService
             cancellationToken);
     }
 
+    public async Task<PagedResult<Recall>> GetPagedByOrganizationAsync(
+        int pageNumber,
+        int pageSize,
+        Guid organizationId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _repository.GetPagedByOrganizationAsync(
+            pageNumber,
+            pageSize,
+            organizationId,
+            cancellationToken);
+    }
+
     public async Task<IReadOnlyList<Recall>> GetByBatchAsync(
         Guid batchId,
         CancellationToken cancellationToken = default)

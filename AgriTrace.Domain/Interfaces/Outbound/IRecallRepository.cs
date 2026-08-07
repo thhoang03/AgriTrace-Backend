@@ -9,6 +9,7 @@ using AgriTrace.Domain.Entities.QualityInspections;
 using AgriTrace.Domain.Entities.Recalls;
 using AgriTrace.Domain.Entities.Units;
 using AgriTrace.Domain.Entities.Users;
+using AgriTrace.Domain.Common;
 
 namespace AgriTrace.Domain.Interfaces.Outbound;
 
@@ -22,4 +23,10 @@ public interface IRecallRepository
     Task<IReadOnlyList<Recall>> GetBySeverityAsync(
      RecallSeverity severity,
      CancellationToken cancellationToken = default);
+
+    Task<PagedResult<Recall>> GetPagedByOrganizationAsync(
+        int pageNumber,
+        int pageSize,
+        Guid organizationId,
+        CancellationToken cancellationToken = default);
 }
