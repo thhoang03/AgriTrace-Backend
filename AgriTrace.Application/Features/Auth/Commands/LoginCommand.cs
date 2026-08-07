@@ -52,12 +52,12 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResult>
 
         if (user.Status == Domain.Enums.UserStatus.Pending)
         {
-            throw new ArgumentException("Tài khoản của bạn đang chờ phê duyệt. Vui lòng liên hệ quản trị viên.");
+            throw new ArgumentException("{\"vi\": \"Tài khoản của bạn đang chờ phê duyệt. Vui lòng liên hệ quản trị viên.\", \"en\": \"Your account is waiting for approval. Please contact the administrator.\"}");
         }
 
         if (user.Status == Domain.Enums.UserStatus.Rejected)
         {
-            throw new ArgumentException("Tài khoản của bạn đã bị từ chối phê duyệt.");
+            throw new ArgumentException("{\"vi\": \"Tài khoản của bạn đã bị từ chối phê duyệt.\", \"en\": \"Your account has been rejected for approval.\"}");
         }
 
         var refreshToken = _tokenService.GenerateRefreshToken();
