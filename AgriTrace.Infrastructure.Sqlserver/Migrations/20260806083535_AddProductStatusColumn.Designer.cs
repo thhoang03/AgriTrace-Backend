@@ -4,6 +4,7 @@ using AgriTrace.Infrastructure.Sqlserver.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgriTrace.Infrastructure.Sqlserver.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260806083535_AddProductStatusColumn")]
+    partial class AddProductStatusColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1077,14 +1080,11 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.Property<int>("InspectionType")
                         .HasColumnType("int");
 
-                    b.Property<Guid?>("InspectorId")
+                    b.Property<Guid>("InspectorId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<Guid?>("OrganizationId")
-                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("OverallResult")
                         .HasMaxLength(10)
@@ -1889,7 +1889,8 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.HasOne("AgriTrace.Infrastructure.Sqlserver.Models.UserDataModel", "Inspector")
                         .WithMany()
                         .HasForeignKey("InspectorId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("Batch");
 

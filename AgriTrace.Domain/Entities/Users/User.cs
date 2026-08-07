@@ -143,6 +143,14 @@ public class User : BaseEntity
         MarkUpdated();
     }
 
+    public void Reject()
+    {
+        IsActive = false;
+        Status = UserStatus.Rejected;
+
+        MarkUpdated();
+    }
+
     public void SetChangeStatus(bool isActive)
     {
         if (isActive)

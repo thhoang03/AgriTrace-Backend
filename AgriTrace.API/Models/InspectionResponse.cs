@@ -43,8 +43,11 @@ public class InspectionResponse
     [JsonPropertyName("batchCode")]
     public string? BatchCode { get; set; }
 
+    [JsonPropertyName("organizationId")]
+    public Guid? OrganizationId { get; set; }
+
     [JsonPropertyName("inspectorId")]
-    public Guid InspectorId { get; set; }
+    public Guid? InspectorId { get; set; }
 
     [JsonPropertyName("inspectorName")]
     public string? InspectorName { get; set; }

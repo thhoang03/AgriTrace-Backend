@@ -185,6 +185,7 @@ public sealed class ProductReadRepository : IProductReadRepository
             model.CategoryId,
             model.UnitId,
             model.Name,
+            model.Status,
             model.CreatedAt,
             model.UpdatedAt,
             model.Category == null ? null : new Category(

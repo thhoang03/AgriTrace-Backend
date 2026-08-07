@@ -49,10 +49,17 @@ public class RejectEventRequestCommandHandler : IRequestHandler<RejectEventReque
             foreach (var u in orgUsers)
             {
                 var eventName = eventReq.EventType?.Name ?? "sự kiện";
+                var titleJson = System.Text.Json.JsonSerializer.Serialize(new { en = "❌ REQUEST REJECTED", vi = "❌ YÊU CẦU BỊ TỪ CHỐI" });
+                var reasonEn = string.IsNullOrEmpty(request.Reason) ? "No reason provided" : request.Reason;
+                var msgJson = System.Text.Json.JsonSerializer.Serialize(new { 
+                    en = $"Your organization's process expansion request for event '{eventName}' has been REJECTED. Reason: {reasonEn}.",
+                    vi = $"Yêu cầu mở rộng quy trình cho sự kiện '{eventName}' của tổ chức bạn đã bị TỪ CHỐI. Lý do: {reason}."
+                });
+
                 var notif = new Notification(
                     u.Id,
-                    "❌ YÊU CẦU BỊ TỪ CHỐI",
-                    $"Yêu cầu mở rộng quy trình cho sự kiện '{eventName}' của tổ chức bạn đã bị TỪ CHỐI. Lý do: {reason}.");
+                    titleJson,
+                    msgJson);
                 await _notificationService.CreateAsync(notif, cancellationToken);
             }
         }

@@ -49,10 +49,16 @@ public class ApproveEventRequestCommandHandler : IRequestHandler<ApproveEventReq
             foreach (var u in orgUsers)
             {
                 var eventName = eventReq.EventType?.Name ?? "sự kiện";
+                var titleJson = System.Text.Json.JsonSerializer.Serialize(new { en = "✅ REQUEST APPROVED", vi = "✅ YÊU CẦU ĐÃ ĐƯỢC PHÊ DUYỆT" });
+                var msgJson = System.Text.Json.JsonSerializer.Serialize(new { 
+                    en = $"Your organization's process expansion request for event '{eventName}' has been approved by the System Administrator.",
+                    vi = $"Yêu cầu mở rộng quy trình cho sự kiện '{eventName}' của tổ chức bạn đã được Quản trị viên hệ thống phê duyệt."
+                });
+
                 var notif = new Notification(
                     u.Id,
-                    "✅ YÊU CẦU ĐÃ ĐƯỢC PHÊ DUYỆT",
-                    $"Yêu cầu mở rộng quy trình cho sự kiện '{eventName}' của tổ chức bạn đã được Quản trị viên hệ thống phê duyệt.");
+                    titleJson,
+                    msgJson);
                 await _notificationService.CreateAsync(notif, cancellationToken);
             }
         }

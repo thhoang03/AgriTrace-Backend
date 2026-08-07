@@ -6,5 +6,7 @@ namespace AgriTrace.Domain.Entities.Organizations;
 public enum OrganizationStatus
 {
     Active = 1,
-    Inactive = 2
+    Inactive = 2,
+    Pending = 3,
+    Rejected = 4
 }

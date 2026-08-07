@@ -84,6 +84,7 @@ public sealed class ProductWriteRepository : IProductWriteRepository
         model.CategoryId = entity.CategoryId;
         model.UnitId = entity.UnitId;
         model.Name = entity.Name;
+        model.Status = entity.Status;
 
         await _context.SaveChangesAsync(cancellationToken);
     }
@@ -115,6 +116,7 @@ public sealed class ProductWriteRepository : IProductWriteRepository
             model.CategoryId,
             model.UnitId,
             model.Name,
+            model.Status,
             model.CreatedAt,
             model.UpdatedAt,
             null,
@@ -130,6 +132,7 @@ public sealed class ProductWriteRepository : IProductWriteRepository
             CategoryId = entity.CategoryId,
             UnitId = entity.UnitId,
             Name = entity.Name,
+            Status = entity.Status,
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt
         };

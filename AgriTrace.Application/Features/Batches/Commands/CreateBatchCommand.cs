@@ -191,7 +191,8 @@ public sealed class CreateBatchCommandValidator
 
 
         RuleFor(x => x.ExpiryDate)
-            .GreaterThan(x => x.ProductionDate)
+            .GreaterThanOrEqualTo(x => x.ProductionDate)
+            .WithMessage("Hạn sử dụng (Expiry Date) phải lớn hơn hoặc bằng Ngày sản xuất.")
             .When(x => x.ExpiryDate.HasValue);
 
     }

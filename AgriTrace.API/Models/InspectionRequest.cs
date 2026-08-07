@@ -13,4 +13,6 @@ public class CreateInspectionRequest
 
     [StringLength(2000)]
     public string? Notes { get; set; }
+
+    public Guid? OrganizationId { get; set; }
 }

@@ -112,10 +112,16 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, UserD
             request.FullName, email, request.Password);
         await _emailService.SendAsync(email, subject, body, cancellationToken);
 
+        var titleJson = System.Text.Json.JsonSerializer.Serialize(new { en = "User Created", vi = "Tài khoản mới" });
+        var msgJson = System.Text.Json.JsonSerializer.Serialize(new { 
+            en = $"User '{request.FullName}' ({email}) has been created with role {request.Role}.",
+            vi = $"Tài khoản '{request.FullName}' ({email}) đã được tạo với vai trò {request.Role}."
+        });
+        
         var notification = new Notification(
             _currentUser.UserId,
-            "User Created",
-            $"User '{request.FullName}' ({email}) has been created with role {request.Role}.");
+            titleJson,
+            msgJson);
         await _notificationService.CreateAsync(notification, cancellationToken);
 
         return ToDto(created);

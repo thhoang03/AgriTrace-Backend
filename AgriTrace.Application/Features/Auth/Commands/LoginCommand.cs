@@ -50,6 +50,16 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResult>
             throw new ArgumentException("Tài khoản đã bị vô hiệu hóa.");
         }
 
+        if (user.Status == Domain.Enums.UserStatus.Pending)
+        {
+            throw new ArgumentException("Tài khoản của bạn đang chờ phê duyệt. Vui lòng liên hệ quản trị viên.");
+        }
+
+        if (user.Status == Domain.Enums.UserStatus.Rejected)
+        {
+            throw new ArgumentException("Tài khoản của bạn đã bị từ chối phê duyệt.");
+        }
+
         var refreshToken = _tokenService.GenerateRefreshToken();
         var expiryDays = 7;
         user.SetRefreshToken(refreshToken, DateTime.UtcNow.AddDays(expiryDays));

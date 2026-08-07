@@ -9,6 +9,8 @@ namespace AgriTrace.Application.Features.EventRequests.Commands;
 
 public record CreateEventRequestCommand(
     Guid EventTypeId,
+    Guid? BatchId,
+    Guid? TargetOrganizationId,
     string? Location,
     string? Description) : IRequest<EventRequestDto>;
 
@@ -20,6 +22,7 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
     private readonly IOrganizationRepository _organizationRepository;
     private readonly IEventTypeRepository _eventTypeRepository;
     private readonly INotificationService? _notificationService;
+    private readonly IQualityInspectionService? _qualityInspectionService;
 
     public CreateEventRequestCommandHandler(
         IEventRequestRepository eventRequestRepository,
@@ -27,7 +30,8 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
         ICurrentUserService currentUser,
         IOrganizationRepository organizationRepository,
         IEventTypeRepository eventTypeRepository,
-        INotificationService? notificationService = null)
+        INotificationService? notificationService = null,
+        IQualityInspectionService? qualityInspectionService = null)
     {
         _eventRequestRepository = eventRequestRepository;
         _userService = userService;
@@ -35,6 +39,7 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
         _organizationRepository = organizationRepository;
         _eventTypeRepository = eventTypeRepository;
         _notificationService = notificationService;
+        _qualityInspectionService = qualityInspectionService;
     }
 
     public async Task<EventRequestDto> Handle(CreateEventRequestCommand request, CancellationToken cancellationToken)
@@ -57,8 +62,8 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
         if (targetCode is "SPLIT" or "MERGE" or "RECALL")
             throw new ConflictException($"Event type '{targetCode}' is a system-level operation and cannot be requested as an organization expansion.");
 
-        // 3. Verify OrganizationId exists in DB
-        Guid organizationId = user.OrganizationId ?? Guid.Empty;
+        // 3. Determine Target Organization
+        Guid organizationId = request.TargetOrganizationId ?? user.OrganizationId ?? Guid.Empty;
         if (organizationId != Guid.Empty)
         {
             var org = await _organizationRepository.GetByIdAsync(organizationId, cancellationToken);
@@ -72,20 +77,23 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
                 ?? throw new ConflictException("No Organization exists in the system.");
         }
 
-        // 4. Check for duplicate pending/approved request for the same org + event type
-        var existing = await _eventRequestRepository.GetAllAsync(cancellationToken);
-        var duplicate = existing.FirstOrDefault(r =>
-            r.OrganizationId == organizationId &&
-            r.EventTypeId == request.EventTypeId &&
-            (r.Status == Domain.Enums.EventRequestStatus.Pending || r.Status == Domain.Enums.EventRequestStatus.Approved));
-        if (duplicate != null)
+        // 4. Check for duplicate pending/approved request (only if it's NOT a targeted inspection request)
+        if (request.TargetOrganizationId == null || request.TargetOrganizationId == Guid.Empty)
         {
-            var statusLabel = duplicate.Status == Domain.Enums.EventRequestStatus.Approved ? "đã được phê duyệt" : "đang chờ xét duyệt";
-            throw new ConflictException($"Tổ chức của bạn đã có yêu cầu mở rộng cho event type '{targetEventType.Name}' ({statusLabel}).");
+            var existing = await _eventRequestRepository.GetAllAsync(cancellationToken);
+            var duplicate = existing.FirstOrDefault(r =>
+                r.OrganizationId == organizationId &&
+                r.EventTypeId == request.EventTypeId &&
+                (r.Status == Domain.Enums.EventRequestStatus.Pending || r.Status == Domain.Enums.EventRequestStatus.Approved));
+            if (duplicate != null)
+            {
+                var statusLabel = duplicate.Status == Domain.Enums.EventRequestStatus.Approved ? "đã được phê duyệt" : "đang chờ xét duyệt";
+                throw new ConflictException($"Tổ chức của bạn đã có yêu cầu mở rộng cho event type '{targetEventType.Name}' ({statusLabel}).");
+            }
         }
 
         var entity = new EventRequest(
-            batchId: null,
+            batchId: request.BatchId,
             request.EventTypeId,
             organizationId,
             _currentUser.UserId,
@@ -96,26 +104,55 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
 
         await _eventRequestRepository.AddAsync(entity, cancellationToken);
 
+
+
         if (_notificationService != null)
         {
-            var systemAdmins = await _userService.GetByRoleAsync(Domain.Entities.Users.UserRole.Admin, cancellationToken);
             var orgName = "Tổ chức không xác định";
-            if (organizationId != Guid.Empty)
+            var myOrgId = user.OrganizationId ?? Guid.Empty;
+            if (myOrgId != Guid.Empty)
             {
-                var org = await _organizationRepository.GetByIdAsync(organizationId, cancellationToken);
-                if (org != null)
+                var myOrg = await _organizationRepository.GetByIdAsync(myOrgId, cancellationToken);
+                if (myOrg != null) orgName = myOrg.Name;
+            }
+
+            if (request.TargetOrganizationId.HasValue && request.TargetOrganizationId != Guid.Empty)
+            {
+                // Notify the Target Organization
+                var targetUsers = await _userService.GetByOrganizationAsync(request.TargetOrganizationId.Value, cancellationToken);
+                foreach (var u in targetUsers)
                 {
-                    orgName = org.Name;
+                    var titleJson = System.Text.Json.JsonSerializer.Serialize(new { en = "📝 NEW INSPECTION REQUEST", vi = "📝 CÓ YÊU CẦU KIỂM ĐỊNH MỚI" });
+                    var msgJson = System.Text.Json.JsonSerializer.Serialize(new { 
+                        en = $"Organization '{orgName}' has sent a new inspection request for their batch. Please review and process.",
+                        vi = $"Tổ chức '{orgName}' vừa gửi một yêu cầu kiểm định cho lô hàng của họ. Vui lòng kiểm tra và xử lý."
+                    });
+
+                    var notif = new Notification(
+                        u.Id,
+                        titleJson,
+                        msgJson);
+                    await _notificationService.CreateAsync(notif, cancellationToken);
                 }
             }
-            
-            foreach (var admin in systemAdmins)
+            else
             {
-                var notif = new Notification(
-                    admin.Id,
-                    "📝 CÓ YÊU CẦU MỞ RỘNG MỚI",
-                    $"Tổ chức '{orgName}' vừa gửi một yêu cầu mở rộng quy trình mới cho sự kiện '{targetEventType.Name}'. Vui lòng kiểm tra và xét duyệt.");
-                await _notificationService.CreateAsync(notif, cancellationToken);
+                // Notify System Admins
+                var systemAdmins = await _userService.GetByRoleAsync(Domain.Entities.Users.UserRole.Admin, cancellationToken);
+                foreach (var admin in systemAdmins)
+                {
+                    var titleJson = System.Text.Json.JsonSerializer.Serialize(new { en = "📝 NEW EXPANSION REQUEST", vi = "📝 CÓ YÊU CẦU MỞ RỘNG MỚI" });
+                    var msgJson = System.Text.Json.JsonSerializer.Serialize(new { 
+                        en = $"Organization '{orgName}' has sent a new process expansion request for event type '{targetEventType.Name}'. Please review and approve.",
+                        vi = $"Tổ chức '{orgName}' vừa gửi một yêu cầu mở rộng quy trình mới cho sự kiện '{targetEventType.Name}'. Vui lòng kiểm tra và xét duyệt."
+                    });
+
+                    var notif = new Notification(
+                        admin.Id,
+                        titleJson,
+                        msgJson);
+                    await _notificationService.CreateAsync(notif, cancellationToken);
+                }
             }
         }
 

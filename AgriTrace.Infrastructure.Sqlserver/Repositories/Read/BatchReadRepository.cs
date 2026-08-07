@@ -230,6 +230,7 @@ public sealed class BatchReadRepository
                 model.Product.CategoryId,
                 model.Product.UnitId,
                 model.Product.Name,
+                model.Product.Status,
                 model.Product.CreatedAt,
                 model.Product.UpdatedAt,
                 category,

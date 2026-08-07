@@ -45,9 +45,6 @@ public sealed class OrganizationsController : ControllerBase
         int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
-        if (!IsAdmin)
-            return Forbid();
-
         var result = await _sender.Send(
             new GetOrganizationsPagedQuery(search, status, organizationTypeId, page, pageSize),
             cancellationToken);
@@ -152,6 +149,47 @@ public sealed class OrganizationsController : ControllerBase
         return Ok(
             ApiResponse.Success(
                 "Organization status updated successfully."));
+    }
+
+    /// <summary>
+    /// Phê duyệt tổ chức mới đăng ký
+    /// </summary>
+    [HttpPost("{id:guid}/approve")]
+    [Authorize(Roles = "Admin,ADMIN")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse>> Approve(
+        Guid id,
+        CancellationToken cancellationToken)
+    {
+        await _sender.Send(
+            new ApproveOrganizationCommand(id),
+            cancellationToken);
+
+        return Ok(
+            ApiResponse.Success(
+                "Organization approved successfully."));
+    }
+
+    /// <summary>
+    /// Từ chối tổ chức mới đăng ký
+    /// </summary>
+    [HttpPost("{id:guid}/reject")]
+    [Authorize(Roles = "Admin,ADMIN")]
+    [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<ApiResponse>> Reject(
+        Guid id,
+        [FromBody] RejectRequest request,
+        CancellationToken cancellationToken)
+    {
+        await _sender.Send(
+            new RejectOrganizationCommand(id, request.Reason),
+            cancellationToken);
+
+        return Ok(
+            ApiResponse.Success(
+                "Organization rejected successfully."));
     }
 
     /// <summary>

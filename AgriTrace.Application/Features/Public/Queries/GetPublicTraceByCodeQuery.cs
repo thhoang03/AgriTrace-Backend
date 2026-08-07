@@ -89,7 +89,9 @@ public class GetPublicTraceByCodeQueryHandler : IRequestHandler<GetPublicTraceBy
         var inspectionSummaries = new List<PublicInspectionDto>();
         foreach (var inspection in inspections.OrderBy(i => i.CreatedAt))
         {
-            var inspector = await _userService.GetByIdAsync(inspection.InspectorId, cancellationToken);
+            var inspector = inspection.InspectorId.HasValue 
+                ? await _userService.GetByIdAsync(inspection.InspectorId.Value, cancellationToken)
+                : null;
             inspectionSummaries.Add(new PublicInspectionDto
             {
                 Result = inspection.OverallResult,

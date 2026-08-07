@@ -29,7 +29,7 @@ public class OrganizationTests
         org.OrganizationTypeId.Should().Be(ValidTypeId);
         org.Name.Should().Be("My Farm");
         org.Address.Should().Be("123 Main Street");
-        org.Status.Should().Be(OrganizationStatus.Active);
+        org.Status.Should().Be(OrganizationStatus.Pending);
     }
 
     [Fact]
@@ -47,10 +47,10 @@ public class OrganizationTests
     }
 
     [Fact]
-    public void Constructor_NewOrg_StatusIsActive()
+    public void Constructor_NewOrg_StatusIsPending()
     {
         var org = CreateValid();
-        org.Status.Should().Be(OrganizationStatus.Active);
+        org.Status.Should().Be(OrganizationStatus.Pending);
     }
 
     // ── Constructor — guard clauses ──────────────────────────────────────────

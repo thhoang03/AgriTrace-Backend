@@ -1,11 +1,12 @@
 using AgriTrace.Application.Contracts;
 using AgriTrace.Domain.Common;
-using AgriTrace.Domain.Interfaces.Inbound;
+using AgriTrace.Domain.Interfaces.Outbound;
 using MediatR;
 
 namespace AgriTrace.Application.Features.Inspections.Queries;
 
 public sealed record GetQualityInspectionsPagedQuery(
+    Guid? OrganizationId,
     int Page,
     int PageSize)
     : IRequest<PagedResult<QualityInspectionDto>>;
@@ -13,19 +14,20 @@ public sealed record GetQualityInspectionsPagedQuery(
 public sealed class GetQualityInspectionsPagedQueryHandler
     : IRequestHandler<GetQualityInspectionsPagedQuery, PagedResult<QualityInspectionDto>>
 {
-    private readonly IQualityInspectionService _service;
+    private readonly IQualityInspectionRepository _repository;
 
     public GetQualityInspectionsPagedQueryHandler(
-        IQualityInspectionService service)
+        IQualityInspectionRepository repository)
     {
-        _service = service;
+        _repository = repository;
     }
 
     public async Task<PagedResult<QualityInspectionDto>> Handle(
         GetQualityInspectionsPagedQuery query,
         CancellationToken cancellationToken)
     {
-        var paged = await _service.GetPagedAsync(query.Page, query.PageSize, cancellationToken);
+        var paged = await _repository.GetPagedByOrganizationAsync(
+            query.OrganizationId, query.Page, query.PageSize, cancellationToken);
 
         var items = paged.Items
             .Select(i => new QualityInspectionDto
@@ -33,6 +35,7 @@ public sealed class GetQualityInspectionsPagedQueryHandler
                 Id = i.Id,
                 BatchId = i.BatchId,
                 BatchCode = i.Batch?.BatchCode,
+                OrganizationId = i.OrganizationId,
                 InspectorId = i.InspectorId,
                 InspectorName = i.Inspector?.FullName,
                 InspectionType = (int)i.InspectionType,

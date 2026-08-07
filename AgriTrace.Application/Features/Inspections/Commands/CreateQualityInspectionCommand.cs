@@ -15,6 +15,7 @@ namespace AgriTrace.Application.Features.Inspections.Commands;
 public sealed record CreateQualityInspectionCommand(
     Guid BatchId,
     Guid InspectorId,
+    Guid? OrganizationId,
     int InspectionType,
     DateTime InspectionDate,
     string? Notes)
@@ -55,6 +56,7 @@ public sealed class CreateQualityInspectionCommandHandler
     {
         var inspection = new QualityInspection(
             command.BatchId,
+            command.OrganizationId, // use the provided org Id
             command.InspectorId,
             (InspectionType)command.InspectionType,
             command.InspectionDate,
@@ -72,12 +74,22 @@ public sealed class CreateQualityInspectionCommandHandler
                 var orgUsers = await _userService.GetByOrganizationAsync(batch.CurrentOrganizationId, cancellationToken);
                 foreach (var u in orgUsers)
                 {
-                    var resultStr = created.OverallResult == "PASS" ? "ĐẠT" :
-                                    created.OverallResult == "FAIL" ? "KHÔNG ĐẠT" : "CẢNH BÁO";
+                    var titleJson = JsonSerializer.Serialize(new { en = "🔬 NEW INSPECTION RESULT", vi = "🔬 KẾT QUẢ KIỂM ĐỊNH MỚI" });
+                    
+                    var resultStrVi = created.OverallResult == "PASS" ? "ĐẠT" :
+                                      created.OverallResult == "FAIL" ? "KHÔNG ĐẠT" : "CẢNH BÁO";
+                    var resultStrEn = created.OverallResult == "PASS" ? "PASS" :
+                                      created.OverallResult == "FAIL" ? "FAIL" : "WARNING";
+
+                    var msgJson = JsonSerializer.Serialize(new { 
+                        en = $"Batch {batch.BatchCode} has a new inspection result. Overall assessment: {resultStrEn}.",
+                        vi = $"Lô hàng {batch.BatchCode} vừa có kết quả kiểm định mới. Kết quả đánh giá chung: {resultStrVi}."
+                    });
+
                     var notif = new Notification(
                         u.Id,
-                        "🔬 KẾT QUẢ KIỂM ĐỊNH MỚI",
-                        $"Lô hàng {batch.BatchCode} vừa có kết quả kiểm định mới. Kết quả đánh giá chung: {resultStr}.");
+                        titleJson,
+                        msgJson);
                     await _notificationService.CreateAsync(notif, cancellationToken);
                 }
             }

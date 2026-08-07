@@ -8,6 +8,10 @@ public class CreateEventRequestModel
     [Required]
     public Guid EventTypeId { get; set; }
 
+    public Guid? BatchId { get; set; }
+
+    public Guid? TargetOrganizationId { get; set; }
+
     [StringLength(200)]
     public string? Location { get; set; }
 

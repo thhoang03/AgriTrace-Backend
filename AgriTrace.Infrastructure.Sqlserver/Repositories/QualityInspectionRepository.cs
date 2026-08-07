@@ -195,6 +195,38 @@ public class QualityInspectionRepository
         return models.Select(ToEntity).ToList();
     }
 
+    public async Task<PagedResult<QualityInspection>> GetPagedByOrganizationAsync(
+        Guid? organizationId,
+        int pageNumber,
+        int pageSize,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.QualityInspections
+            .Include(x => x.Batch)
+            .Include(x => x.Inspector)
+            .Include(x => x.LabTests)
+            .AsQueryable();
+
+        if (organizationId.HasValue)
+        {
+            query = query.Where(x => x.OrganizationId == organizationId.Value);
+        }
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var models = await query
+            .OrderByDescending(x => x.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<QualityInspection>(
+            models.Select(ToEntity).ToList(),
+            totalCount,
+            pageNumber,
+            pageSize);
+    }
+
     public async Task<QualityInspection?> GetByIdWithLabTestsAsync(
         Guid id,
         CancellationToken cancellationToken = default)
@@ -298,6 +330,7 @@ public class QualityInspectionRepository
         return new QualityInspection(
             model.Id,
             model.BatchId,
+            model.OrganizationId,
             model.InspectorId,
             model.InspectionType,
             model.Status,
@@ -339,6 +372,7 @@ public class QualityInspectionRepository
         return new QualityInspection(
             model.Id,
             model.BatchId,
+            model.OrganizationId,
             model.InspectorId,
             model.InspectionType,
             model.Status,
@@ -358,6 +392,7 @@ public class QualityInspectionRepository
         {
             Id = entity.Id,
             BatchId = entity.BatchId,
+            OrganizationId = entity.OrganizationId,
             InspectorId = entity.InspectorId,
             InspectionType = entity.InspectionType,
             Status = entity.Status,

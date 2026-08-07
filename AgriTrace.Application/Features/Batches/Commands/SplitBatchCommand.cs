@@ -79,6 +79,8 @@ public class SplitBatchCommandHandler : IRequestHandler<SplitBatchCommand, Split
 
         var childIds = new List<Guid>();
 
+        var childBatches = new List<Batch>();
+
         // Create child batches (this reduces the parent's remaining quantity per child).
         foreach (var detail in request.Splits)
         {
@@ -90,22 +92,31 @@ public class SplitBatchCommandHandler : IRequestHandler<SplitBatchCommand, Split
 
             split.AddDetail(child.Id, detail.Quantity);
             childIds.Add(child.Id);
+            childBatches.Add(child);
         }
 
         // Persist the split audit record and the parent's updated remaining quantity.
         await _splitRepository.AddAsync(split, cancellationToken);
         await _batchWriteService.UpdateAsync(parent, cancellationToken);
 
-        // Record immutable SupplyChainEvent to ledger
+        // Record immutable SupplyChainEvents to ledger
         if (_eventTypeRepository != null && _eventService != null)
         {
-            var eventType = await _eventTypeRepository.GetByCodeAsync("SPLIT", cancellationToken);
-            if (eventType != null)
-            {
-                var performedBy = request.PerformedByUserId != Guid.Empty
-                    ? request.PerformedByUserId
-                    : (_currentUser?.UserId ?? Guid.Empty);
+            var splitEventType = await _eventTypeRepository.GetByCodeAsync("SPLIT", cancellationToken);
+            var createdEventType = await _eventTypeRepository.GetByCodeAsync("CREATED", cancellationToken);
 
+            var performedBy = request.PerformedByUserId != Guid.Empty
+                ? request.PerformedByUserId
+                : (_currentUser?.UserId ?? Guid.Empty);
+
+            if (performedBy == Guid.Empty)
+            {
+                performedBy = new Guid("70000000-0000-0000-0000-000000000002");
+            }
+
+            // 1. SPLIT Event on Parent Batch
+            if (splitEventType != null)
+            {
                 var eventData = System.Text.Json.JsonSerializer.Serialize(new
                 {
                     description = $"Tách lô hàng {parent.BatchCode} thành {childIds.Count} lô con.",
@@ -116,7 +127,7 @@ public class SplitBatchCommandHandler : IRequestHandler<SplitBatchCommand, Split
 
                 var splitEvent = new SupplyChainEvent(
                     parent.Id,
-                    eventType.Id,
+                    splitEventType.Id,
                     parent.CurrentOrganizationId,
                     performedBy,
                     eventData: eventData,
@@ -126,6 +137,42 @@ public class SplitBatchCommandHandler : IRequestHandler<SplitBatchCommand, Split
                     currentHash: null);
 
                 await _eventService.CreateEventAsync(splitEvent, cancellationToken);
+            }
+
+            // 2. CREATED and SPLIT Events on EACH Child Batch
+            foreach (var child in childBatches)
+            {
+                if (createdEventType != null)
+                {
+                    var childCreatedEvent = new SupplyChainEvent(
+                        child.Id,
+                        createdEventType.Id,
+                        child.CurrentOrganizationId,
+                        performedBy,
+                        eventData: $"Lô hàng con {child.BatchCode} được khởi tạo từ việc tách lô {parent.BatchCode}. Sản lượng: {child.RemainingQuantity}",
+                        location: "Processing Facility",
+                        inspectionId: null,
+                        previousHash: null,
+                        currentHash: null);
+
+                    await _eventService.CreateEventAsync(childCreatedEvent, cancellationToken);
+                }
+
+                if (splitEventType != null)
+                {
+                    var childSplitEvent = new SupplyChainEvent(
+                        child.Id,
+                        splitEventType.Id,
+                        child.CurrentOrganizationId,
+                        performedBy,
+                        eventData: $"Tách ra từ lô hàng mẹ {parent.BatchCode}.",
+                        location: "Processing Facility",
+                        inspectionId: null,
+                        previousHash: null,
+                        currentHash: null);
+
+                    await _eventService.CreateEventAsync(childSplitEvent, cancellationToken);
+                }
             }
         }
 

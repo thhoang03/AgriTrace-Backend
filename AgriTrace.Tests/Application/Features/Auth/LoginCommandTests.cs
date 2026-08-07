@@ -27,7 +27,8 @@ public class LoginCommandTests
         // The real VerifyPassword in User uses BCrypt, but here we can't easily mock it without a wrapper, 
         // so we'll just set a password and use the same for testing.
         user.SetPassword("CorrectPassword123!");
-        if (!isActive) user.Deactivate();
+        if (isActive) user.Activate();
+        else user.Deactivate();
         return user;
     }
 
