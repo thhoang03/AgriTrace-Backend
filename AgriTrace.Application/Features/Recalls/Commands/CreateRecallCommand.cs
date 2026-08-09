@@ -74,11 +74,6 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
             throw new UnauthorizedAccessException("Authentication required to create recalls.");
         }
 
-        if ((_currentUser.Role != "Admin" && _currentUser.Role != "ADMIN") || _currentUser.OrganizationType != "SYSTEM")
-        {
-            throw new RbacForbiddenException("RBAC_FORBIDDEN", "Only system administrator can create recall events.");
-        }
-
         if (request.Severity is < 1 or > 3)
         {
             throw new ArgumentException("Severity must be between 1 and 3.");
@@ -86,6 +81,14 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
 
         var primaryBatch = await _batchReadService.GetByIdAsync(request.BatchId, cancellationToken)
             ?? throw new NotFoundException($"Batch {request.BatchId} not found.");
+
+        bool isAdmin = _currentUser.Role == "Admin" || _currentUser.Role == "ADMIN";
+        bool isInspectionOrg = _currentUser.OrganizationType == "INSPECTION";
+
+        if (!isAdmin && !isInspectionOrg)
+        {
+            throw new RbacForbiddenException("RBAC_FORBIDDEN", "Only system administrator or inspection organization can create recall events.");
+        }
 
         if (!primaryBatch.CanBeRecalled()) {
             throw new ConflictException($"Batch {request.BatchId} is already under an active recall.");

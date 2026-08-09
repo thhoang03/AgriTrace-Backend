@@ -38,8 +38,14 @@ public sealed class RecallsController : ControllerBase
         int pageSize = 20,
         CancellationToken cancellationToken = default)
     {
+        Guid? orgId = null;
+        if (_currentUser.Role != "Admin" && _currentUser.Role != "ADMIN" && _currentUser.Role != "SYSTEM")
+        {
+            orgId = _currentUser.OrganizationId;
+        }
+
         var result = await _sender.Send(
-            new GetRecallsPagedQuery(page, pageSize),
+            new GetRecallsPagedQuery(page, pageSize, orgId),
             cancellationToken);
 
         var paged = new RecallPagedResponse(
@@ -55,7 +61,6 @@ public sealed class RecallsController : ControllerBase
     /// Tạo Recall (thu hồi Batch)
     /// </summary>
     [HttpPost]
-    [Authorize(Roles = "Admin,ADMIN")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status409Conflict)]

@@ -42,6 +42,7 @@ public sealed class CreateBatchCommandHandler
     private readonly ICurrentUserService? _currentUser;
     private readonly INotificationService? _notificationService;
     private readonly IUserService? _userService;
+    private readonly AgriTrace.Domain.Interfaces.Outbound.IEventRequestRepository? _eventRequestRepository;
 
     public CreateBatchCommandHandler(
         IBatchWriteService batchWriteService,
@@ -50,7 +51,8 @@ public sealed class CreateBatchCommandHandler
         IEventService? eventService = null,
         ICurrentUserService? currentUser = null,
         INotificationService? notificationService = null,
-        IUserService? userService = null)
+        IUserService? userService = null,
+        AgriTrace.Domain.Interfaces.Outbound.IEventRequestRepository? eventRequestRepository = null)
     {
         _batchWriteService = batchWriteService;
         _productReadService = productReadService;
@@ -59,15 +61,34 @@ public sealed class CreateBatchCommandHandler
         _currentUser = currentUser;
         _notificationService = notificationService;
         _userService = userService;
+        _eventRequestRepository = eventRequestRepository;
     }
 
     public async Task<BatchDto> Handle(
         CreateBatchCommand command,
         CancellationToken cancellationToken)
     {
-        if (_currentUser != null && _currentUser.IsAuthenticated && _currentUser.Role != "Admin" && _currentUser.OrganizationType != "FARM")
+        if (_currentUser != null && _currentUser.IsAuthenticated && _currentUser.Role != "Admin" && _currentUser.OrganizationType != "FARM" && _currentUser.OrganizationType != "SYSTEM")
         {
-            throw new ForbiddenException("Chỉ đơn vị Trang trại (FARM) hoặc Admin hệ thống mới được phép khởi tạo Lô hàng mới.");
+            bool hasExtraPermission = false;
+            if (_eventRequestRepository != null && _currentUser.OrganizationId.HasValue)
+            {
+                var eventRequests = await _eventRequestRepository.GetPagedAsync(1, 100, null, AgriTrace.Domain.Enums.EventRequestStatus.Approved, _currentUser.OrganizationId.Value, null, cancellationToken);
+                foreach (var req in eventRequests.Items)
+                {
+                    var code = req.EventType?.Code?.ToUpper();
+                    if (code == "CREATED" || code == "CREATE" || code == "HARVEST")
+                    {
+                        hasExtraPermission = true;
+                        break;
+                    }
+                }
+            }
+
+            if (!hasExtraPermission)
+            {
+                throw new ForbiddenException("Chỉ đơn vị Trang trại (FARM), Admin hệ thống hoặc các tài khoản được phê duyệt mở rộng mới được phép khởi tạo Lô hàng mới.");
+            }
         }
 
         // Server-side batch code generation

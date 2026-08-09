@@ -217,6 +217,32 @@ public class RecallRepository
 
     }
 
+    public async Task<PagedResult<Recall>> GetPagedByOrganizationAsync(
+        int pageNumber,
+        int pageSize,
+        Guid organizationId,
+        CancellationToken cancellationToken = default)
+    {
+        var query = _context.Recalls
+            .Include(x => x.Creator)
+            .Where(x => x.Creator.OrganizationId == organizationId);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var models = await query
+            .OrderByDescending(x => x.CreatedAt)
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(cancellationToken);
+
+        return new PagedResult<Recall>(
+            models.Select(ToEntity).ToList(),
+            totalCount,
+            pageNumber,
+            pageSize
+        );
+    }
+
 
 
 

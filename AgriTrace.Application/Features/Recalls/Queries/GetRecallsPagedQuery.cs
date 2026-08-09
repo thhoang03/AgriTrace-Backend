@@ -7,7 +7,8 @@ namespace AgriTrace.Application.Features.Recalls.Queries;
 
 public record GetRecallsPagedQuery(
     int Page,
-    int PageSize) : IRequest<PagedResult<RecallDto>>;
+    int PageSize,
+    Guid? OrganizationId = null) : IRequest<PagedResult<RecallDto>>;
 
 public class GetRecallsPagedQueryHandler : IRequestHandler<GetRecallsPagedQuery, PagedResult<RecallDto>>
 {
@@ -27,7 +28,16 @@ public class GetRecallsPagedQueryHandler : IRequestHandler<GetRecallsPagedQuery,
 
     public async Task<PagedResult<RecallDto>> Handle(GetRecallsPagedQuery request, CancellationToken cancellationToken)
     {
-        var paged = await _recallService.GetPagedAsync(request.Page, request.PageSize, cancellationToken);
+        PagedResult<AgriTrace.Domain.Entities.Recalls.Recall> paged;
+        
+        if (request.OrganizationId.HasValue)
+        {
+            paged = await _recallService.GetPagedByOrganizationAsync(request.Page, request.PageSize, request.OrganizationId.Value, cancellationToken);
+        }
+        else
+        {
+            paged = await _recallService.GetPagedAsync(request.Page, request.PageSize, cancellationToken);
+        }
 
         var items = new List<RecallDto>();
         foreach (var recall in paged.Items)
