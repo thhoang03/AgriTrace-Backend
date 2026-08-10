@@ -24,6 +24,9 @@ public sealed class BatchDto
     public string BatchCode { get; set; } = null!;
 
 
+    public string? Gs1BatchCode { get; set; }
+
+
     public decimal Quantity { get; set; }
 
 
@@ -45,10 +48,10 @@ public sealed class BatchDto
     public DateTime? UpdatedAt { get; set; }
 
     // ---- Fields aligned to swagger BatchListItem / BatchDetail ----
-    // The following joined fields are not carried by the Batch domain entity and cannot be
-    // populated from the current read projection (Mapster Adapt<BatchDto> from the rehydrated
     // entity). They are left null until the read layer projects joined data (Phase 11 follow-up).
     public string? ProductName { get; set; }
+
+    public string? ProductGtin { get; set; }
 
     public Guid? CategoryId { get; set; }
 
@@ -63,5 +66,9 @@ public sealed class BatchDto
     public string? QrCodeUrl { get; set; }
 
     public string? FarmerName { get; set; }
+
+    public string? Location { get; set; }
+
+    public string? ProductionArea { get; set; }
 }
 

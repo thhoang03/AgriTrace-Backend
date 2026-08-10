@@ -8,19 +8,28 @@ namespace AgriTrace.API.Models;
 public class IssueCertificateRequest
 {
     /// <summary>
-    /// Related inspection Id.
+    /// Optional related inspection Id.
     /// </summary>
-    [Required]
-    public Guid InspectionId { get; set; }
+    public Guid? InspectionId { get; set; }
 
     /// <summary>
-    /// Certificate type.
+    /// Certificate number (e.g. VG-2026-00125).
+    /// </summary>
+    public string? CertificateNumber { get; set; }
+
+    /// <summary>
+    /// Certificate type (VietGAP, GlobalGAP, Organic, HACCP, ISO 22000...).
     /// </summary>
     [Required]
     public string CertificateType { get; set; } = null!;
 
     /// <summary>
-    /// URL to the certificate file.
+    /// Organization issuing the certificate.
+    /// </summary>
+    public string? IssuingOrganization { get; set; }
+
+    /// <summary>
+    /// URL to the certificate file document.
     /// </summary>
     [Required]
     public string FileUrl { get; set; } = null!;
@@ -30,4 +39,15 @@ public class IssueCertificateRequest
     /// </summary>
     [Required]
     public DateOnly IssuedDate { get; set; }
+
+    /// <summary>
+    /// Expiry date.
+    /// </summary>
+    public DateOnly? ExpiryDate { get; set; }
+
+    /// <summary>
+    /// Notes or Scope.
+    /// </summary>
+    public string? Notes { get; set; }
 }
+

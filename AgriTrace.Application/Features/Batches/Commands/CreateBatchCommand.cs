@@ -26,7 +26,8 @@ public sealed record CreateBatchCommand(
     Guid UnitId,
     decimal Quantity,
     DateTime ProductionDate,
-    DateTime? ExpiryDate)
+    DateTime? ExpiryDate,
+    string? Location = null)
     : IRequest<BatchDto>;
 
 
@@ -108,6 +109,14 @@ public sealed class CreateBatchCommandHandler
             if (product != null && product.OrganizationId != Guid.Empty)
             {
                 batch.ChangeOrganization(product.OrganizationId);
+
+                if (!string.IsNullOrWhiteSpace(product.Gtin))
+                {
+                    var prodDate = command.ProductionDate.ToString("yyMMdd");
+                    var expDate = command.ExpiryDate.HasValue ? $"(17){command.ExpiryDate.Value.ToString("yyMMdd")}" : "";
+                    var gs1Code = $"(01){product.Gtin}(10){batchCode}(11){prodDate}{expDate}";
+                    batch.SetGs1BatchCode(gs1Code);
+                }
             }
             else
             {
@@ -154,7 +163,7 @@ public sealed class CreateBatchCommandHandler
                     batch.CurrentOrganizationId,
                     performedByUserId,
                     eventData: $"Lô hàng {batchCode} được khởi tạo. Sản lượng: {command.Quantity}",
-                    location: "Farm",
+                    location: !string.IsNullOrWhiteSpace(command.Location) ? command.Location : "Nông trại sản xuất",
                     inspectionId: null,
                     previousHash: null,
                     currentHash: null);

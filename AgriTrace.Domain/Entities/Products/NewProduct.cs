@@ -4,4 +4,5 @@ public sealed record NewProduct(
     Guid OrganizationId,
     Guid? CategoryId,
     Guid? UnitId,
-    string Name);
+    string Name,
+    string? Gtin = null);

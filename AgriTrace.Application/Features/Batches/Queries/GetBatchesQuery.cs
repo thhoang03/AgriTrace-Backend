@@ -81,6 +81,7 @@ public sealed class GetBatchesQueryHandler
             var dto = b.Adapt<BatchDto>();
             dto.CurrentOrganizationId = b.CurrentOrganizationId;
             dto.QrCodeUrl = b.QRCode;
+            dto.ProductGtin = b.Product?.Gtin;
 
             if (unitCodes != null && unitCodes.TryGetValue(b.UnitId, out var uCode))
             {

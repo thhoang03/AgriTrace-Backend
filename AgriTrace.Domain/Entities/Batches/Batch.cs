@@ -64,6 +64,8 @@ public class Batch : BaseEntity
 
     public string? QRCode { get; private set; }
 
+    public string? Gs1BatchCode { get; private set; }
+
 
 
     public Guid? ParentBatchId { get; private set; }
@@ -183,7 +185,8 @@ public class Batch : BaseEntity
         DateTime? updatedAt,
         Product? product = null,
         Unit? unit = null,
-        Organization? currentOrganization = null)
+        Organization? currentOrganization = null,
+        string? gs1BatchCode = null)
     {
         var batch = new Batch();
 
@@ -204,12 +207,18 @@ public class Batch : BaseEntity
         batch.SplitId = splitId;
         batch.CreatedAt = createdAt;
         batch.UpdatedAt = updatedAt;
+        batch.Gs1BatchCode = gs1BatchCode;
 
         if (product != null) batch.Product = product;
         if (unit != null) batch.Unit = unit;
         if (currentOrganization != null) batch.CurrentOrganization = currentOrganization;
 
         return batch;
+    }
+
+    public void SetGs1BatchCode(string code)
+    {
+        Gs1BatchCode = code;
     }
 
 

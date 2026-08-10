@@ -18,10 +18,16 @@ namespace AgriTrace.Application.Features.Certificates.Commands;
 
 public sealed record IssueCertificateCommand(
     Guid BatchId,
-    Guid InspectionId,
+    Guid? InspectionId,
     string CertificateType,
     string FileUrl,
-    DateOnly IssuedDate)
+    DateOnly IssuedDate,
+    string? CertificateNumber = null,
+    string? IssuingOrganization = null,
+    DateOnly? ExpiryDate = null,
+    CertificateStatus Status = CertificateStatus.Active,
+
+    string? Notes = null)
     : IRequest<CertificateDto>;
 
 public sealed class IssueCertificateCommandHandler
@@ -44,7 +50,12 @@ public sealed class IssueCertificateCommandHandler
             command.InspectionId,
             command.CertificateType,
             command.FileUrl,
-            command.IssuedDate.ToDateTime(TimeOnly.MinValue));
+            command.IssuedDate.ToDateTime(TimeOnly.MinValue),
+            command.CertificateNumber,
+            command.IssuingOrganization,
+            command.ExpiryDate?.ToDateTime(TimeOnly.MinValue),
+            command.Status,
+            command.Notes);
 
         var created = await _service.CreateAsync(certificate, cancellationToken);
 
@@ -53,9 +64,15 @@ public sealed class IssueCertificateCommandHandler
             Id = created.Id,
             BatchId = created.BatchId,
             InspectionId = created.InspectionId,
+            CertificateNumber = created.CertificateNumber,
             CertificateType = created.CertificateType,
+            IssuingOrganization = created.IssuingOrganization,
             FileUrl = created.FileUrl,
             IssuedDate = created.IssuedDate,
+            ExpiryDate = created.ExpiryDate,
+            Status = (int)created.Status,
+            StatusName = created.Status.ToString(),
+            Notes = created.Notes,
             CreatedAt = created.CreatedAt,
             UpdatedAt = created.UpdatedAt
         };
@@ -71,10 +88,6 @@ public sealed class IssueCertificateCommandValidator
             .NotEmpty()
             .WithMessage("BatchId is required.");
 
-        RuleFor(x => x.InspectionId)
-            .NotEmpty()
-            .WithMessage("InspectionId is required.");
-
         RuleFor(x => x.CertificateType)
             .NotEmpty()
             .WithMessage("CertificateType is required.");
@@ -88,4 +101,5 @@ public sealed class IssueCertificateCommandValidator
             .WithMessage("IssuedDate is required.");
     }
 }
+
 

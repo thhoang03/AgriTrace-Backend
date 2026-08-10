@@ -71,7 +71,13 @@ public sealed class CertificatesController : ControllerBase
                 request.InspectionId,
                 request.CertificateType,
                 request.FileUrl,
-                request.IssuedDate),
+                request.IssuedDate,
+                request.CertificateNumber,
+                request.IssuingOrganization,
+                request.ExpiryDate,
+                AgriTrace.Domain.Entities.Certificates.CertificateStatus.Active,
+
+                request.Notes),
             cancellationToken);
 
         return CreatedAtAction(
@@ -131,10 +137,17 @@ public sealed class CertificatesController : ControllerBase
             BatchId = dto.BatchId,
             BatchCode = dto.BatchCode,
             InspectionId = dto.InspectionId,
+            CertificateNumber = dto.CertificateNumber,
             CertificateType = dto.CertificateType,
+            IssuingOrganization = dto.IssuingOrganization,
             FileUrl = dto.FileUrl,
             IssuedDate = dto.IssuedDate.HasValue ? DateOnly.FromDateTime(dto.IssuedDate.Value) : null,
+            ExpiryDate = dto.ExpiryDate.HasValue ? DateOnly.FromDateTime(dto.ExpiryDate.Value) : null,
+            Status = dto.Status,
+            StatusName = dto.StatusName,
+            Notes = dto.Notes,
             CreatedAt = dto.CreatedAt
         };
     }
 }
+

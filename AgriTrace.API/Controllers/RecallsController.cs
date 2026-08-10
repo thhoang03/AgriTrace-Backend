@@ -103,7 +103,7 @@ public sealed class RecallsController : ControllerBase
     /// Kết thúc Recall
     /// </summary>
     [HttpPatch("{recallId:guid}/resolve")]
-    [Authorize(Roles = "Admin,ADMIN,Manager,MANAGER")]
+    [Authorize]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]

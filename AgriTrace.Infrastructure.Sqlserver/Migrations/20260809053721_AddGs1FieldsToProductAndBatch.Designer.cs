@@ -4,6 +4,7 @@ using AgriTrace.Infrastructure.Sqlserver.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace AgriTrace.Infrastructure.Sqlserver.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260809053721_AddGs1FieldsToProductAndBatch")]
+    partial class AddGs1FieldsToProductAndBatch
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -392,17 +395,11 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                     b.Property<Guid>("BatchId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("CertificateNumber")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("CertificateType")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("ExpiryDate")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("FileUrl")
@@ -414,15 +411,6 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
 
                     b.Property<DateTime?>("IssuedDate")
                         .HasColumnType("datetime2");
-
-                    b.Property<string>("IssuingOrganization")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("Status")
-                        .HasColumnType("int");
 
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
@@ -440,41 +428,11 @@ namespace AgriTrace.Infrastructure.Sqlserver.Migrations
                         {
                             Id = new Guid("b0000000-0000-0000-0000-000000000001"),
                             BatchId = new Guid("80000000-0000-0000-0000-000000000001"),
-                            CertificateNumber = "ORG-VN-2026-001",
                             CertificateType = "Organic Certification",
-                            CreatedAt = new DateTime(2026, 1, 15, 10, 0, 0, 0, DateTimeKind.Utc),
-                            ExpiryDate = new DateTime(2027, 1, 15, 10, 0, 0, 0, DateTimeKind.Utc),
-                            FileUrl = "https://agritrace.com/certs/cert-organic-001.pdf",
+                            CreatedAt = new DateTime(2026, 6, 2, 10, 0, 0, 0, DateTimeKind.Utc),
+                            FileUrl = "https://agritrace.com/certs/cert-001.pdf",
                             InspectionId = new Guid("a0000000-0000-0000-0000-000000000001"),
-                            IssuedDate = new DateTime(2026, 1, 15, 10, 0, 0, 0, DateTimeKind.Utc),
-                            IssuingOrganization = "Control Union Certifications",
-                            Status = 3
-                        },
-                        new
-                        {
-                            Id = new Guid("b0000000-0000-0000-0000-000000000004"),
-                            BatchId = new Guid("80000000-0000-0000-0000-000000000004"),
-                            CertificateNumber = "VG-2026-8819",
-                            CertificateType = "VietGAP Certificate",
-                            CreatedAt = new DateTime(2026, 1, 12, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ExpiryDate = new DateTime(2027, 1, 12, 0, 0, 0, 0, DateTimeKind.Utc),
-                            FileUrl = "https://agritrace.com/certs/cert-vietgap-rice.pdf",
-                            IssuedDate = new DateTime(2026, 1, 12, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IssuingOrganization = "Ministry of Agriculture & RD",
-                            Status = 3
-                        },
-                        new
-                        {
-                            Id = new Guid("b0000000-0000-0000-0000-000000000003"),
-                            BatchId = new Guid("80000000-0000-0000-0000-000000000003"),
-                            CertificateNumber = "GG-2026-992",
-                            CertificateType = "GlobalG.A.P. Certificate",
-                            CreatedAt = new DateTime(2026, 1, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            ExpiryDate = new DateTime(2027, 1, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            FileUrl = "https://agritrace.com/certs/cert-globalgap-coffee.pdf",
-                            IssuedDate = new DateTime(2026, 1, 10, 0, 0, 0, 0, DateTimeKind.Utc),
-                            IssuingOrganization = "Eurofins Global Standards",
-                            Status = 3
+                            IssuedDate = new DateTime(2026, 6, 2, 10, 0, 0, 0, DateTimeKind.Utc)
                         });
                 });
 

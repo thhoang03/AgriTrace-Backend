@@ -75,6 +75,14 @@ public sealed class UpdateBatchCommandHandler
             batch.ProductionDate,
             expiryDate);
 
+        if (batch.Product != null && !string.IsNullOrWhiteSpace(batch.Product.Gtin))
+        {
+            var prodDate = batch.ProductionDate.ToString("yyMMdd");
+            var expDateStr = expiryDate.HasValue ? $"(17){expiryDate.Value.ToString("yyMMdd")}" : "";
+            var gs1Code = $"(01){batch.Product.Gtin}(10){batch.BatchCode}(11){prodDate}{expDateStr}";
+            batch.SetGs1BatchCode(gs1Code);
+        }
+
 
 
         await _batchWriteService.UpdateAsync(

@@ -31,6 +31,7 @@ public sealed class CreateQualityInspectionCommandHandler
     private readonly ICurrentUserService _currentUser;
     private readonly INotificationService? _notificationService;
     private readonly IUserService? _userService;
+    private readonly IOrganizationService? _organizationService;
 
     public CreateQualityInspectionCommandHandler(
         IQualityInspectionService service,
@@ -39,7 +40,8 @@ public sealed class CreateQualityInspectionCommandHandler
         IBatchReadService batchReadService,
         ICurrentUserService currentUser,
         INotificationService? notificationService = null,
-        IUserService? userService = null)
+        IUserService? userService = null,
+        IOrganizationService? organizationService = null)
     {
         _service = service;
         _mediator = mediator;
@@ -48,6 +50,7 @@ public sealed class CreateQualityInspectionCommandHandler
         _currentUser = currentUser;
         _notificationService = notificationService;
         _userService = userService;
+        _organizationService = organizationService;
     }
 
     public async Task<QualityInspectionDto> Handle(
@@ -136,6 +139,27 @@ public sealed class CreateQualityInspectionCommandHandler
 
             if (eventType is null) return;
 
+            string? location = null;
+            if (command.OrganizationId.HasValue && command.OrganizationId.Value != Guid.Empty && _organizationService != null)
+            {
+                var org = await _organizationService.GetByIdAsync(command.OrganizationId.Value, cancellationToken);
+                location = org?.Address;
+            }
+            if (string.IsNullOrWhiteSpace(location) && _currentUser.OrganizationId.HasValue && _currentUser.OrganizationId.Value != Guid.Empty && _organizationService != null)
+            {
+                var org = await _organizationService.GetByIdAsync(_currentUser.OrganizationId.Value, cancellationToken);
+                location = org?.Address;
+            }
+            if (string.IsNullOrWhiteSpace(location))
+            {
+                var batch = await _batchReadService.GetByIdAsync(created.BatchId, cancellationToken);
+                if (batch != null && batch.CurrentOrganizationId != Guid.Empty && _organizationService != null)
+                {
+                    var org = await _organizationService.GetByIdAsync(batch.CurrentOrganizationId, cancellationToken);
+                    location = org?.Address;
+                }
+            }
+
             var eventData = JsonSerializer.Serialize(new
             {
                 description = $"Khởi tạo phiếu kiểm định chất lượng",
@@ -149,7 +173,7 @@ public sealed class CreateQualityInspectionCommandHandler
                 created.BatchId,
                 eventType.Id,
                 eventData,
-                Location: null,
+                Location: location ?? "Trung tâm kiểm định chất lượng",
                 _currentUser.UserId,
                 created.Id), cancellationToken);
         }

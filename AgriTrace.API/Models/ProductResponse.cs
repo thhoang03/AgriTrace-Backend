@@ -21,6 +21,9 @@ public class ProductDetailResponse
     [JsonPropertyName("name")]
     public string Name { get; set; } = null!;
 
+    [JsonPropertyName("gtin")]
+    public string? Gtin { get; set; }
+
     [JsonPropertyName("category")]
     public ProductCategoryRef? Category { get; set; }
 
@@ -69,6 +72,9 @@ public class ProductListItemResponse
 
     [JsonPropertyName("name")]
     public string Name { get; set; } = null!;
+
+    [JsonPropertyName("gtin")]
+    public string? Gtin { get; set; }
 
     [JsonPropertyName("categoryId")]
     public Guid? CategoryId { get; set; }

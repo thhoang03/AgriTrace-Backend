@@ -26,18 +26,22 @@ public sealed class ConcludeInspectionCommandHandler
     private readonly IBatchReadService _batchReadService;
     private readonly ICurrentUserService _currentUser;
 
+    private readonly IOrganizationService? _organizationService;
+
     public ConcludeInspectionCommandHandler(
         IQualityInspectionService service,
         IMediator mediator,
         IEventTypeService eventTypeService,
         IBatchReadService batchReadService,
-        ICurrentUserService currentUser)
+        ICurrentUserService currentUser,
+        IOrganizationService? organizationService = null)
     {
         _service = service;
         _mediator = mediator;
         _eventTypeService = eventTypeService;
         _batchReadService = batchReadService;
         _currentUser = currentUser;
+        _organizationService = organizationService;
     }
 
     public async Task Handle(
@@ -70,6 +74,27 @@ public sealed class ConcludeInspectionCommandHandler
 
             if (eventType is null) return;
 
+            string? location = null;
+            if (inspection.OrganizationId.HasValue && inspection.OrganizationId.Value != Guid.Empty && _organizationService != null)
+            {
+                var org = await _organizationService.GetByIdAsync(inspection.OrganizationId.Value, cancellationToken);
+                location = org?.Address;
+            }
+            if (string.IsNullOrWhiteSpace(location) && _currentUser.OrganizationId.HasValue && _currentUser.OrganizationId.Value != Guid.Empty && _organizationService != null)
+            {
+                var org = await _organizationService.GetByIdAsync(_currentUser.OrganizationId.Value, cancellationToken);
+                location = org?.Address;
+            }
+            if (string.IsNullOrWhiteSpace(location))
+            {
+                var batch = await _batchReadService.GetByIdAsync(inspection.BatchId, cancellationToken);
+                if (batch != null && batch.CurrentOrganizationId != Guid.Empty && _organizationService != null)
+                {
+                    var org = await _organizationService.GetByIdAsync(batch.CurrentOrganizationId, cancellationToken);
+                    location = org?.Address;
+                }
+            }
+
             var resultText = inspection.OverallResult == "PASS" ? "ĐẠT (PASS)" : inspection.OverallResult == "FAIL" ? "KHÔNG ĐẠT (FAIL)" : inspection.OverallResult;
             var eventData = JsonSerializer.Serialize(new
             {
@@ -84,7 +109,7 @@ public sealed class ConcludeInspectionCommandHandler
                 inspection.BatchId,
                 eventType.Id,
                 eventData,
-                Location: null,
+                Location: location ?? "Trung tâm kiểm định chất lượng",
                 _currentUser.UserId,
                 inspection.Id), cancellationToken);
         }

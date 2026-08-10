@@ -749,12 +749,43 @@ public static class SeedData
                 Id = new Guid("B0000000-0000-0000-0000-000000000001"),
                 BatchId = new Guid("80000000-0000-0000-0000-000000000001"),
                 InspectionId = new Guid("A0000000-0000-0000-0000-000000000001"),
+                CertificateNumber = "ORG-VN-2026-001",
                 CertificateType = "Organic Certification",
-                FileUrl = "https://agritrace.com/certs/cert-001.pdf",
-                IssuedDate = new DateTime(2026, 6, 2, 10, 0, 0, DateTimeKind.Utc),
-                CreatedAt = new DateTime(2026, 6, 2, 10, 0, 0, DateTimeKind.Utc)
+                IssuingOrganization = "Control Union Certifications",
+                FileUrl = "https://agritrace.com/certs/cert-organic-001.pdf",
+                IssuedDate = new DateTime(2026, 1, 15, 10, 0, 0, DateTimeKind.Utc),
+                ExpiryDate = new DateTime(2027, 1, 15, 10, 0, 0, DateTimeKind.Utc),
+                Status = 3, // Active
+                CreatedAt = new DateTime(2026, 1, 15, 10, 0, 0, DateTimeKind.Utc)
+            },
+            new CertificateDataModel
+            {
+                Id = new Guid("B0000000-0000-0000-0000-000000000004"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000004"), // Jasmine Rice batch
+                CertificateNumber = "VG-2026-8819",
+                CertificateType = "VietGAP Certificate",
+                IssuingOrganization = "Ministry of Agriculture & RD",
+                FileUrl = "https://agritrace.com/certs/cert-vietgap-rice.pdf",
+                IssuedDate = new DateTime(2026, 1, 12, 0, 0, 0, DateTimeKind.Utc),
+                ExpiryDate = new DateTime(2027, 1, 12, 0, 0, 0, DateTimeKind.Utc),
+                Status = 3, // Active
+                CreatedAt = new DateTime(2026, 1, 12, 0, 0, 0, DateTimeKind.Utc)
+            },
+            new CertificateDataModel
+            {
+                Id = new Guid("B0000000-0000-0000-0000-000000000003"),
+                BatchId = new Guid("80000000-0000-0000-0000-000000000003"), // Arabica Coffee batch
+                CertificateNumber = "GG-2026-992",
+                CertificateType = "GlobalG.A.P. Certificate",
+                IssuingOrganization = "Eurofins Global Standards",
+                FileUrl = "https://agritrace.com/certs/cert-globalgap-coffee.pdf",
+                IssuedDate = new DateTime(2026, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                ExpiryDate = new DateTime(2027, 1, 10, 0, 0, 0, DateTimeKind.Utc),
+                Status = 3, // Active
+                CreatedAt = new DateTime(2026, 1, 10, 0, 0, 0, DateTimeKind.Utc)
             }
         );
     }
 }
+
 
