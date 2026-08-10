@@ -94,6 +94,7 @@ public sealed class PublicController : ControllerBase
         {
             EventTypeCode = t.EventTypeCode,
             OrganizationName = t.OrganizationName,
+            PerformedByName = t.PerformedByName,
             EventTime = t.EventTime,
             Location = t.Location
         }).ToList(),

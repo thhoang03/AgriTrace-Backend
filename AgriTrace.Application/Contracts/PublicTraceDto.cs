@@ -25,6 +25,7 @@ public class TimelineEventDto
 {
     public string? EventTypeCode { get; set; }
     public string? OrganizationName { get; set; }
+    public string? PerformedByName { get; set; }
     public DateTime EventTime { get; set; }
     public string? Location { get; set; }
 }

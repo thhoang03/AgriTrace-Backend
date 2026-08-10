@@ -57,6 +57,9 @@ public class TimelineEvent
     [JsonPropertyName("organizationName")]
     public string? OrganizationName { get; set; }
 
+    [JsonPropertyName("performedByName")]
+    public string? PerformedByName { get; set; }
+
     [JsonPropertyName("eventTime")]
     public DateTime EventTime { get; set; }
 

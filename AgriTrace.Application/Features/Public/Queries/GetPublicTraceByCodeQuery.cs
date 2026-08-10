@@ -58,6 +58,7 @@ public class GetPublicTraceByCodeQueryHandler : IRequestHandler<GetPublicTraceBy
 
         var eventTypeCodes = new Dictionary<Guid, string?>();
         var orgNames = new Dictionary<Guid, string?>();
+        var performerNames = new Dictionary<Guid, string?>();
         var timeline = new List<TimelineEventDto>();
         foreach (var ev in events.OrderBy(e => e.EventTime))
         {
@@ -75,10 +76,18 @@ public class GetPublicTraceByCodeQueryHandler : IRequestHandler<GetPublicTraceBy
                 orgNames[ev.OrganizationId] = orgName;
             }
 
+            if (!performerNames.TryGetValue(ev.PerformedByUserId, out var performerName))
+            {
+                var performer = await _userService.GetByIdAsync(ev.PerformedByUserId, cancellationToken);
+                performerName = performer?.FullName;
+                performerNames[ev.PerformedByUserId] = performerName;
+            }
+
             timeline.Add(new TimelineEventDto
             {
                 EventTypeCode = code,
                 OrganizationName = orgName,
+                PerformedByName = performerName,
                 EventTime = ev.EventTime,
                 Location = ev.Location
             });
