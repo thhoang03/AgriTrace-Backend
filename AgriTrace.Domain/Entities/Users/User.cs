@@ -48,7 +48,8 @@ public class User : BaseEntity
         string fullName,
         string email,
         string passwordHash,
-        UserRole role)
+        UserRole role,
+        bool isActive=true)
     {
         Validate(
             fullName,
@@ -61,7 +62,7 @@ public class User : BaseEntity
         Email = email.Trim().ToLowerInvariant();
         PasswordHash = passwordHash;
         Role = role;
-        IsActive = true;
+        IsActive = isActive;
         Status = UserStatus.Pending;
         MustChangePassword = true;
     }

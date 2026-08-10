@@ -64,7 +64,7 @@ public sealed class AuthController : ControllerBase
         var existingOrg = await _organizationService.GetByNameAsync(orgName, cancellationToken);
         if (existingOrg != null)
         {
-            organizationId = existingOrg.Id;
+            throw new InvalidOperationException($"Tên tổ chức đã tồn tại. Vui lòng chọn tên khác.");
         }
         else
         {
@@ -75,12 +75,11 @@ public sealed class AuthController : ControllerBase
 
         // 3. Create User account (Manager role)
         await _sender.Send(
-            new Application.Features.Users.Commands.CreateUserCommand(
+            new Application.Features.Auth.Commands.RegisterOrganizationCommand(
                 organizationId,
                 request.FullName,
                 request.Email,
-                request.Password,
-                "Manager"
+                request.Password
             ),
             cancellationToken);
 
