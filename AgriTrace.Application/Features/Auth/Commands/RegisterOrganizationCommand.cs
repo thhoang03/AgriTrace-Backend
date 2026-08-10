@@ -4,6 +4,7 @@ using AgriTrace.Application.Emails;
 using AgriTrace.Application.Features.Users.Commands;
 using AgriTrace.Domain.Interfaces.Inbound;
 using AgriTrace.Domain.Interfaces.Outbound;
+using AgriTrace.Domain.Services;
 using FluentValidation;
 using MediatR;
 
@@ -29,11 +30,15 @@ public class RegisterOrganizationCommandHandler : IRequestHandler<RegisterOrgani
 {
     private readonly IUserService _userService;
     private readonly IEmailService _emailService;
+    private readonly INotificationService _notificationService;
 
-    public RegisterOrganizationCommandHandler(IUserService userService, IEmailService emailService)
+
+
+    public RegisterOrganizationCommandHandler(IUserService userService, IEmailService emailService, INotificationService notificationService)
     {
         _userService = userService;
         _emailService = emailService;
+        _notificationService = notificationService;
     }
 
     public async Task<UserDto> Handle(RegisterOrganizationCommand request, CancellationToken cancellationToken)
@@ -50,11 +55,13 @@ public class RegisterOrganizationCommandHandler : IRequestHandler<RegisterOrgani
             request.FullName,
             email,
             User.HashPassword(request.Password),
-            UserRole.Manager); // fix cứng Manager, không nhận Role từ client
+            UserRole.Manager,// fix cứng Manager, không nhận Role từ client
+            isActive: false); 
 
         var created = await _userService.CreateAsync(user, cancellationToken);
 
-        var (subject, body) = WelcomeEmailTemplate.Build(request.FullName, email, request.Password);
+        var (subject, body) = WelcomeEmailTemplate.Build(
+            request.FullName, email, request.Password);
         await _emailService.SendAsync(email, subject, body, cancellationToken);
 
         return CreateUserCommandHandler.ToDto(created);
