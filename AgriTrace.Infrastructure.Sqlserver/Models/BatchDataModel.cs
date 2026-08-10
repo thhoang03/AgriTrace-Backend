@@ -38,6 +38,8 @@ public class BatchDataModel : BaseDataModel
 
     public string? QRCode { get; set; }
 
+    public string? Gs1BatchCode { get; set; }
+
 
 
     public DateTime ProductionDate { get; set; }

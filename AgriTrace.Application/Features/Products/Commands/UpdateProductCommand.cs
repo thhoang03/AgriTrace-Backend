@@ -1,4 +1,4 @@
-﻿using FluentValidation;
+using FluentValidation;
 using MediatR;
 using AgriTrace.Domain.Entities.Products;
 using AgriTrace.Domain.Interfaces.Inbound;
@@ -9,7 +9,8 @@ public sealed record UpdateProductCommand(
     Guid Id,
     Guid? CategoryId,
     Guid? UnitId,
-    string Name) : IRequest;
+    string Name,
+    string? Gtin = null) : IRequest;
 
 public sealed class UpdateProductCommandHandler
     : IRequestHandler<UpdateProductCommand>
@@ -44,5 +45,9 @@ public sealed class UpdateProductCommandValidator
         RuleFor(x => x.Name)
             .NotEmpty()
             .MaximumLength(200);
+
+        RuleFor(x => x.Gtin)
+            .MaximumLength(14)
+            .When(x => !string.IsNullOrEmpty(x.Gtin));
     }
 }

@@ -20,8 +20,14 @@ public class CertificateResponse
     [JsonPropertyName("inspectionId")]
     public Guid? InspectionId { get; set; }
 
+    [JsonPropertyName("certificateNumber")]
+    public string? CertificateNumber { get; set; }
+
     [JsonPropertyName("certificateType")]
     public string CertificateType { get; set; } = string.Empty;
+
+    [JsonPropertyName("issuingOrganization")]
+    public string? IssuingOrganization { get; set; }
 
     [JsonPropertyName("fileUrl")]
     public string FileUrl { get; set; } = string.Empty;
@@ -29,6 +35,19 @@ public class CertificateResponse
     [JsonPropertyName("issuedDate")]
     public DateOnly? IssuedDate { get; set; }
 
+    [JsonPropertyName("expiryDate")]
+    public DateOnly? ExpiryDate { get; set; }
+
+    [JsonPropertyName("status")]
+    public int Status { get; set; } = 3;
+
+    [JsonPropertyName("statusName")]
+    public string StatusName { get; set; } = "Active";
+
+    [JsonPropertyName("notes")]
+    public string? Notes { get; set; }
+
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }
 }
+

@@ -49,6 +49,7 @@ public sealed class GetBatchByIdQueryHandler
         var dto = batch.Adapt<BatchDto>();
         dto.CurrentOrganizationId = batch.CurrentOrganizationId;
         dto.QrCodeUrl = batch.QRCode;
+        dto.ProductGtin = batch.Product?.Gtin;
 
         if (_eventService != null && _userService != null)
         {

@@ -17,6 +17,8 @@ public class PublicTraceDto
     public List<PublicInspectionDto> Inspections { get; set; } = new();
     public List<PublicCertificateDto> Certificates { get; set; } = new();
     public string? RecallStatus { get; set; }
+    public string? RecallReason { get; set; }
+    public int? RecallSeverity { get; set; }
 }
 
 public class TimelineEventDto
@@ -36,9 +38,13 @@ public class PublicInspectionDto
 
 public class PublicCertificateDto
 {
+    public string? CertificateNumber { get; set; }
     public string? CertificateType { get; set; }
+    public string? IssuingOrganization { get; set; }
     public string? FileUrl { get; set; }
     public DateTime? IssuedDate { get; set; }
+    public DateTime? ExpiryDate { get; set; }
+    public int Status { get; set; } = 3;
 }
 
 /// <summary>

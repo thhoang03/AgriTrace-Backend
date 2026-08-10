@@ -106,11 +106,16 @@ public class GetPublicTraceQueryHandler : IRequestHandler<GetPublicTraceQuery, P
             .OrderBy(c => c.CreatedAt)
             .Select(c => new PublicCertificateDto
             {
+                CertificateNumber = c.CertificateNumber,
                 CertificateType = c.CertificateType,
+                IssuingOrganization = c.IssuingOrganization,
                 FileUrl = c.FileUrl,
-                IssuedDate = c.IssuedDate
+                IssuedDate = c.IssuedDate,
+                ExpiryDate = c.ExpiryDate,
+                Status = (int)c.Status
             })
             .ToList();
+
 
         // Recall status (latest recall for the batch, if any).
         var recalls = await _recallService.GetByBatchAsync(batch.Id, cancellationToken);
@@ -128,7 +133,9 @@ public class GetPublicTraceQueryHandler : IRequestHandler<GetPublicTraceQuery, P
             Timeline = timeline,
             Inspections = inspectionSummaries,
             Certificates = certificateSummaries,
-            RecallStatus = latestRecall?.Status.ToString().ToUpperInvariant()
+            RecallStatus = latestRecall?.Status.ToString().ToUpperInvariant(),
+            RecallReason = latestRecall?.Reason,
+            RecallSeverity = latestRecall != null ? (int)latestRecall.Severity : null
         };
     }
 }

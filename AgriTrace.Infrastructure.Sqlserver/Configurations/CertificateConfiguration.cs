@@ -1,4 +1,4 @@
-﻿using AgriTrace.Infrastructure.Sqlserver.Models;
+using AgriTrace.Infrastructure.Sqlserver.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 

@@ -21,6 +21,8 @@ public class ProductDataModel : BaseDataModel
 
     public ProductStatus Status { get; set; } = ProductStatus.Active;
 
+    public string? Gtin { get; set; }
+
 
 
     // Navigation

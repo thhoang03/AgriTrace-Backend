@@ -36,11 +36,18 @@ public sealed class GetCertificateByIdQueryHandler
             Id = certificate.Id,
             BatchId = certificate.BatchId,
             InspectionId = certificate.InspectionId,
+            CertificateNumber = certificate.CertificateNumber,
             CertificateType = certificate.CertificateType,
+            IssuingOrganization = certificate.IssuingOrganization,
             FileUrl = certificate.FileUrl,
             IssuedDate = certificate.IssuedDate,
+            ExpiryDate = certificate.ExpiryDate,
+            Status = (int)certificate.Status,
+            StatusName = certificate.Status.ToString(),
+            Notes = certificate.Notes,
             CreatedAt = certificate.CreatedAt,
             UpdatedAt = certificate.UpdatedAt
         };
     }
 }
+

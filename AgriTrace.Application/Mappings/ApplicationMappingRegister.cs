@@ -29,11 +29,13 @@ namespace AgriTrace.Application.Mappings
 
             config.NewConfig<Batch, BatchDto>()
                 .Map(dest => dest.ProductName, src => src.Product == null ? null : src.Product.Name)
+                .Map(dest => dest.ProductGtin, src => src.Product == null ? null : src.Product.Gtin)
                 .Map(dest => dest.CategoryId, src => src.Product == null ? null : src.Product.CategoryId)
                 .Map(dest => dest.CategoryName, src => src.Product == null || src.Product.Category == null ? null : src.Product.Category.Name)
-                .Map(dest => dest.UnitCode, src => src.Unit == null ? null : src.Unit.Code)
-                .Map(dest => dest.OrganizationName, src => src.CurrentOrganization != null ? src.CurrentOrganization.Name : (src.Product != null && src.Product.Organization != null ? src.Product.Organization.Name : null));
+                .Map(dest => dest.OrganizationName, src => src.CurrentOrganization == null ? null : src.CurrentOrganization.Name)
+                .Map(dest => dest.Location, src => src.CurrentOrganization == null ? null : src.CurrentOrganization.Address)
+                .Map(dest => dest.ProductionArea, src => src.CurrentOrganization == null ? null : src.CurrentOrganization.Address)
+                .Map(dest => dest.UnitCode, src => src.Unit == null ? null : src.Unit.Code);
         }
     }
 }
-

@@ -34,10 +34,20 @@ public sealed class CreateSupplyChainEventCommandHandler
     : IRequestHandler<CreateSupplyChainEventCommand, SupplyChainEventDto>
 {
     private readonly ISupplyChainEventWriteService _writeService;
+    private readonly IBatchReadService? _batchReadService;
+    private readonly IBatchWriteService? _batchWriteService;
+    private readonly IEventTypeRepository? _eventTypeRepository;
 
-    public CreateSupplyChainEventCommandHandler(ISupplyChainEventWriteService writeService)
+    public CreateSupplyChainEventCommandHandler(
+        ISupplyChainEventWriteService writeService,
+        IBatchReadService? batchReadService = null,
+        IBatchWriteService? batchWriteService = null,
+        IEventTypeRepository? eventTypeRepository = null)
     {
         _writeService = writeService;
+        _batchReadService = batchReadService;
+        _batchWriteService = batchWriteService;
+        _eventTypeRepository = eventTypeRepository;
     }
 
     public async Task<SupplyChainEventDto> Handle(
@@ -56,6 +66,55 @@ public sealed class CreateSupplyChainEventCommandHandler
             currentHash: null);
 
         var created = await _writeService.CreateAsync(entity, cancellationToken);
+
+        // Synchronize Batch Status & Current Organization upon new Event
+        if (_batchReadService != null && _batchWriteService != null)
+        {
+            var batch = await _batchReadService.GetByIdAsync(command.BatchId, cancellationToken);
+            if (batch != null && batch.Status != BatchStatus.Recalled)
+            {
+                bool modified = false;
+
+                if (_eventTypeRepository != null)
+                {
+                    var eventType = await _eventTypeRepository.GetByIdAsync(command.EventTypeId, cancellationToken);
+                    if (eventType != null)
+                    {
+                        var code = (eventType.Code ?? "").ToUpperInvariant();
+                        BatchStatus? newStatus = code switch
+                        {
+                            "CREATED" => BatchStatus.Created,
+                            "HARVEST" => BatchStatus.Harvested,
+                            "PROCESSING" => BatchStatus.Processing,
+                            "PACKAGING" => BatchStatus.Processing,
+                            "TRANSPORT" => BatchStatus.Transporting,
+                            "DISTRIBUTION" => BatchStatus.Distributed,
+                            "RETAIL" => BatchStatus.Retail,
+                            "RECALL" => BatchStatus.Recalled,
+                            "RECALL_INITIATED" => BatchStatus.Recalled,
+                            _ => null
+                        };
+
+                        if (newStatus.HasValue && batch.Status != newStatus.Value)
+                        {
+                            batch.ChangeStatus(newStatus.Value);
+                            modified = true;
+                        }
+                    }
+                }
+
+                if (command.OrganizationId != Guid.Empty && batch.CurrentOrganizationId != command.OrganizationId)
+                {
+                    batch.ChangeOrganization(command.OrganizationId);
+                    modified = true;
+                }
+
+                if (modified)
+                {
+                    await _batchWriteService.UpdateAsync(batch, cancellationToken);
+                }
+            }
+        }
 
         return ToDto(created);
     }

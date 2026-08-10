@@ -174,8 +174,8 @@ public sealed class BatchWriteRepository
         model.QRCode =
             entity.QRCode;
 
-
-
+        model.Gs1BatchCode =
+            entity.Gs1BatchCode;
 
         model.UpdatedAt =
             DateTime.UtcNow;
@@ -254,7 +254,8 @@ public sealed class BatchWriteRepository
             rootBatchId:           model.RootBatchId,
             splitId:               model.SplitId,
             createdAt:             model.CreatedAt,
-            updatedAt:             model.UpdatedAt);
+            updatedAt:             model.UpdatedAt,
+            gs1BatchCode:          model.Gs1BatchCode);
     }
 
 
@@ -353,7 +354,10 @@ public sealed class BatchWriteRepository
 
 
             UpdatedAt =
-                entity.UpdatedAt
+                entity.UpdatedAt,
+
+            Gs1BatchCode =
+                entity.Gs1BatchCode
 
         };
 

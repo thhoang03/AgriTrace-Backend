@@ -74,7 +74,8 @@ internal static class ApiMappings
             orgId,
             request.CategoryId,
             unitId,
-            request.Name);
+            request.Name,
+            request.Gtin);
     }
 
     public static UpdateProductCommand ToCommand(
@@ -87,7 +88,8 @@ internal static class ApiMappings
             id,
             request.CategoryId,
             unitId,
-            request.Name);
+            request.Name,
+            request.Gtin);
     }
 
 
@@ -133,7 +135,8 @@ internal static class ApiMappings
             request.UnitId,
             request.Quantity,
             request.ProductionDate.ToDateTime(TimeOnly.MinValue),
-            request.ExpiryDate?.ToDateTime(TimeOnly.MinValue));
+            request.ExpiryDate?.ToDateTime(TimeOnly.MinValue),
+            request.Location);
     }
 
 
@@ -178,6 +181,7 @@ internal static class ApiMappings
                     Name = dto.CategoryName ?? string.Empty
                 }
                 : null,
+            Gtin = dto.Gtin,
             Unit = dto.UnitName,
             UnitId = dto.UnitId,
             OrganizationId = dto.OrganizationId,
@@ -195,6 +199,7 @@ internal static class ApiMappings
             Name = dto.Name,
             CategoryId = dto.CategoryId,
             CategoryName = dto.CategoryName,
+            Gtin = dto.Gtin,
             Unit = dto.UnitName,
             UnitId = dto.UnitId,
             OrganizationId = dto.OrganizationId,
@@ -245,6 +250,7 @@ internal static class ApiMappings
             BatchId = dto.Id,
             ProductId = dto.ProductId,
             ProductName = dto.ProductName,
+            ProductGtin = dto.ProductGtin,
             CategoryId = dto.CategoryId,
             CategoryName = dto.CategoryName,
             BatchCode = dto.BatchCode,
@@ -257,8 +263,11 @@ internal static class ApiMappings
             Status = (int)dto.Status,
             CurrentOrganizationId = dto.CurrentOrganizationId,
             OrganizationName = dto.OrganizationName,
-            QrCodeUrl = dto.QrCodeUrl,
-            CreatedAt = dto.CreatedAt
+            Location = dto.Location,
+            ProductionArea = dto.ProductionArea,
+
+            CreatedAt = dto.CreatedAt,
+            QrCodeUrl = dto.QrCodeUrl
         };
     }
 
@@ -270,6 +279,7 @@ internal static class ApiMappings
             BatchId = dto.Id,
             ProductId = dto.ProductId,
             ProductName = dto.ProductName,
+            ProductGtin = dto.ProductGtin,
             BatchCode = dto.BatchCode,
             Quantity = dto.Quantity,
             RemainingQuantity = dto.RemainingQuantity,

@@ -32,9 +32,15 @@ public sealed class GetCertificatesByBatchQueryHandler
                 Id = c.Id,
                 BatchId = c.BatchId,
                 InspectionId = c.InspectionId,
+                CertificateNumber = c.CertificateNumber,
                 CertificateType = c.CertificateType,
+                IssuingOrganization = c.IssuingOrganization,
                 FileUrl = c.FileUrl,
                 IssuedDate = c.IssuedDate,
+                ExpiryDate = c.ExpiryDate,
+                Status = (int)c.Status,
+                StatusName = c.Status.ToString(),
+                Notes = c.Notes,
                 CreatedAt = c.CreatedAt,
                 UpdatedAt = c.UpdatedAt
             })
@@ -42,3 +48,4 @@ public sealed class GetCertificatesByBatchQueryHandler
             .AsReadOnly();
     }
 }
+
