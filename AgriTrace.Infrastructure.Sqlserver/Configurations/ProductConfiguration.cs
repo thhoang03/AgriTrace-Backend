@@ -1,4 +1,4 @@
-﻿using AgriTrace.Infrastructure.Sqlserver.Models;
+using AgriTrace.Infrastructure.Sqlserver.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -24,10 +24,11 @@ public class ProductConfiguration
 
 
         builder.Property(x => x.Name)
-
             .HasMaxLength(200)
-
             .IsRequired();
+
+        builder.Property(x => x.Gtin)
+            .HasMaxLength(14);
 
 
 

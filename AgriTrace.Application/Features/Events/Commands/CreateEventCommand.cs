@@ -144,9 +144,37 @@ public class CreateEventCommandHandler : IRequestHandler<CreateEventCommand, Eve
 
         var created = await _eventService.CreateEventAsync(entity, cancellationToken);
 
+        bool batchModified = false;
+
         if (isReceiveEvent && user.OrganizationId.HasValue)
         {
             batch.ChangeOrganization(user.OrganizationId.Value);
+            batchModified = true;
+        }
+
+        var code = (eventType.Code ?? "").ToUpperInvariant();
+        AgriTrace.Domain.Entities.Batches.BatchStatus? newStatus = code switch
+        {
+            "CREATED" => AgriTrace.Domain.Entities.Batches.BatchStatus.Created,
+            "HARVEST" => AgriTrace.Domain.Entities.Batches.BatchStatus.Harvested,
+            "PROCESSING" => AgriTrace.Domain.Entities.Batches.BatchStatus.Processing,
+            "PACKAGING" => AgriTrace.Domain.Entities.Batches.BatchStatus.Processing,
+            "TRANSPORT" => AgriTrace.Domain.Entities.Batches.BatchStatus.Transporting,
+            "DISTRIBUTION" => AgriTrace.Domain.Entities.Batches.BatchStatus.Distributed,
+            "RETAIL" => AgriTrace.Domain.Entities.Batches.BatchStatus.Retail,
+            "RECALL" => AgriTrace.Domain.Entities.Batches.BatchStatus.Recalled,
+            "RECALL_INITIATED" => AgriTrace.Domain.Entities.Batches.BatchStatus.Recalled,
+            _ => null
+        };
+
+        if (newStatus.HasValue && batch.Status != newStatus.Value)
+        {
+            batch.ChangeStatus(newStatus.Value);
+            batchModified = true;
+        }
+
+        if (batchModified)
+        {
             await _batchWriteService.UpdateAsync(batch, cancellationToken);
         }
 

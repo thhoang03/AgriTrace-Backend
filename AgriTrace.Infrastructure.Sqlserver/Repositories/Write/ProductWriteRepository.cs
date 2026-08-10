@@ -85,6 +85,7 @@ public sealed class ProductWriteRepository : IProductWriteRepository
         model.UnitId = entity.UnitId;
         model.Name = entity.Name;
         model.Status = entity.Status;
+        model.Gtin = entity.Gtin;
 
         await _context.SaveChangesAsync(cancellationToken);
     }
@@ -120,7 +121,9 @@ public sealed class ProductWriteRepository : IProductWriteRepository
             model.CreatedAt,
             model.UpdatedAt,
             null,
-            null);
+            null,
+            null,
+            model.Gtin);
     }
 
     private static ProductDataModel ToModel(Product entity)
@@ -134,7 +137,8 @@ public sealed class ProductWriteRepository : IProductWriteRepository
             Name = entity.Name,
             Status = entity.Status,
             CreatedAt = entity.CreatedAt,
-            UpdatedAt = entity.UpdatedAt
+            UpdatedAt = entity.UpdatedAt,
+            Gtin = entity.Gtin
         };
     }
 }

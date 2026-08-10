@@ -12,6 +12,8 @@ public class Product : BaseEntity
 
     public string Name { get; private set; }
 
+    public string? Gtin { get; private set; }
+
     // Navigation
 
     public Organization Organization { get; private set; }
@@ -33,7 +35,8 @@ public class Product : BaseEntity
         Guid organizationId,
         Guid? categoryId,
         Guid? unitId,
-        string name)
+        string name,
+        string? gtin = null)
     {
         Validate(
             organizationId,
@@ -44,6 +47,7 @@ public class Product : BaseEntity
         CategoryId = categoryId;
         UnitId = unitId;
         Name = name.Trim();
+        Gtin = gtin?.Trim();
     }
 
     public Product(
@@ -57,7 +61,8 @@ public class Product : BaseEntity
         DateTime? updatedAt,
         Category? category,
         Unit? unit,
-        Organization? organization = null)
+        Organization? organization = null,
+        string? gtin = null)
         : base(id, createdAt, updatedAt)
     {
         OrganizationId = organizationId;
@@ -68,12 +73,14 @@ public class Product : BaseEntity
         Category = category;
         Unit = unit;
         Organization = organization;
+        Gtin = gtin;
     }
 
     public void UpdateInformation(
         Guid? categoryId,
         Guid? unitId,
-        string name)
+        string name,
+        string? gtin = null)
     {
         Validate(
             OrganizationId,
@@ -83,6 +90,7 @@ public class Product : BaseEntity
         CategoryId = categoryId;
         UnitId = unitId;
         Name = name.Trim();
+        Gtin = gtin?.Trim();
 
         MarkUpdated();
     }

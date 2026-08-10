@@ -1,4 +1,4 @@
-﻿using AgriTrace.Infrastructure.Sqlserver.Models;
+using AgriTrace.Infrastructure.Sqlserver.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -60,6 +60,10 @@ public sealed class BatchConfiguration
 
 
         builder.HasIndex(x => x.QRCode);
+
+        builder.Property(x => x.Gs1BatchCode)
+            .HasMaxLength(128)
+            .IsRequired(false);
 
 
 

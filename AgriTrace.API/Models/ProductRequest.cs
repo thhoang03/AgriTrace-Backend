@@ -12,6 +12,9 @@ public sealed class ProductRequest
     [StringLength(200)]
     public string Name { get; set; } = string.Empty;
 
+    [StringLength(14)]
+    public string? Gtin { get; set; }
+
     public Guid? CategoryId { get; set; }
 
     /// <summary>

@@ -201,6 +201,36 @@ public sealed class ProductReadRepository : IProductReadRepository
                 model.Unit.Name,
                 model.Unit.CreatedAt,
                 model.Unit.UpdatedAt),
-            organization);
+            organization,
+            model.Gtin);
+    }
+
+    public async Task<bool> IsGtinExistsAsync(
+        string gtin,
+        Guid? excludeProductId = null,
+        CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(gtin))
+        {
+            return false;
+        }
+
+        var query = _context.Products.Where(x => x.Gtin == gtin);
+
+        if (excludeProductId.HasValue)
+        {
+            query = query.Where(x => x.Id != excludeProductId.Value);
+        }
+
+        return await query.AnyAsync(cancellationToken);
+    }
+
+    public async Task<bool> HasBatchesAsync(
+        Guid productId,
+        CancellationToken cancellationToken = default)
+    {
+        return await _context.Batches.AnyAsync(
+            x => x.ProductId == productId,
+            cancellationToken);
     }
 }

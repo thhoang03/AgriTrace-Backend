@@ -19,7 +19,8 @@ public sealed record CreateProductCommand(
     Guid OrganizationId,
     Guid? CategoryId,
     Guid? UnitId,
-    string Name)
+    string Name,
+    string? Gtin = null)
     : IRequest<Product>;
 
 public sealed class CreateProductCommandHandler
@@ -62,5 +63,9 @@ public sealed class CreateProductCommandValidator
         RuleFor(x => x.UnitId)
             .NotEqual(Guid.Empty)
             .When(x => x.UnitId.HasValue);
+
+        RuleFor(x => x.Gtin)
+            .MaximumLength(14)
+            .When(x => !string.IsNullOrEmpty(x.Gtin));
     }
 }

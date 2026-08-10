@@ -41,6 +41,12 @@ public class PublicTraceData
 
     [JsonPropertyName("recallStatus")]
     public string? RecallStatus { get; set; }
+
+    [JsonPropertyName("recallReason")]
+    public string? RecallReason { get; set; }
+
+    [JsonPropertyName("recallSeverity")]
+    public int? RecallSeverity { get; set; }
 }
 
 public class TimelineEvent
@@ -72,15 +78,28 @@ public class PublicInspectionSummary
 
 public class PublicCertificateSummary
 {
+    [JsonPropertyName("certificateNumber")]
+    public string? CertificateNumber { get; set; }
+
     [JsonPropertyName("certificateType")]
     public string? CertificateType { get; set; }
+
+    [JsonPropertyName("issuingOrganization")]
+    public string? IssuingOrganization { get; set; }
 
     [JsonPropertyName("fileUrl")]
     public string? FileUrl { get; set; }
 
     [JsonPropertyName("issuedDate")]
     public DateTime? IssuedDate { get; set; }
+
+    [JsonPropertyName("expiryDate")]
+    public DateTime? ExpiryDate { get; set; }
+
+    [JsonPropertyName("status")]
+    public int Status { get; set; } = 3;
 }
+
 
 /// <summary>
 /// Batch lineage payload. Matches swagger <c>LineageData</c>.

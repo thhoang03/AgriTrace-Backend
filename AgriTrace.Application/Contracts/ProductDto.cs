@@ -4,6 +4,8 @@ public sealed class ProductDto
 
     public string Name { get; init; } = string.Empty;
 
+    public string? Gtin { get; init; }
+
     public Guid OrganizationId { get; init; }
 
     public string? OrganizationName { get; init; }

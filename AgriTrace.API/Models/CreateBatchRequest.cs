@@ -11,5 +11,6 @@ public sealed record CreateBatchRequest(
     [Required] decimal Quantity,
     [Required] Guid UnitId,
     [Required] DateOnly ProductionDate,
-    DateOnly? ExpiryDate
+    DateOnly? ExpiryDate,
+    string? Location = null
 );

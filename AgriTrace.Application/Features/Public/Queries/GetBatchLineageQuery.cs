@@ -16,7 +16,7 @@ using MediatR;
 
 namespace AgriTrace.Application.Features.Public.Queries;
 
-public record GetBatchLineageQuery(Guid BatchId) : IRequest<LineageDto>;
+public record GetBatchLineageQuery(string Identifier) : IRequest<LineageDto>;
 
 public class GetBatchLineageQueryHandler : IRequestHandler<GetBatchLineageQuery, LineageDto>
 {
@@ -29,8 +29,21 @@ public class GetBatchLineageQueryHandler : IRequestHandler<GetBatchLineageQuery,
 
     public async Task<LineageDto> Handle(GetBatchLineageQuery request, CancellationToken cancellationToken)
     {
-        var batch = await _batchReadService.GetByIdAsync(request.BatchId, cancellationToken)
-            ?? throw new NotFoundException($"Batch {request.BatchId} not found.");
+        Batch? batch = null;
+        if (Guid.TryParse(request.Identifier, out var batchId))
+        {
+            batch = await _batchReadService.GetByIdAsync(batchId, cancellationToken);
+        }
+
+        if (batch == null)
+        {
+            batch = await _batchReadService.GetByBatchCodeAsync(request.Identifier, cancellationToken);
+        }
+
+        if (batch == null)
+        {
+            throw new NotFoundException($"Batch '{request.Identifier}' not found.");
+        }
 
         // Determine the root of the lineage tree.
         var rootBatchId = batch.RootBatchId ?? batch.Id;

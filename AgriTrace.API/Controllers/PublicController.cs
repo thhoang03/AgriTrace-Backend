@@ -41,14 +41,15 @@ public sealed class PublicController : ControllerBase
     /// <summary>
     /// Batch lineage (split/merge relationships). No authentication required.
     /// </summary>
-    [HttpGet("trace/{batchId:guid}/lineage")]
+    [HttpGet("trace/{identifier}/lineage")]
+    [HttpGet("trace/code/{identifier}/lineage")]
     [ProducesResponseType(typeof(ApiResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ApiResponse>> GetLineage(
-        Guid batchId,
+        string identifier,
         CancellationToken cancellationToken)
     {
-        var dto = await _sender.Send(new GetBatchLineageQuery(batchId), cancellationToken);
+        var dto = await _sender.Send(new GetBatchLineageQuery(identifier), cancellationToken);
 
         var data = new LineageData
         {
@@ -104,10 +105,17 @@ public sealed class PublicController : ControllerBase
         }).ToList(),
         Certificates = dto.Certificates.Select(c => new PublicCertificateSummary
         {
+            CertificateNumber = c.CertificateNumber,
             CertificateType = c.CertificateType,
+            IssuingOrganization = c.IssuingOrganization,
             FileUrl = c.FileUrl,
-            IssuedDate = c.IssuedDate
+            IssuedDate = c.IssuedDate,
+            ExpiryDate = c.ExpiryDate,
+            Status = c.Status
         }).ToList(),
-        RecallStatus = dto.RecallStatus
+
+        RecallStatus = dto.RecallStatus,
+        RecallReason = dto.RecallReason,
+        RecallSeverity = dto.RecallSeverity
     };
 }

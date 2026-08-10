@@ -42,4 +42,13 @@ public interface IProductReadRepository
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken = default);
+
+    Task<bool> IsGtinExistsAsync(
+        string gtin,
+        Guid? excludeProductId = null,
+        CancellationToken cancellationToken = default);
+
+    Task<bool> HasBatchesAsync(
+        Guid productId,
+        CancellationToken cancellationToken = default);
 }

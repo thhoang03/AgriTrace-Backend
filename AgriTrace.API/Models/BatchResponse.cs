@@ -67,6 +67,12 @@ public class BatchListItemResponse
     [JsonPropertyName("qrCodeUrl")]
     public string? QrCodeUrl { get; set; }
 
+    [JsonPropertyName("productGtin")]
+    public string? ProductGtin { get; set; }
+
+    [JsonPropertyName("gtin")]
+    public string? Gtin => ProductGtin;
+
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }
 }
@@ -87,6 +93,12 @@ public class BatchDetailResponse
 
     [JsonPropertyName("productName")]
     public string? ProductName { get; set; }
+
+    [JsonPropertyName("productGtin")]
+    public string? ProductGtin { get; set; }
+
+    [JsonPropertyName("gtin")]
+    public string? Gtin => ProductGtin;
 
     [JsonPropertyName("categoryId")]
     public Guid? CategoryId { get; set; }
@@ -129,6 +141,12 @@ public class BatchDetailResponse
 
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }
+
+    [JsonPropertyName("location")]
+    public string? Location { get; set; }
+
+    [JsonPropertyName("productionArea")]
+    public string? ProductionArea { get; set; }
 }
 
 /// <summary>

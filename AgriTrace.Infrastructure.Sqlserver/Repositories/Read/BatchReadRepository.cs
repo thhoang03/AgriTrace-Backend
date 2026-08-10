@@ -235,7 +235,8 @@ public sealed class BatchReadRepository
                 model.Product.UpdatedAt,
                 category,
                 null,
-                org);
+                org,
+                model.Product.Gtin);
         }
 
         Unit? unit = model.Unit == null ? null : new Unit(
@@ -275,6 +276,7 @@ public sealed class BatchReadRepository
             updatedAt:            model.UpdatedAt,
             product:              product,
             unit:                 unit,
-            currentOrganization:  currentOrg);
+            currentOrganization:  currentOrg,
+            gs1BatchCode:         model.Gs1BatchCode);
     }
 }
