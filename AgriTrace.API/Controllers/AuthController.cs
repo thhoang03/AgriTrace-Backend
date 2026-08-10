@@ -4,9 +4,6 @@ using AgriTrace.API.Models.Auth;
 using AgriTrace.API.Models.Users;
 using AgriTrace.Application.Contracts.Auth;
 using AgriTrace.Application.Features.Auth.Commands;
-using AgriTrace.Domain.Entities.Organizations;
-using AgriTrace.Domain.Interfaces.Inbound;
-using AgriTrace.Domain.Services;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -22,12 +19,10 @@ namespace AgriTrace.API.Controllers;
 public sealed class AuthController : ControllerBase
 {
     private readonly ISender _sender;
-    private readonly IOrganizationService _organizationService;
 
-    public AuthController(ISender sender, IOrganizationService organizationService)
+    public AuthController(ISender sender)
     {
         _sender = sender;
-        _organizationService = organizationService;
     }
 
     /// <summary>
@@ -48,42 +43,26 @@ public sealed class AuthController : ControllerBase
             var types = await _sender.Send(new Application.Features.Lookup.Queries.GetOrganizationTypesQuery(), cancellationToken);
             var found = types.FirstOrDefault(t => string.Equals(t.Code, request.OrganizationTypeCode, StringComparison.OrdinalIgnoreCase));
             if (found != null && Guid.TryParse(found.Id, out var parsedGuid))
-            {
                 orgTypeId = parsedGuid;
-            }
         }
         if (orgTypeId == Guid.Empty)
-        {
             orgTypeId = Guid.Parse("10000000-0000-0000-0000-000000000001");
-        }
 
-        // 2. Create Organization if name provided
-        Guid organizationId;
-        string orgName = string.IsNullOrWhiteSpace(request.OrganizationName) ? $"{request.FullName}'s Organization" : request.OrganizationName;
-        
-        var existingOrg = await _organizationService.GetByNameAsync(orgName, cancellationToken);
-        if (existingOrg != null)
-        {
-            throw new InvalidOperationException($"Tên tổ chức đã tồn tại. Vui lòng chọn tên khác.");
-        }
-        else
-        {
-            var newOrg = new Organization(orgTypeId, orgName, request.OrganizationAddress);
-            var createdOrg = await _organizationService.CreateAsync(newOrg, cancellationToken);
-            organizationId = createdOrg.Id;
-        }
+        string orgName = string.IsNullOrWhiteSpace(request.OrganizationName)
+            ? $"{request.FullName}'s Organization"
+            : request.OrganizationName;
 
-        // 3. Create User account (Manager role)
+        // 2. Validate + tạo org + tạo user — atomic trong một command
         await _sender.Send(
-            new Application.Features.Auth.Commands.RegisterOrganizationCommand(
-                organizationId,
+            new RegisterOrganizationCommand(
                 request.FullName,
                 request.Email,
-                request.Password
-            ),
+                request.Password,
+                orgName,
+                request.OrganizationAddress,
+                orgTypeId),
             cancellationToken);
 
-        // 4. Return success response (do not auto-login)
         return Ok(ApiResponse.Success(null, "Đăng ký tài khoản doanh nghiệp thành công. Tài khoản của bạn đang chờ quản trị viên phê duyệt."));
     }
 
