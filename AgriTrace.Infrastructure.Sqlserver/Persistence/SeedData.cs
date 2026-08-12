@@ -340,7 +340,7 @@ public static class SeedData
                 OrganizationId = new Guid("50000000-0000-0000-0000-000000000006"),
                 FullName = "System Administrator",
                 Email = "admin@agritrace.com",
-                PasswordHash = "100000.WO50AmM77hFBSqiT1aSFiw==.e1i6MrL9ZZlQF4h2CiK5+qvkR7zilfDmRnLCHfUsNx8=",
+                PasswordHash = "100000.HoQlWI9n60ndlTCaKVM0aQ==.+KZpNBzmkmk2ujjrvVZxa+eNslHYW36+bD8uNNYBOmY=",
                 Role = UserRole.Admin,
                 IsActive = true,
                 CreatedAt = new DateTime(2026, 1, 1, 0, 0, 0, DateTimeKind.Utc)

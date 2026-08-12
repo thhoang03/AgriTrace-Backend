@@ -51,13 +51,20 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserD
                 throw new ArgumentException($"Role '{request.Role}' is invalid.");
             }
 
+            if (user.Role == UserRole.Admin && parsed != UserRole.Admin)
+            {
+                throw new RbacForbiddenException(
+                    "RBAC_ADMIN_ROLE_PROTECTED",
+                    "Không thể thay đổi vai trò của tài khoản System Admin.");
+            }
+
             if (parsed == UserRole.Manager
                 && user.Role != UserRole.Manager
                 && !string.Equals(_currentUser.Role, "Admin", StringComparison.OrdinalIgnoreCase))
             {
                 throw new RbacForbiddenException(
                     "RBAC_ROLE_UPGRADE",
-                    "Chỉ Admin mới có thể thăng cấp người dùng lên Manager.");
+                    "Chỉ Admin mới có quyền thăng cấp người dùng lên Manager.");
             }
 
             role = parsed;
