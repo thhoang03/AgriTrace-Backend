@@ -45,6 +45,13 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserD
         UserRole? role = null;
         if (!string.IsNullOrWhiteSpace(request.Role))
         {
+            if (request.UserId == _currentUser.UserId)
+            {
+                throw new RbacForbiddenException(
+                    "RBAC_SELF_ROLE_CHANGE",
+                    "Không thể tự thay đổi role của chính mình.");
+            }
+
             if (!Enum.TryParse<UserRole>(request.Role, ignoreCase: true, out var parsed)
                 || !Enum.IsDefined(typeof(UserRole), parsed))
             {
