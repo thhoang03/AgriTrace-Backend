@@ -1,7 +1,7 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Certificates;
 
 /// <summary>
 /// Response DTO for a certificate record. Matches swagger <c>CertificateDetail</c>.

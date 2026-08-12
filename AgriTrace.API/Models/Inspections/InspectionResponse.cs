@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Inspections;
 
 public class LabTestResponse
 {

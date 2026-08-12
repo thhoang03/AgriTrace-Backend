@@ -1,4 +1,4 @@
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Batches;
 
 /// <summary>
 /// Request body for updating an existing batch. Matches swagger <c>UpdateBatchRequest</c>.

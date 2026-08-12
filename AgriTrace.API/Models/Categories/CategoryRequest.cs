@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Categories;
 
 public class CategoryRequest
 {

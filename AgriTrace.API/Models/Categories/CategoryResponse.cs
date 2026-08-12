@@ -1,7 +1,7 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Categories;
 
 /// <summary>
 /// Response DTO for a category. Matches swagger <c>CategoryDetail</c> / <c>CategoryListItem</c>.

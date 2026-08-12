@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using AgriTrace.Domain.Entities.Products;
 
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Products;
 
 /// <summary>
 /// Detailed product response.

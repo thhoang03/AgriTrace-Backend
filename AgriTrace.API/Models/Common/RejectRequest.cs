@@ -1,4 +1,4 @@
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Common;
 
 public class RejectRequest
 {

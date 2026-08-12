@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Organizations;
 
 /// <summary>
 /// Detailed organization response. Matches swagger <c>OrganizationDetail</c>.

@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Certificates;
 
 /// <summary>
 /// Paged response for certificates. Matches swagger <c>CertificatePagedResponse</c>.

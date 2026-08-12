@@ -1,7 +1,7 @@
 using System;
 using System.Text.Json.Serialization;
 
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Common;
 
 /// <summary>
 /// Response DTO for a batch QR code. Matches swagger <c>QrCodeData</c>.

@@ -2,6 +2,7 @@ using AgriTrace.API;
 using AgriTrace.Application;
 using AgriTrace.Infrastructure.Sqlserver;
 using AgriTrace.Infrastructure.Sqlserver.Persistence;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -72,5 +73,17 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+using (var scope = app.Services.CreateScope())
+{
+    try
+    {
+        var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+        await db.Database.ExecuteSqlRawAsync("UPDATE Users SET Role = 1 WHERE Email = 'admin@agritrace.com' OR Id = '70000000-0000-0000-0000-000000000001'");
+    }
+    catch
+    {
+        // Ignore if DB is not migrated yet on initial setup
+    }
+}
 
 app.Run();

@@ -58,13 +58,11 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserD
                     "Không thể thay đổi vai trò của tài khoản System Admin.");
             }
 
-            if (parsed == UserRole.Manager
-                && user.Role != UserRole.Manager
-                && !string.Equals(_currentUser.Role, "Admin", StringComparison.OrdinalIgnoreCase))
+            if (parsed != user.Role && !string.Equals(_currentUser.Role, "Admin", StringComparison.OrdinalIgnoreCase))
             {
                 throw new RbacForbiddenException(
-                    "RBAC_ROLE_UPGRADE",
-                    "Chỉ Admin mới có quyền thăng cấp người dùng lên Manager.");
+                    "RBAC_ROLE_CHANGE",
+                    "Chỉ Admin mới có quyền thay đổi vai trò của người dùng.");
             }
 
             role = parsed;

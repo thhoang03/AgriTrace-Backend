@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Batches;
 
 /// <summary>
 /// Request body for creating a new batch. Matches swagger <c>CreateBatchRequest</c>.

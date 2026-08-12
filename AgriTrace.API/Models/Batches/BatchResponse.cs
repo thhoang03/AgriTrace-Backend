@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Batches;
 
 /// <summary>
 /// Created data for a batch. Matches swagger <c>BatchCreatedData</c>.

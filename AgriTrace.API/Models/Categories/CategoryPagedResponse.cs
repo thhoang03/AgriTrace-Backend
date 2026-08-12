@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Categories;
 
 /// <summary>
 /// Paged response for categories. Matches swagger <c>CategoryPagedResponse</c> (extends <see cref="PagedMeta"/>).

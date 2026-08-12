@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Certificates;
 
 /// <summary>
 /// Request body for issuing a new certificate on a batch.

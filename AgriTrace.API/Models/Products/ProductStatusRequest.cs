@@ -11,7 +11,7 @@ using AgriTrace.Domain.Entities.Recalls;
 using AgriTrace.Domain.Entities.Units;
 using AgriTrace.Domain.Entities.Users;
 
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Products;
 
 /// <summary>
 /// Request body for setting a product's status.

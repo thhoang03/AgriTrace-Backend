@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Http;
 
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Common;
 
 /// <summary>
 /// Request body for uploading an image. Matches swagger <c>ImageUploadRequest</c>.

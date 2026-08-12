@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace AgriTrace.API.Models;
+namespace AgriTrace.API.Models.Inspections;
 
 public class CreateInspectionRequest
 {

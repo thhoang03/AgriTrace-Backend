@@ -1,4 +1,11 @@
 using AgriTrace.API.Models;
+using AgriTrace.API.Models.Common;
+using AgriTrace.API.Models.Batches;
+using AgriTrace.API.Models.Categories;
+using AgriTrace.API.Models.Certificates;
+using AgriTrace.API.Models.Inspections;
+using AgriTrace.API.Models.Organizations;
+using AgriTrace.API.Models.Products;
 using AgriTrace.API.Models.Notifications;
 using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Features.Notifications.Commands;
