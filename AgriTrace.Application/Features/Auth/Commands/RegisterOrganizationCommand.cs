@@ -1,4 +1,4 @@
-﻿using AgriTrace.Application.Common.Exceptions;
+using AgriTrace.Application.Common.Exceptions;
 using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Emails;
 using AgriTrace.Application.Features.Users.Commands;
@@ -22,11 +22,24 @@ public class RegisterOrganizationCommandValidator : AbstractValidator<RegisterOr
 {
     public RegisterOrganizationCommandValidator()
     {
-        RuleFor(x => x.FullName).NotEmpty().MaximumLength(200);
+        // FullName: trim đầu/cuối → không chỉ khoảng trắng → không có 2+ dấu cách liên tiếp ở giữa → 2..100 ký tự
+        RuleFor(x => x.FullName)
+            .NotEmpty()
+            .Must(name => !string.IsNullOrWhiteSpace(name))
+                .WithMessage("'Full Name' must not be empty or whitespace only.")
+            .Must(name => !System.Text.RegularExpressions.Regex.IsMatch(name.Trim(), @"\s{2,}"))
+                .WithMessage("'Full Name' must not contain multiple consecutive spaces.")
+            .Must(name => name.Trim().Length >= 2)
+                .WithMessage("'Full Name' must be at least 2 characters.")
+            .Must(name => name.Trim().Length <= 100)
+                .WithMessage("'Full Name' must not exceed 100 characters.");
+
         RuleFor(x => x.Email).NotEmpty().EmailAddress();
         RuleFor(x => x.Password).NotEmpty().MinimumLength(6);
     }
 }
+
+
 
 public class RegisterOrganizationCommandHandler : IRequestHandler<RegisterOrganizationCommand, UserDto>
 {
