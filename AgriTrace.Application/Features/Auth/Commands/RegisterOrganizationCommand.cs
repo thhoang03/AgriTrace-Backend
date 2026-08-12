@@ -2,6 +2,7 @@
 using AgriTrace.Application.Contracts;
 using AgriTrace.Application.Emails;
 using AgriTrace.Application.Features.Users.Commands;
+using AgriTrace.Domain.Entities.Organizations;
 using AgriTrace.Domain.Interfaces.Inbound;
 using AgriTrace.Domain.Interfaces.Outbound;
 using FluentValidation;
@@ -10,10 +11,12 @@ using MediatR;
 namespace AgriTrace.Application.Features.Auth.Commands;
 
 public record RegisterOrganizationCommand(
-    Guid OrganizationId,
     string FullName,
     string Email,
-    string Password) : IRequest<UserDto>;
+    string Password,
+    string OrgName,
+    string? OrgAddress,
+    Guid OrgTypeId) : IRequest<UserDto>;
 
 public class RegisterOrganizationCommandValidator : AbstractValidator<RegisterOrganizationCommand>
 {
@@ -28,29 +31,43 @@ public class RegisterOrganizationCommandValidator : AbstractValidator<RegisterOr
 public class RegisterOrganizationCommandHandler : IRequestHandler<RegisterOrganizationCommand, UserDto>
 {
     private readonly IUserService _userService;
+    private readonly IOrganizationService _organizationService;
     private readonly IEmailService _emailService;
 
-    public RegisterOrganizationCommandHandler(IUserService userService, IEmailService emailService)
+    public RegisterOrganizationCommandHandler(
+        IUserService userService,
+        IOrganizationService organizationService,
+        IEmailService emailService)
     {
         _userService = userService;
+        _organizationService = organizationService;
         _emailService = emailService;
     }
 
     public async Task<UserDto> Handle(RegisterOrganizationCommand request, CancellationToken cancellationToken)
     {
-        // KHÔNG check _currentUser — đây là bootstrap, chưa có ai đăng nhập
         var email = request.Email.Trim().ToLowerInvariant();
 
-        var existing = await _userService.GetByEmailAsync(email, cancellationToken);
-        if (existing is not null)
-            throw new ConflictException($"Email '{email}' already exists.");
+        // 1. Validate trước — không tạo gì nếu email đã tồn tại
+        if (await _userService.GetByEmailAsync(email, cancellationToken) is not null)
+            throw new ConflictException($"Email '{email}' đã được sử dụng.");
 
+        // 2. Tạo org
+        var existingOrg = await _organizationService.GetByNameAsync(request.OrgName, cancellationToken);
+        if (existingOrg is not null)
+            throw new ConflictException("Tên tổ chức đã tồn tại. Vui lòng chọn tên khác.");
+
+        var org = new Organization(request.OrgTypeId, request.OrgName, request.OrgAddress);
+        var createdOrg = await _organizationService.CreateAsync(org, cancellationToken);
+
+        // 3. Tạo user
         var user = new User(
-            request.OrganizationId,
+            createdOrg.Id,
             request.FullName,
             email,
             User.HashPassword(request.Password),
-            UserRole.Manager); // fix cứng Manager, không nhận Role từ client
+            UserRole.Manager,
+            isActive: false);
 
         var created = await _userService.CreateAsync(user, cancellationToken);
 
