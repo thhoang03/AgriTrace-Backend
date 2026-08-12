@@ -28,7 +28,8 @@ public record CreateRecallCommand(
     Guid BatchId,
     string Reason,
     int Severity,
-    Guid CreatedByUserId) : IRequest<RecallCreatedResult>;
+    Guid CreatedByUserId,
+    string? Location = null) : IRequest<RecallCreatedResult>;
 
 public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, RecallCreatedResult>
 {
@@ -197,7 +198,7 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
                     targetBatch.CurrentOrganizationId,
                     createdBy,
                     eventData: eventData,
-                    location: "Safety & Recall Center",
+                    location: !string.IsNullOrWhiteSpace(request.Location) ? request.Location : "Safety & Recall Center",
                     inspectionId: null,
                     previousHash: null,
                     currentHash: null);
@@ -220,7 +221,8 @@ public class CreateRecallCommandHandler : IRequestHandler<CreateRecallCommand, R
                     var notif = new Notification(
                         u.Id,
                         titleJson,
-                        msgJson);
+                        msgJson,
+                        "RECALL");
                     await _notificationService.CreateAsync(notif, cancellationToken);
                 }
             }

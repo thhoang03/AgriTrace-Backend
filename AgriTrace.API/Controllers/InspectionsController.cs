@@ -93,7 +93,8 @@ public sealed class InspectionsController : ControllerBase
                 orgId,
                 request.InspectionType,
                 request.InspectionDate,
-                request.Notes),
+                request.Notes,
+                request.Location),
             cancellationToken);
 
         return CreatedAtAction(

@@ -15,5 +15,8 @@ public class NotificationDto
 
     public bool IsRead { get; set; }
 
+    /// <summary>RECALL | INSPECTION | BATCH | CERTIFICATE | SYSTEM</summary>
+    public string Type { get; set; } = "SYSTEM";
+
     public DateTime CreatedAt { get; set; }
 }

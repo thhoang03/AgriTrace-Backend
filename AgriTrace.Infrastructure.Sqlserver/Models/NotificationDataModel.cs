@@ -1,4 +1,4 @@
-﻿namespace AgriTrace.Infrastructure.Sqlserver.Models;
+namespace AgriTrace.Infrastructure.Sqlserver.Models;
 
 
 public class NotificationDataModel : BaseDataModel
@@ -19,6 +19,9 @@ public class NotificationDataModel : BaseDataModel
 
 
     public bool IsRead { get; set; }
+
+    /// <summary>RECALL | INSPECTION | BATCH | CERTIFICATE | SYSTEM</summary>
+    public string Type { get; set; } = "SYSTEM";
 
 
 

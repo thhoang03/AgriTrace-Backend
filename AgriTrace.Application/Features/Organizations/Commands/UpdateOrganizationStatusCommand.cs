@@ -24,7 +24,7 @@ public class UpdateOrganizationStatusCommandHandler : IRequestHandler<UpdateOrga
         var organization = await _organizationService.GetByIdAsync(request.Id, cancellationToken)
             ?? throw new NotFoundException($"Organization {request.Id} not found.");
 
-        if (request.Status == "ACTIVE")
+        if (string.Equals(request.Status, "ACTIVE", StringComparison.OrdinalIgnoreCase))
             organization.Activate();
         else
             organization.Deactivate();

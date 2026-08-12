@@ -22,6 +22,7 @@ public static class NotificationMapper
         Title = n.Title,
         Message = n.Message,
         IsRead = n.IsRead,
+        Type = n.Type,
         CreatedAt = n.CreatedAt
     };
 }

@@ -59,7 +59,8 @@ public class RejectEventRequestCommandHandler : IRequestHandler<RejectEventReque
                 var notif = new Notification(
                     u.Id,
                     titleJson,
-                    msgJson);
+                    msgJson,
+                    "BATCH");
                 await _notificationService.CreateAsync(notif, cancellationToken);
             }
         }

@@ -73,7 +73,8 @@ public sealed class RecallsController : ControllerBase
                 request.BatchId,
                 request.Reason,
                 request.Severity,
-                _currentUser.UserId),
+                _currentUser.UserId,
+                request.Location),
             cancellationToken);
 
         return CreatedAtAction(
