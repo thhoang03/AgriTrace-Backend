@@ -180,7 +180,8 @@ public sealed class CreateBatchCommandHandler
                 var notif = new Notification(
                     u.Id,
                     "📦 LÔ HÀNG MỚI ĐƯỢC KHỞI TẠO",
-                    $"Lô hàng {batchCode} (Sản lượng: {command.Quantity}) vừa được khởi tạo thành công trên hệ thống.");
+                    $"Lô hàng {batchCode} (Sản lượng: {command.Quantity}) vừa được khởi tạo thành công trên hệ thống.",
+                    "BATCH");
                 await _notificationService.CreateAsync(notif, cancellationToken);
             }
         }

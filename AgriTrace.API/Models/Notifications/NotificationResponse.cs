@@ -25,6 +25,9 @@ public class NotificationItem
     [JsonPropertyName("isRead")]
     public bool IsRead { get; set; }
 
+    [JsonPropertyName("type")]
+    public string Type { get; set; } = "SYSTEM";
+
     [JsonPropertyName("createdAt")]
     public DateTime CreatedAt { get; set; }
 }

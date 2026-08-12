@@ -18,7 +18,8 @@ public sealed record CreateQualityInspectionCommand(
     Guid? OrganizationId,
     int InspectionType,
     DateTime InspectionDate,
-    string? Notes)
+    string? Notes,
+    string? Location = null)
     : IRequest<QualityInspectionDto>;
 
 public sealed class CreateQualityInspectionCommandHandler
@@ -106,7 +107,8 @@ public sealed class CreateQualityInspectionCommandHandler
                     var notif = new Notification(
                         u.Id,
                         titleJson,
-                        msgJson);
+                        msgJson,
+                        "INSPECTION");
                     await _notificationService.CreateAsync(notif, cancellationToken);
                 }
             }
@@ -139,8 +141,8 @@ public sealed class CreateQualityInspectionCommandHandler
 
             if (eventType is null) return;
 
-            string? location = null;
-            if (command.OrganizationId.HasValue && command.OrganizationId.Value != Guid.Empty && _organizationService != null)
+            string? location = command.Location;
+            if (string.IsNullOrWhiteSpace(location) && command.OrganizationId.HasValue && command.OrganizationId.Value != Guid.Empty && _organizationService != null)
             {
                 var org = await _organizationService.GetByIdAsync(command.OrganizationId.Value, cancellationToken);
                 location = org?.Address;

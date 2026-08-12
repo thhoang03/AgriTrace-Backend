@@ -106,6 +106,7 @@ public sealed class NotificationsController : ControllerBase
         Title = dto.Title,
         Message = dto.Message,
         IsRead = dto.IsRead,
+        Type = dto.Type,
         CreatedAt = dto.CreatedAt
     };
 }

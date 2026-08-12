@@ -142,7 +142,8 @@ public class NotificationRepository : INotificationRepository
             model.Message,
             model.IsRead,
             model.CreatedAt,
-            model.UpdatedAt);
+            model.UpdatedAt,
+            model.Type);
     }
 
     private static NotificationDataModel ToModel(Notification entity)
@@ -154,6 +155,7 @@ public class NotificationRepository : INotificationRepository
             Title = entity.Title,
             Message = entity.Message,
             IsRead = entity.IsRead,
+            Type = entity.Type,
             CreatedAt = entity.CreatedAt,
             UpdatedAt = entity.UpdatedAt
         };

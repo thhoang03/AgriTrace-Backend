@@ -12,6 +12,9 @@ public class Notification : BaseEntity
 
     public bool IsRead { get; private set; }
 
+    /// <summary>RECALL | INSPECTION | BATCH | CERTIFICATE | SYSTEM</summary>
+    public string Type { get; private set; } = "SYSTEM";
+
     // Navigation
 
     public User User { get; private set; }
@@ -23,7 +26,8 @@ public class Notification : BaseEntity
     public Notification(
         Guid userId,
         string title,
-        string message)
+        string message,
+        string type = "SYSTEM")
     {
         Validate(userId, title, message);
 
@@ -31,6 +35,7 @@ public class Notification : BaseEntity
         Title = title.Trim();
         Message = message.Trim();
         IsRead = false;
+        Type = type.ToUpperInvariant();
     }
 
     /// <summary>
@@ -43,7 +48,8 @@ public class Notification : BaseEntity
         string message,
         bool isRead,
         DateTime createdAt,
-        DateTime? updatedAt)
+        DateTime? updatedAt,
+        string type = "SYSTEM")
     {
         return new Notification
         {
@@ -53,7 +59,8 @@ public class Notification : BaseEntity
             Message = message,
             IsRead = isRead,
             CreatedAt = createdAt,
-            UpdatedAt = updatedAt
+            UpdatedAt = updatedAt,
+            Type = type.ToUpperInvariant()
         };
     }
 

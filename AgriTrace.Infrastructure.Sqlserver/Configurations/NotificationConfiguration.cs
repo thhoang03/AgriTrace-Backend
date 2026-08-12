@@ -1,4 +1,4 @@
-﻿using AgriTrace.Infrastructure.Sqlserver.Models;
+using AgriTrace.Infrastructure.Sqlserver.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
@@ -40,6 +40,13 @@ public class NotificationConfiguration
 
         builder.Property(x => x.IsRead)
             .HasDefaultValue(false);
+
+
+
+        builder.Property(x => x.Type)
+            .HasMaxLength(50)
+            .HasDefaultValue("SYSTEM")
+            .IsRequired();
 
 
 
