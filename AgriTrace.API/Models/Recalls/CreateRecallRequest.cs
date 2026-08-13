@@ -19,4 +19,7 @@ public class CreateRecallRequest
     [Range(1, 3)]
     [JsonPropertyName("severity")]
     public int Severity { get; set; }
+
+    [JsonPropertyName("location")]
+    public string? Location { get; set; }
 }

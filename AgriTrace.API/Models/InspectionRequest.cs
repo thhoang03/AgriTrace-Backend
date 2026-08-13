@@ -15,4 +15,7 @@ public class CreateInspectionRequest
     public string? Notes { get; set; }
 
     public Guid? OrganizationId { get; set; }
+
+    [StringLength(500)]
+    public string? Location { get; set; }
 }

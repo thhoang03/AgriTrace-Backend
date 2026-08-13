@@ -131,7 +131,8 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
                     var notif = new Notification(
                         u.Id,
                         titleJson,
-                        msgJson);
+                        msgJson,
+                        "INSPECTION");
                     await _notificationService.CreateAsync(notif, cancellationToken);
                 }
             }
@@ -150,7 +151,8 @@ public class CreateEventRequestCommandHandler : IRequestHandler<CreateEventReque
                     var notif = new Notification(
                         admin.Id,
                         titleJson,
-                        msgJson);
+                        msgJson,
+                        "SYSTEM");
                     await _notificationService.CreateAsync(notif, cancellationToken);
                 }
             }
