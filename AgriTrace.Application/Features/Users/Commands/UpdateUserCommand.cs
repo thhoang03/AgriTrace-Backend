@@ -51,7 +51,6 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, UserD
                     "RBAC_SELF_ROLE_CHANGE",
                     "Không thể tự thay đổi role của chính mình.");
             }
-
             if (!Enum.TryParse<UserRole>(request.Role, ignoreCase: true, out var parsed)
                 || !Enum.IsDefined(typeof(UserRole), parsed))
             {
